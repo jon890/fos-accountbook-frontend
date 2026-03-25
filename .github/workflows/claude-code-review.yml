@@ -1,0 +1,69 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Dismiss old Claude bot comments
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+
+          gh api "repos/$REPO/issues/$PR_NUMBER/comments" \
+            --jq '.[] | select(.user.login == "claude[bot]") | .node_id' \
+            | while read -r comment_node_id; do
+              if [ -n "$comment_node_id" ]; then
+                echo "Hiding outdated Claude comment: $comment_node_id"
+                gh api graphql -f query='
+                  mutation($id: ID!) {
+                    minimizeComment(input: {subjectId: $id, classifier: OUTDATED}) {
+                      minimizedComment {
+                        isMinimized
+                      }
+                    }
+                  }' -f id="$comment_node_id"
+              fi
+            done
+
+      - name: Run Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          allowed_bots: "*"
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            이 프로젝트는 Next.js 16 기반의 가족 가계부 웹 앱입니다.
+            CLAUDE.md의 가이드를 참고하여 PR 변경사항을 리뷰해주세요.
+
+            다음 관점에서 검토해주세요:
+            - **TypeScript**: strict mode 준수, `any` 타입 사용 여부
+            - **컴포넌트 경계**: Server/Client Component 구분이 올바른지
+            - **스타일**: 하드코딩 색상 대신 시맨틱 CSS 클래스 사용 여부 (CLAUDE.md 참고)
+            - **보안**: Server Actions에서 인증/권한 검사 누락 여부
+            - **코드 품질**: 잠재적 버그, 엣지 케이스, 에러 처리
+            - **금지사항**: `alert()` 사용, 인라인 스타일 남용 등
+            - **테스트**: 새 로직에 대한 테스트 커버리지 적절성
+
+            리뷰는 `gh pr comment` 명령으로 PR에 코멘트로 남겨주세요.
+            피드백은 건설적이고 구체적으로, 한국어로 작성해도 됩니다.
+
+          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
