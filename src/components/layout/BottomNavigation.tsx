@@ -7,6 +7,7 @@ import type { LucideIcon } from "lucide-react";
 import { BarChart3, CreditCard, Home, Plus, Settings } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface NavButtonProps {
   icon: LucideIcon;
@@ -45,7 +46,7 @@ export function BottomNavigation() {
     pathname === "/transactions" || pathname === "/expenses";
 
   const handleAnalyticsClick = () => {
-    alert("분석 기능은 준비 중입니다.");
+    toast.info("분석 기능은 준비 중입니다.");
   };
 
   return (
@@ -72,7 +73,7 @@ export function BottomNavigation() {
             {/* 지출 추가 */}
             <div className="relative -mt-4 md:-mt-6">
               <Button
-                className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl gradient-primary hover:opacity-90 shadow-lg hover:shadow-xl transition-all duration-200"
                 onClick={() => setIsExpenseDialogOpen(true)}
               >
                 <Plus className="w-5 h-5 md:w-6 md:h-6 text-white" />

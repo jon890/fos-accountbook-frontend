@@ -48,7 +48,7 @@ export function RecentActivity({ expenses }: RecentActivityProps) {
               첫 번째 지출을 추가해보세요!
             </p>
             <Link href="/expenses">
-              <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 rounded-xl md:rounded-2xl px-6 md:px-8 text-sm md:text-base">
+              <Button className="gradient-primary hover:opacity-90 shadow-lg hover:shadow-xl transition-all duration-200 rounded-xl md:rounded-2xl px-6 md:px-8 text-sm md:text-base text-white">
                 <Plus className="w-4 h-4 md:w-5 md:h-5 mr-2" />첫 지출 추가하기
               </Button>
             </Link>
