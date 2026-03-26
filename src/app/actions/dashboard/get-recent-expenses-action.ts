@@ -15,6 +15,7 @@ import {
   requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
+import { getCachedFamilyCategories } from "@/lib/server/cache";
 import type { RecentExpense } from "@/types/dashboard";
 import type { CategoryResponse } from "@/types/category";
 import type { ExpenseResponse } from "@/types/expense";
@@ -51,10 +52,8 @@ export async function getRecentExpensesAction(
       `/families/${selectedFamilyUuid}/expenses?page=0&size=${limit}&sort=-date`
     );
 
-    // 카테고리 정보 조회
-    const categories = await serverApiGet<CategoryResponse[]>(
-      `/families/${selectedFamilyUuid}/categories`
-    );
+    // 카테고리 정보 조회 (per-request 캐시)
+    const categories = await getCachedFamilyCategories(selectedFamilyUuid);
 
     // 카테고리 맵 생성
     const categoryMap = new Map(categories.map((cat) => [cat.uuid, cat]));
