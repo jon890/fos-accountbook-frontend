@@ -1,6 +1,6 @@
 /**
  * 지출 목록 클라이언트 컴포넌트
- * 수정 다이얼로그 상태 관리
+ * 수정/삭제 다이얼로그 상태 관리 + 날짜별 그룹핑
  */
 
 "use client";
@@ -20,6 +20,23 @@ interface ExpenseListClientProps {
   familyUuid: string;
 }
 
+function getDateLabel(dateStr: string): string {
+  // dateStr: ISO format (e.g. "2025-03-26T..." or "2025-03-26")
+  const dayPart = dateStr.split("T")[0]; // YYYY-MM-DD
+  const [year, month, day] = dayPart.split("-").map(Number);
+
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
+
+  if (dayPart === todayStr) return "오늘";
+  if (dayPart === yesterdayStr) return "어제";
+  if (year === today.getFullYear()) return `${month}월 ${day}일`;
+  return `${year}년 ${month}월 ${day}일`;
+}
+
 export function ExpenseListClient({
   expenses,
   categories: initialCategories,
@@ -27,11 +44,9 @@ export function ExpenseListClient({
 }: ExpenseListClientProps) {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
-  const [categories, setCategories] =
-    useState<CategoryResponse[]>(initialCategories);
+  const [categories, setCategories] = useState<CategoryResponse[]>(initialCategories);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
-  // 카테고리 로드 (다이얼로그 열릴 때)
   useEffect(() => {
     if (editingExpense && categories.length === 0) {
       loadCategories();
@@ -47,45 +62,75 @@ export function ExpenseListClient({
       } else {
         toast.error(result.error.message);
       }
-    } catch (error) {
-      console.error("Failed to load categories:", error);
+    } catch {
       toast.error("카테고리를 불러오는데 실패했습니다");
     } finally {
       setIsLoadingCategories(false);
     }
   };
 
-  // 카테고리 매핑
   const categoryMap = new Map(categories.map((cat) => [cat.uuid, cat]));
+
+  // 날짜별 그룹핑
+  const groups: { dateKey: string; label: string; items: Expense[] }[] = [];
+  const seenDates = new Map<string, number>(); // dateKey → index in groups
+
+  for (const expense of expenses) {
+    const dayPart = expense.date.split("T")[0];
+    if (!seenDates.has(dayPart)) {
+      seenDates.set(dayPart, groups.length);
+      groups.push({ dateKey: dayPart, label: getDateLabel(dayPart), items: [] });
+    }
+    groups[seenDates.get(dayPart)!].items.push(expense);
+  }
 
   return (
     <>
-      <div className="space-y-2 md:space-y-3">
-        {expenses.map((expense) => {
-          const category = categoryMap.get(expense.categoryUuid);
-          const expenseData: ExpenseItemData = {
-            uuid: expense.uuid,
-            amount: expense.amount,
-            description: expense.description,
-            date: expense.date,
-            categoryUuid: expense.categoryUuid,
-            categoryName: category?.name || expense.category?.name || "기타",
-            categoryColor:
-              category?.color || expense.category?.color || "#6366f1",
-            categoryIcon: category?.icon || expense.category?.icon || "default",
-          };
+      <div className="space-y-5">
+        {groups.map(({ dateKey, label, items }) => {
+          const groupTotal = items.reduce((sum, e) => sum + Number(e.amount), 0);
+
           return (
-            <ExpenseItem
-              key={expense.uuid}
-              expense={expenseData}
-              onEdit={() => setEditingExpense(expense)}
-              onDelete={() => setDeletingExpense(expense)}
-            />
+            <div key={dateKey}>
+              {/* 날짜 헤더 */}
+              <div className="flex items-center justify-between px-1 mb-2">
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                  {label}
+                </span>
+                <span className="text-xs font-semibold text-rose-500">
+                  -₩{groupTotal.toLocaleString()}
+                </span>
+              </div>
+
+              {/* 해당 날짜의 지출 목록 */}
+              <div className="bg-white rounded-2xl overflow-hidden divide-y divide-gray-50">
+                {items.map((expense) => {
+                  const category = categoryMap.get(expense.categoryUuid);
+                  const expenseData: ExpenseItemData = {
+                    uuid: expense.uuid,
+                    amount: expense.amount,
+                    description: expense.description,
+                    date: expense.date,
+                    categoryUuid: expense.categoryUuid,
+                    categoryName: category?.name || expense.category?.name || "기타",
+                    categoryColor: category?.color || expense.category?.color || "#6366f1",
+                    categoryIcon: category?.icon || expense.category?.icon || "💸",
+                  };
+                  return (
+                    <ExpenseItem
+                      key={expense.uuid}
+                      expense={expenseData}
+                      onEdit={() => setEditingExpense(expense)}
+                      onDelete={() => setDeletingExpense(expense)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           );
         })}
       </div>
 
-      {/* 수정 다이얼로그 */}
       {editingExpense && (
         <EditExpenseDialog
           open={!!editingExpense}
@@ -105,7 +150,6 @@ export function ExpenseListClient({
         />
       )}
 
-      {/* 삭제 확인 다이얼로그 */}
       {deletingExpense && (
         <DeleteExpenseDialog
           open={!!deletingExpense}

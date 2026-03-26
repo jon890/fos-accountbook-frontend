@@ -1,16 +1,18 @@
 /**
- * 지출 추가 다이얼로그
+ * 거래 추가 다이얼로그 (지출 / 수입 전환 가능)
  */
 
 "use client";
 
 import { getFamilyCategoriesAction } from "@/app/actions/category/get-categories-action";
 import { createExpenseAction } from "@/app/actions/expense/create-expense-action";
+import type { CreateIncomeFormState } from "@/app/actions/income/create-income-action";
+import { createIncomeAction } from "@/app/actions/income/create-income-action";
+import { cn } from "@/lib/client/utils";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -19,16 +21,25 @@ import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
 import type { CreateExpenseFormState } from "@/types/expense";
 import type { CategoryResponse } from "@/types/category";
-import { Loader2 } from "lucide-react";
+import { Loader2, TrendingDown, TrendingUp } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
+
+type TransactionType = "expense" | "income";
 
 interface AddExpenseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultType?: TransactionType;
 }
 
-const initialState: CreateExpenseFormState = {
+const initialExpenseState: CreateExpenseFormState = {
+  message: "",
+  errors: {},
+  success: false,
+};
+
+const initialIncomeState: CreateIncomeFormState = {
   message: "",
   errors: {},
   success: false,
@@ -37,18 +48,27 @@ const initialState: CreateExpenseFormState = {
 export function AddExpenseDialog({
   open,
   onOpenChange,
+  defaultType = "expense",
 }: AddExpenseDialogProps) {
+  const [activeType, setActiveType] = useState<TransactionType>(defaultType);
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [familyUuid, setFamilyUuid] = useState<string>("");
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
-  const [state, formAction] = useActionState(createExpenseAction, initialState);
 
-  // 다이얼로그가 열릴 때만 카테고리 로드
+  const [expenseState, expenseFormAction] = useActionState(
+    createExpenseAction,
+    initialExpenseState
+  );
+  const [incomeState, incomeFormAction] = useActionState(
+    createIncomeAction,
+    initialIncomeState
+  );
+
   useEffect(() => {
     if (open) {
+      setActiveType(defaultType);
       loadData();
     } else {
-      // 다이얼로그가 닫힐 때 데이터 초기화
       setCategories([]);
       setFamilyUuid("");
     }
@@ -60,46 +80,81 @@ export function AddExpenseDialog({
       const result = await getFamilyCategoriesAction();
       if (result.success) {
         setCategories(result.data);
-        // 첫 번째 카테고리의 familyUuid 사용
         if (result.data.length > 0) {
           setFamilyUuid(result.data[0].familyUuid);
         }
       } else {
-        console.error("Failed to load categories:", result.error);
         toast.error(result.error.message);
       }
-    } catch (error) {
-      console.error("Failed to load categories:", error);
+    } catch {
       toast.error("카테고리를 불러오는데 실패했습니다");
     } finally {
       setIsLoadingCategories(false);
     }
   };
 
-  // 성공 시 처리
   useEffect(() => {
-    if (state.success) {
-      toast.success(state.message);
+    if (expenseState.success) {
+      toast.success(expenseState.message);
       onOpenChange(false);
-      // 폼 리셋을 위해 state 초기화
-    } else if (state.message && !state.success) {
-      toast.error(state.message);
+    } else if (expenseState.message && !expenseState.success) {
+      toast.error(expenseState.message);
     }
-  }, [state, onOpenChange]);
+  }, [expenseState, onOpenChange]);
+
+  useEffect(() => {
+    if (incomeState.success) {
+      toast.success(incomeState.message);
+      onOpenChange(false);
+    } else if (incomeState.message && !incomeState.success) {
+      toast.error(incomeState.message);
+    }
+  }, [incomeState, onOpenChange]);
+
+  const isExpense = activeType === "expense";
+  const formAction = isExpense ? expenseFormAction : incomeFormAction;
+  const errors = isExpense ? expenseState.errors : incomeState.errors;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-white">
         <DialogHeader>
-          <DialogTitle>지출 추가</DialogTitle>
-          <DialogDescription>새로운 지출 내역을 추가합니다</DialogDescription>
+          <DialogTitle className="sr-only">거래 추가</DialogTitle>
+          {/* 지출 / 수입 타입 토글 */}
+          <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+            <button
+              type="button"
+              onClick={() => setActiveType("expense")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all duration-200",
+                isExpense
+                  ? "gradient-expense text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-white/60"
+              )}
+            >
+              <TrendingDown className="w-4 h-4" />
+              지출
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveType("income")}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all duration-200",
+                !isExpense
+                  ? "gradient-income text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-white/60"
+              )}
+            >
+              <TrendingUp className="w-4 h-4" />
+              수입
+            </button>
+          </div>
         </DialogHeader>
 
         <form action={formAction} className="space-y-4">
-          {/* familyUuid hidden input */}
           <input type="hidden" name="familyUuid" value={familyUuid} />
 
-          {/* 금액 입력 */}
+          {/* 금액 */}
           <div className="space-y-2">
             <Label htmlFor="amount">금액 *</Label>
             <div className="relative">
@@ -111,16 +166,16 @@ export function AddExpenseDialog({
                 className="text-right pr-8"
                 required
               />
-              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
                 원
               </span>
             </div>
-            {state.errors?.amount && (
-              <p className="text-sm text-red-500">{state.errors.amount[0]}</p>
+            {errors?.amount && (
+              <p className="text-sm text-red-500">{errors.amount[0]}</p>
             )}
           </div>
 
-          {/* 카테고리 선택 */}
+          {/* 카테고리 */}
           <div className="space-y-2">
             <Label htmlFor="categoryId">카테고리 *</Label>
             {isLoadingCategories ? (
@@ -135,21 +190,19 @@ export function AddExpenseDialog({
                 required
               >
                 <option value="">카테고리를 선택하세요</option>
-                {categories.map((category) => (
-                  <option key={category.uuid} value={category.uuid}>
-                    {category.icon} {category.name}
+                {categories.map((cat) => (
+                  <option key={cat.uuid} value={cat.uuid}>
+                    {cat.icon} {cat.name}
                   </option>
                 ))}
               </select>
             )}
-            {state.errors?.categoryId && (
-              <p className="text-sm text-red-500">
-                {state.errors.categoryId[0]}
-              </p>
+            {errors?.categoryId && (
+              <p className="text-sm text-red-500">{errors.categoryId[0]}</p>
             )}
           </div>
 
-          {/* 날짜 선택 */}
+          {/* 날짜 */}
           <div className="space-y-2">
             <Label htmlFor="date">날짜 *</Label>
             <Input
@@ -159,12 +212,12 @@ export function AddExpenseDialog({
               defaultValue={new Date().toISOString().split("T")[0]}
               required
             />
-            {state.errors?.date && (
-              <p className="text-sm text-red-500">{state.errors.date[0]}</p>
+            {errors?.date && (
+              <p className="text-sm text-red-500">{errors.date[0]}</p>
             )}
           </div>
 
-          {/* 메모 입력 */}
+          {/* 메모 */}
           <div className="space-y-2">
             <Label htmlFor="description">메모</Label>
             <Input
@@ -172,14 +225,12 @@ export function AddExpenseDialog({
               name="description"
               placeholder="간단한 메모를 입력하세요 (선택사항)"
             />
-            {state.errors?.description && (
-              <p className="text-sm text-red-500">
-                {state.errors.description[0]}
-              </p>
+            {errors?.description && (
+              <p className="text-sm text-red-500">{errors.description[0]}</p>
             )}
           </div>
 
-          {/* 버튼들 */}
+          {/* 버튼 */}
           <div className="flex gap-2 pt-4">
             <Button
               type="button"
@@ -189,8 +240,14 @@ export function AddExpenseDialog({
             >
               취소
             </Button>
-            <SubmitButton className="flex-1" pendingText="추가 중...">
-              지출 추가
+            <SubmitButton
+              className={cn(
+                "flex-1 text-white hover:opacity-90",
+                isExpense ? "gradient-expense" : "gradient-income"
+              )}
+              pendingText="추가 중..."
+            >
+              {isExpense ? "지출" : "수입"} 추가
             </SubmitButton>
           </div>
         </form>

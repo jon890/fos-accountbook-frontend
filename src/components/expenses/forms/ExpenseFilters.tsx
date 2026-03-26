@@ -1,16 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/client/utils";
 import {
   getMonthRange,
@@ -21,7 +10,16 @@ import { useTimeZone } from "@/lib/client/timezone-context";
 import type { CategoryResponse } from "@/types/category";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Calendar, CalendarRange } from "lucide-react";
+import { toast } from "sonner";
+import { CalendarDays, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ExpenseFiltersProps {
   categories: CategoryResponse[];
@@ -29,11 +27,7 @@ interface ExpenseFiltersProps {
   defaultEndDate?: string;
 }
 
-const PAGE_SIZE_OPTIONS = [
-  { value: 25, label: "25개씩" },
-  { value: 50, label: "50개씩" },
-  { value: 100, label: "100개씩" },
-];
+type QuickRange = "thisMonth" | "3months" | "1year" | "custom";
 
 export function ExpenseFilters({
   categories,
@@ -44,236 +38,181 @@ export function ExpenseFilters({
   const searchParams = useSearchParams();
   const { timezone } = useTimeZone();
 
-  const [selectedCategory, setSelectedCategory] = useState(
-    searchParams.get("categoryId") || "all"
-  );
-  const [startDate, setStartDate] = useState(
+  const [activeRange, setActiveRange] = useState<QuickRange>("thisMonth");
+  const [showCustomDate, setShowCustomDate] = useState(false);
+  const [customStart, setCustomStart] = useState(
     searchParams.get("startDate") || defaultStartDate || ""
   );
-  const [endDate, setEndDate] = useState(
+  const [customEnd, setCustomEnd] = useState(
     searchParams.get("endDate") || defaultEndDate || ""
   );
-  const [pageSize, setPageSize] = useState(
-    Number(searchParams.get("limit")) || 25
-  );
 
-  const applyFilters = () => {
+  const selectedCategory = searchParams.get("categoryId") || "all";
+
+  const navigate = (overrides: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
-
-    // 필터 값 설정
-    if (selectedCategory && selectedCategory !== "all") {
-      params.set("categoryId", selectedCategory);
-    } else {
-      params.delete("categoryId");
+    for (const [key, value] of Object.entries(overrides)) {
+      if (value === null) {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
     }
-
-    if (startDate) {
-      params.set("startDate", startDate);
-    } else {
-      params.delete("startDate");
-    }
-
-    if (endDate) {
-      params.set("endDate", endDate);
-    } else {
-      params.delete("endDate");
-    }
-
-    params.set("limit", pageSize.toString());
-    params.set("page", "1"); // 페이지를 1로 리셋
-
-    router.push(`/transactions?${params.toString()}`);
-  };
-
-  const handlePageSizeChange = (newSize: number) => {
-    setPageSize(newSize);
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("limit", newSize.toString());
-    params.set("page", "1"); // 페이지 크기 변경 시 1페이지로 리셋
-    router.push(`/transactions?${params.toString()}`);
-  };
-
-  const clearFilters = () => {
-    setSelectedCategory("all");
-    setStartDate(defaultStartDate || "");
-    setEndDate(defaultEndDate || "");
-    setPageSize(25);
-
-    const params = new URLSearchParams(searchParams.toString());
-    // 필터 관련 파라미터만 제거
-    params.delete("categoryId");
-    params.delete("page");
-    // startDate와 endDate는 기본값으로 설정
-    if (defaultStartDate) {
-      params.set("startDate", defaultStartDate);
-    } else {
-      params.delete("startDate");
-    }
-    if (defaultEndDate) {
-      params.set("endDate", defaultEndDate);
-    } else {
-      params.delete("endDate");
-    }
-    params.set("limit", "25");
     params.set("page", "1");
-
     router.push(`/transactions?${params.toString()}`);
   };
 
-  // 날짜 범위 바로가기
-  const setThisMonth = () => {
-    const { startDate: start, endDate: end } = getMonthRange(timezone);
-    setStartDate(start);
-    setEndDate(end);
+  const applyQuickRange = (range: QuickRange) => {
+    setActiveRange(range);
+    setShowCustomDate(false);
+
+    let startDate = "";
+    let endDate = "";
+
+    if (range === "thisMonth") {
+      const r = getMonthRange(timezone);
+      startDate = r.startDate;
+      endDate = r.endDate;
+    } else if (range === "3months") {
+      const r = getLastNMonthsRange(timezone, 3);
+      startDate = r.startDate;
+      endDate = r.endDate;
+    } else if (range === "1year") {
+      const r = getLastYearRange(timezone);
+      startDate = r.startDate;
+      endDate = r.endDate;
+    }
+
+    navigate({ startDate, endDate });
   };
 
-  const setLast3Months = () => {
-    const { startDate: start, endDate: end } = getLastNMonthsRange(timezone, 3);
-    setStartDate(start);
-    setEndDate(end);
+  const applyCustomDate = () => {
+    if (!customStart || !customEnd) {
+      toast.error("시작일과 종료일을 모두 입력해주세요");
+      return;
+    }
+    if (customStart > customEnd) {
+      toast.error("종료일은 시작일 이후여야 합니다");
+      return;
+    }
+    setActiveRange("custom");
+    setShowCustomDate(false);
+    navigate({ startDate: customStart, endDate: customEnd });
   };
 
-  const setLastYear = () => {
-    const { startDate: start, endDate: end } = getLastYearRange(timezone);
-    setStartDate(start);
-    setEndDate(end);
+  const handleCategoryChange = (value: string) => {
+    navigate({ categoryId: value === "all" ? null : value });
   };
 
-  const hasActiveFilters = selectedCategory !== "all" || startDate || endDate;
+  const clearCategory = () => navigate({ categoryId: null });
+
+  const hasActiveCategory = selectedCategory !== "all";
+  const selectedCategoryObj = categories.find((c) => c.uuid === selectedCategory);
+
+  const chipBase =
+    "px-3 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap border shrink-0";
+  const chipActive = "chip-active";
+  const chipInactive =
+    "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50";
 
   return (
-    <Card>
-      <CardHeader className="py-1.5 md:py-4">
-        <CardTitle className="text-sm md:text-base">내역 필터</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {/* 카테고리 및 기간 필터 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-          {/* 카테고리 필터 */}
-          <div>
-            <label className="text-xs text-gray-600 mb-1 block">카테고리</label>
-            <Select
-              value={selectedCategory}
-              onValueChange={setSelectedCategory}
-            >
-              <SelectTrigger className="h-9 text-sm">
-                <SelectValue placeholder="전체 카테고리" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">전체 카테고리</SelectItem>
-                {categories.map((category) => (
-                  <SelectItem key={category.uuid} value={category.uuid}>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">{category.icon}</span>
-                      <span className="text-sm">{category.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+    <div className="space-y-2.5">
+      {/* 필터 칩 바 */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
+        {/* 기간 빠른 선택 */}
+        <button
+          onClick={() => applyQuickRange("thisMonth")}
+          className={cn(chipBase, activeRange === "thisMonth" ? chipActive : chipInactive)}
+        >
+          이번달
+        </button>
+        <button
+          onClick={() => applyQuickRange("3months")}
+          className={cn(chipBase, activeRange === "3months" ? chipActive : chipInactive)}
+        >
+          3개월
+        </button>
+        <button
+          onClick={() => applyQuickRange("1year")}
+          className={cn(chipBase, activeRange === "1year" ? chipActive : chipInactive)}
+        >
+          1년
+        </button>
+        <button
+          onClick={() => {
+            const next = !showCustomDate;
+            setShowCustomDate(next);
+            if (next) setActiveRange("custom");
+          }}
+          className={cn(
+            chipBase,
+            "flex items-center gap-1",
+            showCustomDate || activeRange === "custom" ? chipActive : chipInactive
+          )}
+        >
+          <CalendarDays className="w-3 h-3" />
+          직접 설정
+        </button>
 
-          {/* 날짜 필터 */}
-          <div>
-            <label className="text-xs text-gray-600 mb-1 block">기간</label>
-            <div className="grid grid-cols-2 gap-2">
-              <Input
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                placeholder="시작 날짜"
-                className="h-9 text-sm"
-              />
-              <Input
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                placeholder="종료 날짜"
-                className="h-9 text-sm"
-              />
-            </div>
-          </div>
-        </div>
+        {/* 구분선 */}
+        <div className="w-px h-5 bg-gray-200 shrink-0" />
 
-        {/* 날짜 바로가기 */}
-        <div className="flex gap-1.5 md:max-w-[50%] md:ml-auto">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={setThisMonth}
-            className="h-7 text-xs px-2 flex-1"
-          >
-            <Calendar className="w-3 h-3 mr-1" />
-            이번달
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={setLast3Months}
-            className="h-7 text-xs px-2 flex-1"
-          >
-            <CalendarRange className="w-3 h-3 mr-1" />
-            3개월
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={setLastYear}
-            className="h-7 text-xs px-2 flex-1"
-          >
-            <CalendarRange className="w-3 h-3 mr-1" />
-            1년
-          </Button>
-        </div>
-
-        {/* 버튼 및 페이지 크기 */}
-        <div className="flex flex-col gap-2 pt-1">
-          {/* 필터 버튼 */}
-          <div className="flex gap-2">
-            <Button
-              onClick={applyFilters}
-              className="bg-blue-600 hover:bg-blue-700 h-9 text-sm flex-1 md:flex-initial md:max-w-[120px]"
-            >
-              필터 적용
-            </Button>
-
-            {hasActiveFilters && (
-              <Button
-                variant="outline"
-                onClick={clearFilters}
-                className="h-9 text-sm md:max-w-[100px]"
-              >
-                초기화
-              </Button>
+        {/* 카테고리 필터 */}
+        {hasActiveCategory ? (
+          <button
+            onClick={clearCategory}
+            className={cn(
+              chipBase,
+              "flex items-center gap-1.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
             )}
-          </div>
-
-          {/* 페이지 크기 선택 */}
-          <div className="flex items-center gap-2 justify-between">
-            <span className="text-xs text-gray-600">표시 개수:</span>
-            <div className="flex gap-1.5">
-              {PAGE_SIZE_OPTIONS.map((option) => (
-                <Badge
-                  key={option.value}
-                  variant={pageSize === option.value ? "default" : "outline"}
-                  className={cn(
-                    "cursor-pointer transition-colors text-xs px-2 py-0.5",
-                    pageSize === option.value
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : "hover:bg-gray-100"
-                  )}
-                  onClick={() => handlePageSizeChange(option.value)}
-                >
-                  {option.label}
-                </Badge>
+          >
+            {selectedCategoryObj?.icon} {selectedCategoryObj?.name}
+            <X className="w-3 h-3" />
+          </button>
+        ) : (
+          <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+            <SelectTrigger className="h-8 text-xs rounded-full border-gray-200 bg-white px-3 min-w-[120px] gap-1 shadow-none shrink-0">
+              <SelectValue placeholder="전체 카테고리" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">전체 카테고리</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.uuid} value={cat.uuid}>
+                  <div className="flex items-center gap-2">
+                    <span>{cat.icon}</span>
+                    <span>{cat.name}</span>
+                  </div>
+                </SelectItem>
               ))}
-            </div>
-          </div>
+            </SelectContent>
+          </Select>
+        )}
+      </div>
+
+      {/* 날짜 직접 입력 (펼치기) */}
+      {showCustomDate && (
+        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
+          <Input
+            type="date"
+            value={customStart}
+            onChange={(e) => setCustomStart(e.target.value)}
+            className="h-8 text-xs flex-1 min-w-0"
+          />
+          <span className="text-gray-400 text-xs shrink-0">~</span>
+          <Input
+            type="date"
+            value={customEnd}
+            onChange={(e) => setCustomEnd(e.target.value)}
+            className="h-8 text-xs flex-1 min-w-0"
+          />
+          <button
+            onClick={applyCustomDate}
+            className="px-3 py-1.5 rounded-lg bg-gray-800 text-white text-xs font-semibold hover:bg-gray-700 transition-colors shrink-0"
+          >
+            적용
+          </button>
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }
