@@ -10,11 +10,11 @@ import {
   successResult,
   type ActionResult,
 } from "@/lib/errors";
-import { serverApiGet } from "@/lib/server/api";
 import {
   requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
+import { getCachedFamilyCategories } from "@/lib/server/cache";
 import type { CategoryResponse } from "@/types/category";
 
 export async function getFamilyCategoriesAction(
@@ -32,9 +32,7 @@ export async function getFamilyCategoriesAction(
       throw ActionError.familyNotSelected();
     }
 
-    const categories = await serverApiGet<CategoryResponse[]>(
-      `/families/${selectedFamilyUuid}/categories`
-    );
+    const categories = await getCachedFamilyCategories(selectedFamilyUuid);
 
     return successResult(categories);
   } catch (error) {

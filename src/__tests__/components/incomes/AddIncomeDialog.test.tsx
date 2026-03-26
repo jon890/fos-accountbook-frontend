@@ -19,6 +19,12 @@ jest.mock("@/lib/server/api", () => ({
   serverApiGet: jest.fn(),
 }));
 
+jest.mock("@/lib/server/cache", () => ({
+  getCachedSession: jest.fn(),
+  getCachedFamilyCategories: jest.fn(),
+  getCachedDashboardStats: jest.fn(),
+}));
+
 jest.mock("next/cache", () => ({
   revalidatePath: jest.fn(),
 }));

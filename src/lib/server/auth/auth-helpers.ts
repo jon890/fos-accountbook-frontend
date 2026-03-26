@@ -4,7 +4,7 @@
  */
 
 import { ActionError } from "@/lib/errors";
-import { auth } from "@/lib/server/auth";
+import { getCachedSession } from "@/lib/server/cache";
 import type { Session } from "next-auth";
 import { redirect } from "next/navigation";
 
@@ -24,7 +24,7 @@ import { redirect } from "next/navigation";
  * ```
  */
 export async function requireAuth(): Promise<Session> {
-  const session = await auth();
+  const session = await getCachedSession();
 
   if (!session?.user?.userUuid) {
     throw ActionError.unauthorized();
@@ -42,7 +42,7 @@ export async function requireAuth(): Promise<Session> {
 export async function requireAuthOrRedirect(
   callbackUrl?: string
 ): Promise<Session> {
-  const session = await auth();
+  const session = await getCachedSession();
 
   if (!session?.user?.userUuid) {
     const url = callbackUrl
@@ -61,6 +61,6 @@ export async function requireAuthOrRedirect(
  * @returns 선택된 가족 UUID 또는 null
  */
 export async function getSelectedFamilyUuid(): Promise<string | null> {
-  const session = await auth();
-  return session?.user?.profile?.defaultFamilyUuid || null;
+  const session = await getCachedSession();
+  return session?.user?.profile?.defaultFamilyUuid ?? null;
 }
