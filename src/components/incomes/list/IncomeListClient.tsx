@@ -45,16 +45,16 @@ export function IncomeListClient({
             <div key={dateKey}>
               {/* 날짜 헤더 */}
               <div className="flex items-center justify-between px-1 mb-2">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
                   {label}
                 </span>
-                <span className="text-xs font-semibold text-emerald-600">
+                <span className="text-xs font-semibold text-income">
                   +₩{groupTotal.toLocaleString()}
                 </span>
               </div>
 
               {/* 해당 날짜의 수입 목록 */}
-              <div className="bg-white rounded-2xl overflow-hidden divide-y divide-gray-50">
+              <div className="bg-card rounded-2xl overflow-hidden divide-y divide-border">
                 {items.map((income) => (
                   <IncomeItem
                     key={income.uuid}
@@ -75,17 +75,17 @@ export function IncomeListClient({
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-4 py-2 bg-white border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            className="px-4 py-2 bg-card border border-border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary"
           >
             이전
           </button>
-          <span className="px-4 py-2 text-sm text-gray-700">
+          <span className="px-4 py-2 text-sm text-muted-foreground">
             {currentPage} / {totalPages}
           </span>
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-white border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            className="px-4 py-2 bg-card border border-border rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-secondary"
           >
             다음
           </button>
