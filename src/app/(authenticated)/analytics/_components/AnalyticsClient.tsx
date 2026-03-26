@@ -133,6 +133,7 @@ export function AnalyticsClient({
     for (const expense of expenses) {
       const amount = Number(expense.amount);
       const cat = expense.category;
+      if (!cat) continue;
       const existing = map.get(cat.uuid);
       if (existing) {
         existing.total += amount;
@@ -311,16 +312,16 @@ export function AnalyticsClient({
                 </span>
                 <div
                   className="w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0"
-                  style={{ backgroundColor: `${expense.category.color}20` }}
+                  style={{ backgroundColor: `${expense.category?.color ?? "#6366f1"}20` }}
                 >
-                  {expense.category.icon}
+                  {expense.category?.icon ?? "💸"}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-gray-800 truncate">
-                    {expense.description || expense.category.name}
+                    {expense.description || expense.category?.name || "기타"}
                   </p>
                   <p className="text-[10px] text-gray-400">
-                    {expense.description ? `${expense.category.name} · ` : ""}
+                    {expense.description ? `${expense.category?.name ?? "기타"} · ` : ""}
                     {expense.date.split("T")[0]}
                   </p>
                 </div>
