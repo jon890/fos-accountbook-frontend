@@ -56,7 +56,11 @@
     --accent: 210 40% 96%;
     --accent-foreground: 222 47% 11%;
 
-    /* 위험/삭제 */
+    /* 차트 */
+    --chart-expense: #fb7185; /* rose-400 */
+    --chart-income: #34d399;  /* emerald-400 */
+
+  /* 위험/삭제 */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 

@@ -66,8 +66,8 @@ export function DailyBarChart({ data }: DailyBarChartProps) {
           content={<CustomTooltip />}
           cursor={{ fill: "rgba(0,0,0,0.04)", radius: 4 }}
         />
-        <Bar dataKey="지출" fill="#fb7185" radius={[3, 3, 0, 0]} maxBarSize={12} />
-        <Bar dataKey="수입" fill="#34d399" radius={[3, 3, 0, 0]} maxBarSize={12} />
+        <Bar dataKey="지출" fill="var(--chart-expense)" radius={[3, 3, 0, 0]} maxBarSize={12} />
+        <Bar dataKey="수입" fill="var(--chart-income)" radius={[3, 3, 0, 0]} maxBarSize={12} />
       </BarChart>
     </ResponsiveContainer>
   );

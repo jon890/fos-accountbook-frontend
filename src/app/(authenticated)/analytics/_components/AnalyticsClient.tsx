@@ -96,8 +96,10 @@ export function AnalyticsClient({
       setMonth(newMonth);
       setDailyStats(daily.success ? daily.data : []);
       setExpenses(exps.success ? exps.data.items : []);
-      // 현재 월이 아니면 stats 무효화
-      if (!isCurrentMonth) setStats(null);
+      // 새로 이동한 월이 현재 월이 아니면 stats 무효화
+      const now = new Date();
+      const isNewCurrentMonth = newYear === now.getFullYear() && newMonth === now.getMonth() + 1;
+      if (!isNewCurrentMonth) setStats(null);
       setIsPending(false);
     });
   };
@@ -228,8 +230,8 @@ export function AnalyticsClient({
           <BarChart2 className="w-4 h-4 text-gray-400" />
           <h2 className="text-sm font-bold text-gray-700">일별 추이</h2>
           <div className="ml-auto flex items-center gap-3 text-[11px] text-gray-400">
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-400 inline-block" />지출</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />수입</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: "var(--chart-expense)" }} />지출</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: "var(--chart-income)" }} />수입</span>
           </div>
         </div>
         {totalExpense === 0 && totalIncome === 0 ? (
