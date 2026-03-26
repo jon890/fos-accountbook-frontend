@@ -31,7 +31,8 @@ describe("ExpenseItem", () => {
     // Then
     expect(screen.getByText("마트 장보기")).toBeInTheDocument();
     expect(screen.getByText("-₩50,000")).toBeInTheDocument();
-    expect(screen.getByText("식비")).toBeInTheDocument();
+    // 카테고리명은 서브텍스트에 "식비 · 날짜" 형태로 포함됨
+    expect(screen.getAllByText(/식비/).length).toBeGreaterThan(0);
   });
 
   it("설명이 없으면 카테고리 이름을 표시한다", () => {
@@ -45,7 +46,7 @@ describe("ExpenseItem", () => {
     render(<ExpenseItem expense={expenseWithoutDescription} />);
 
     // Then
-    // 식비가 h4와 Badge 두 곳에 표시됨
+    // 설명이 없으면 카테고리명이 메인 타이틀로 표시됨
     const categoryTexts = screen.getAllByText("식비");
     expect(categoryTexts.length).toBeGreaterThan(0);
   });
