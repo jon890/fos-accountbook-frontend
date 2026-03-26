@@ -23,9 +23,6 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-  # NEXT_PUBLIC_ 변수는 빌드 시 클라이언트 번들에 포함됨
-  # TODO: 추후 Next.js API Route 프록시로 전환하면 런타임 주입 가능
-  NEXT_PUBLIC_API_BASE_URL: https://accountbook-api.fosworld.co.kr/api/v1
 
 jobs:
   build-and-push:
@@ -75,9 +72,10 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           # NEXT_PUBLIC_ 변수는 빌드 시 클라이언트 번들에 포함
-          # GitHub repo Variables에서 NEXT_PUBLIC_API_BASE_URL 설정 필요
+          # GitHub Settings > Variables > Actions에서 NEXT_PUBLIC_API_BASE_URL 등록 필요
+          # TODO: 추후 Next.js API Route 프록시로 전환하면 런타임 주입 가능
           build-args: |
-            NEXT_PUBLIC_API_BASE_URL=${{ env.NEXT_PUBLIC_API_BASE_URL }}
+            NEXT_PUBLIC_API_BASE_URL=${{ vars.NEXT_PUBLIC_API_BASE_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64,linux/arm64

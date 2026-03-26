@@ -34,5 +34,7 @@ src/__tests__/
 jest.config.js
 jest.setup.ts
 
-# OMC
+# OMC / Claude / Cursor
 .omc/
+.claude/
+.cursor/
