@@ -156,6 +156,19 @@
   }
 
   /* 레거시 호환 */
+  /* === 그라디언트 카드 위 텍스트/오버레이 공통 유틸 === */
+  /* 그라디언트 배경 위에서 색상에 무관하게 일관된 가독성 제공 */
+  .gradient-card-label {
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .gradient-card-sublabel {
+    color: rgba(255, 255, 255, 0.70);
+  }
+  .gradient-card-overlay {
+    background-color: rgba(255, 255, 255, 0.20);
+  }
+
+  /* 레거시 호환 */
   .gradient-blue-purple {
     background-image: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
   }
