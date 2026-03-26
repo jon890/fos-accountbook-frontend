@@ -312,7 +312,7 @@ export function AnalyticsClient({
                 </span>
                 <div
                   className="w-8 h-8 rounded-xl flex items-center justify-center text-sm shrink-0"
-                  style={{ backgroundColor: `${expense.category?.color ?? "#6366f1"}20` }}
+                  style={{ backgroundColor: expense.category?.color ? `${expense.category.color}20` : "var(--color-category-fallback-bg)" }}
                 >
                   {expense.category?.icon ?? "💸"}
                 </div>

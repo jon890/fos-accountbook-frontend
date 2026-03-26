@@ -63,6 +63,7 @@
     /* 차트 */
     --chart-expense: #fb7185; /* rose-400 */
     --chart-income: #34d399;  /* emerald-400 */
+    --color-category-fallback-bg: rgb(99 102 241 / 0.12); /* indigo-500 at 12% — 삭제된 카테고리 fallback */
 
   /* 위험/삭제 */
     --destructive: 0 84% 60%;
