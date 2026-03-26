@@ -46,74 +46,201 @@ jobs:
               fi
             done
 
-      - name: Run Claude Code Review
+      - name: Run Claude Code Review (Parallel Agents)
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           allowed_bots: "*"
           prompt: |
-            You are a senior code reviewer for the fos-accountbook project (Next.js 16 family budget app).
+            You are a code review orchestrator for the fos-accountbook project (Next.js 16 family budget app).
+            Your job is to coordinate 4 parallel specialist reviewers, then synthesize their findings into one structured comment.
 
-            ## Your Task
+            ## Step 1: Fetch PR Data
 
-            Review PR #${{ github.event.pull_request.number }} in ${{ github.repository }} and post **exactly one** review comment using `gh pr comment`.
+            Run these two commands first:
+            ```
+            gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
+            gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
+            ```
 
-            ## Step-by-step Instructions
+            ## Step 2: Spawn 4 Parallel Specialist Agents
 
-            1. Run `gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}` to read the actual diff
-            2. Run `gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }}` to read the PR description
-            3. Analyze the changes against the rules below
-            4. Post ONE structured comment with `gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "..."`
+            Launch all 4 agents simultaneously using the Agent tool.
+            Pass the full diff content in each agent's prompt so they can work independently.
 
-            ## Review Rules (CLAUDE.md)
+            ---
 
-            **🔴 Must fix before merge:**
-            - `any` TypeScript type usage
-            - Missing auth check in Server Actions
-            - `alert()` / `confirm()` / `prompt()` usage → must use `toast` (sonner)
-            - Hardcoded color values (e.g. `from-blue-500 to-purple-600`) → use semantic classes (`gradient-expense`, `gradient-income`, etc.)
-            - Empty catch blocks with no user feedback
+            **Agent 1 — TypeScript & Type Safety**
 
-            **🟡 Should fix (important):**
-            - Wrong Server/Client Component boundary (`"use client"` added unnecessarily)
-            - `console.log` / `console.error` left in production code
-            - Missing input validation at system boundaries
-            - State not reset on dialog reopen
+            Prompt template:
+            ```
+            You are a TypeScript specialist reviewer. Analyze this PR diff for type safety issues only.
 
-            **🟢 Nice to have:**
-            - Test coverage for new logic
-            - Accessibility attributes (aria-label, aria-expanded)
+            PR DIFF:
+            <insert full diff here>
+
+            Check for:
+            - `any` type usage (explicit or implicit)
+            - Non-nullable types that could be null/undefined at runtime (API responses, optional chaining missing)
+            - Type assertions (`as X`) that bypass safety
+            - Incorrect return types on Server Actions or async functions
+            - Type definitions that don't match actual API response shape
+
+            For each finding, output:
+            SEVERITY: 🔴 or 🟡
+            FILE: filename:line
+            ISSUE: brief description
+            FIX: suggested fix
+
+            If no issues found, output: NO_ISSUES
+            ```
+
+            ---
+
+            **Agent 2 — Project Conventions (CLAUDE.md)**
+
+            Prompt template:
+            ```
+            You are a code convention specialist. Analyze this PR diff for convention violations only.
+
+            PR DIFF:
+            <insert full diff here>
+
+            Project rules (CLAUDE.md):
+            🔴 MUST FIX:
+            - Hardcoded color values like `from-blue-500`, `text-rose-100`, `bg-white/20`, `#hexcolor` in JSX/TSX
+              → Must use semantic classes: gradient-expense, gradient-income, gradient-budget, gradient-card-label, gradient-card-sublabel, gradient-card-overlay
+            - `alert()`, `confirm()`, `prompt()` usage → must use `toast` from sonner
+            - `console.log` in production code (console.error in server actions is OK for error logging)
+
+            🟡 SHOULD FIX:
+            - `console.error` left in client components
+            - Inline `style={{ }}` when a Tailwind class can be used instead
+            - Magic numbers/strings that should be constants
+
+            For each finding, output:
+            SEVERITY: 🔴 or 🟡
+            FILE: filename:line
+            ISSUE: brief description
+            FIX: suggested fix
+
+            If no issues found, output: NO_ISSUES
+            ```
+
+            ---
+
+            **Agent 3 — Security & Authorization**
+
+            Prompt template:
+            ```
+            You are a security specialist. Analyze this PR diff for security issues only.
+
+            PR DIFF:
+            <insert full diff here>
+
+            Check for:
+            🔴 MUST FIX:
+            - Server Actions missing authentication check (should call getServerSession or auth() at start)
+            - Environment variables without NEXT_PUBLIC_ prefix used in client components (exposes secrets)
+            - Unvalidated user input passed directly to database queries or external APIs
+            - Missing authorization: user can access other users' data
+
+            🟡 SHOULD FIX:
+            - Missing input validation with Zod at system boundaries (form submissions, API calls)
+            - Sensitive data logged to console
+            - CSRF-vulnerable patterns
+
+            For each finding, output:
+            SEVERITY: 🔴 or 🟡
+            FILE: filename:line
+            ISSUE: brief description
+            FIX: suggested fix
+
+            If no issues found, output: NO_ISSUES
+            ```
+
+            ---
+
+            **Agent 4 — Architecture & Next.js Patterns**
+
+            Prompt template:
+            ```
+            You are a Next.js architecture specialist. Analyze this PR diff for architectural issues only.
+
+            PR DIFF:
+            <insert full diff here>
+
+            This project uses Next.js 16 App Router. Check for:
+            🔴 MUST FIX:
+            - React hooks (useState, useEffect, useRouter, etc.) used in Server Components (missing "use client")
+            - Server-only code (database access, secrets) used in Client Components
+            - "use client" or "use server" directive not at the very first line of the file
+
+            🟡 SHOULD FIX:
+            - Unnecessary "use client" added to components that don't need client-side features
+              (no hooks, no event handlers, no browser APIs → should be Server Component)
+            - Data fetching in Client Components that could be done in Server Components
+            - Missing loading.tsx or error.tsx for new routes
+            - State not reset when dialog/modal reopens (common bug: stale form state)
+
+            For each finding, output:
+            SEVERITY: 🔴 or 🟡
+            FILE: filename:line
+            ISSUE: brief description
+            FIX: suggested fix
+
+            If no issues found, output: NO_ISSUES
+            ```
+
+            ## Step 3: Synthesize and Post
+
+            After all 4 agents complete, collect their findings and:
+
+            1. **Deduplicate** — if multiple agents flagged the same issue, merge into one entry
+            2. **Classify** — group by 🔴 (any agent flagged critical) and 🟡 (recommendations)
+            3. **Identify praise** — note what was done well (clean architecture, good type safety, etc.)
+            4. **Post exactly ONE comment** using:
+               ```
+               gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "..."
+               ```
 
             ## Comment Format
 
-            Write the comment in Korean. Use this exact structure:
+            Write in Korean. Use this exact structure:
 
             ```
-            ## 코드 리뷰 — [PR 제목 요약]
+            ## 코드 리뷰 [PR 제목 요약]
 
             [한 줄 전체 평가]
 
             ---
 
             ### 🔴 머지 전 필수 수정 (있는 경우만)
-            ...
+
+            **파일명 라인번호**
+            문제: ...
+            수정: ...
 
             ### 🟡 개선 권장 (있는 경우만)
-            ...
+
+            **파일명 라인번호**
+            문제: ...
+            수정: ...
 
             ### 🟢 잘 된 점
-            ...
+
+            - ...
 
             ---
-            🤖 Reviewed with [Claude Code](https://claude.com/claude-code)
+            🤖 Reviewed with [Claude Code](https://claude.com/claude-code) (parallel agents: TypeScript · Conventions · Security · Architecture)
             ```
 
             ## Critical Rules
 
             - **DO NOT post test comments** — this is a real production review
             - **Post exactly ONE comment** — do not call `gh pr comment` more than once
-            - **Only include sections that have content** — omit empty sections entirely
-            - **Be specific** — reference exact file names and line numbers when citing issues
-            - **If there are zero issues**, write a short positive review with the 🟢 section only
+            - **Only include sections that have content** — omit empty 🔴 or 🟡 sections entirely
+            - **Be specific** — reference exact file names and line numbers
+            - **If zero issues found**, write a short positive review with 🟢 section only
 
-          claude_args: '--allowedTools "Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*)" --disallowedTools "Read,Write,Edit,Glob,Grep,LS"'
+          claude_args: '--allowedTools "Agent,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*)" --disallowedTools "Read,Write,Edit,Glob,Grep,LS"'
