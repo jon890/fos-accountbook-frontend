@@ -8,6 +8,8 @@
  * ⚠️ 서버 전용 — Client Component에서 import 금지
  */
 
+import "server-only";
+
 import { cache } from "react";
 import { auth } from "@/lib/server/auth";
 import { serverApiGet } from "@/lib/server/api";
@@ -26,7 +28,10 @@ export const getCachedSession = cache(() => auth());
  * 가족 카테고리 목록 조회 (per-request 캐시)
  *
  * 같은 요청에서 동일한 familyUuid로 여러 번 호출해도 API는 한 번만 호출됩니다.
- * (예: getRecentExpensesAction + getFamilyCategoriesAction 동시 호출 시)
+ * RSC 렌더링 중 여러 컴포넌트나 동일 Server Action 내 중복 호출 시 효과적입니다.
+ *
+ * ⚠️ React.cache()는 단일 요청(렌더 트리) 범위의 메모이제이션입니다.
+ * 별도의 Server Action POST 요청 간에는 캐시가 공유되지 않습니다.
  */
 export const getCachedFamilyCategories = cache(
   (familyUuid: string): Promise<CategoryResponse[]> =>
