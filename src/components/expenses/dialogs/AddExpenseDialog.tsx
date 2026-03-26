@@ -66,6 +66,7 @@ export function AddExpenseDialog({
 
   useEffect(() => {
     if (open) {
+      setActiveType(defaultType);
       loadData();
     } else {
       setCategories([]);
