@@ -29,6 +29,10 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
 
+  /* 시맨틱 거래 색상 */
+  --color-income: hsl(var(--income));
+  --color-expense: hsl(var(--expense));
+
   --radius: 0.5rem;
 }
 
@@ -69,6 +73,10 @@
     --input: 214 32% 91%;
     --ring: 220 90% 56%;             /* primary와 동일 */
     --radius: 0.5rem;
+
+    /* 시맨틱 거래 색상 */
+    --income: 160 84% 39%;           /* emerald-600 — 수입 */
+    --expense: 347 77% 50%;          /* rose-600 — 지출 */
   }
 
   .dark {
