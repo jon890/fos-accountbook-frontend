@@ -10,11 +10,11 @@ import {
   successResult,
   type ActionResult,
 } from "@/lib/errors";
-import { serverApiGet } from "@/lib/server/api";
 import {
   requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
+import { getCachedDashboardStats } from "@/lib/server/cache";
 import type { DashboardStats } from "@/types/dashboard";
 
 export async function getDashboardStatsAction(): Promise<
@@ -37,10 +37,8 @@ export async function getDashboardStatsAction(): Promise<
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
 
-    // 월별 통계 조회
-    const stats = await serverApiGet<DashboardStats>(
-      `/families/${selectedFamilyUuid}/dashboard/stats/monthly?year=${year}&month=${month}`
-    );
+    // 월별 통계 조회 (per-request 캐시)
+    const stats = await getCachedDashboardStats(selectedFamilyUuid, year, month);
 
     return successResult(stats);
   } catch (error) {
