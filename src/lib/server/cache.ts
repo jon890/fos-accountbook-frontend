@@ -23,14 +23,6 @@ import type { DashboardStats } from "@/types/dashboard";
 export const getCachedSession = cache(() => auth());
 
 /**
- * 선택된 가족 UUID 조회 (per-request 캐시)
- */
-export const getCachedSelectedFamilyUuid = cache(async (): Promise<string | null> => {
-  const session = await getCachedSession();
-  return session?.user?.profile?.defaultFamilyUuid ?? null;
-});
-
-/**
  * 가족 카테고리 목록 조회 (per-request 캐시)
  *
  * 같은 요청에서 동일한 familyUuid로 여러 번 호출해도 API는 한 번만 호출됩니다.

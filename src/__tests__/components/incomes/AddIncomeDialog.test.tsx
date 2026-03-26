@@ -21,7 +21,6 @@ jest.mock("@/lib/server/api", () => ({
 
 jest.mock("@/lib/server/cache", () => ({
   getCachedSession: jest.fn(),
-  getCachedSelectedFamilyUuid: jest.fn(),
   getCachedFamilyCategories: jest.fn(),
   getCachedDashboardStats: jest.fn(),
 }));
