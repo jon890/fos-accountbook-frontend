@@ -62,11 +62,9 @@ export function AddIncomeDialog({ open, onOpenChange }: AddIncomeDialogProps) {
           setFamilyUuid(result.data[0].familyUuid);
         }
       } else {
-        console.error("Failed to load categories:", result.error);
         toast.error(result.error.message);
       }
-    } catch (error) {
-      console.error("Failed to load categories:", error);
+    } catch {
       toast.error("카테고리를 불러오는데 실패했습니다");
     } finally {
       setIsLoadingCategories(false);
