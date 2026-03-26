@@ -14,11 +14,6 @@ jobs:
       id-token: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
       - name: Dismiss old Claude bot comments
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -112,4 +107,4 @@ jobs:
             - **Be specific** — reference exact file names and line numbers when citing issues
             - **If there are zero issues**, write a short positive review with the 🟢 section only
 
-          claude_args: '--allowed-tools "Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*)"'
+          claude_args: '--allowedTools "Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*)" --disallowedTools "Read,Write,Edit,Glob,Grep,LS"'
