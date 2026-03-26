@@ -1,8 +1,8 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import type { Income } from "@/types/income";
 import type { CategoryResponse } from "@/types/category";
+import { groupByDate } from "@/lib/utils/group-by-date";
 import { useRouter, useSearchParams } from "next/navigation";
 import { IncomeItem } from "./IncomeItem";
 
@@ -20,10 +20,8 @@ export function IncomeListClient({
   incomes,
   familyUuid,
   categories,
-  totalElements,
   totalPages,
   currentPage,
-  limit,
 }: IncomeListClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -34,23 +32,42 @@ export function IncomeListClient({
     router.push(`/transactions?${params.toString()}`);
   };
 
+  // 날짜별 그룹핑
+  const groups = groupByDate(incomes);
+
   return (
     <div className="space-y-4">
-      {/* 수입 목록 카드 */}
-      <Card>
-        <CardContent className="p-4 md:p-6">
-          <div className="space-y-2">
-            {incomes.map((income) => (
-              <IncomeItem
-                key={income.uuid}
-                income={income}
-                familyUuid={familyUuid}
-                categories={categories}
-              />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-5">
+        {groups.map(({ dateKey, label, items }) => {
+          const groupTotal = items.reduce((sum, i) => sum + Number(i.amount), 0);
+
+          return (
+            <div key={dateKey}>
+              {/* 날짜 헤더 */}
+              <div className="flex items-center justify-between px-1 mb-2">
+                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">
+                  {label}
+                </span>
+                <span className="text-xs font-semibold text-emerald-600">
+                  +₩{groupTotal.toLocaleString()}
+                </span>
+              </div>
+
+              {/* 해당 날짜의 수입 목록 */}
+              <div className="bg-white rounded-2xl overflow-hidden divide-y divide-gray-50">
+                {items.map((income) => (
+                  <IncomeItem
+                    key={income.uuid}
+                    income={income}
+                    familyUuid={familyUuid}
+                    categories={categories}
+                  />
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
       {/* 페이지네이션 */}
       {totalPages > 1 && (

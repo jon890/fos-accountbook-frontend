@@ -10,6 +10,7 @@ import type { CategoryResponse } from "@/types/category";
 import type { Expense, ExpenseItemData } from "@/types/expense";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { groupByDate } from "@/lib/utils/group-by-date";
 import { DeleteExpenseDialog } from "../dialogs/DeleteExpenseDialog";
 import { EditExpenseDialog } from "../dialogs/EditExpenseDialog";
 import { ExpenseItem } from "./ExpenseItem";
@@ -18,23 +19,6 @@ interface ExpenseListClientProps {
   expenses: Expense[];
   categories: CategoryResponse[];
   familyUuid: string;
-}
-
-function getDateLabel(dateStr: string): string {
-  // dateStr: ISO format (e.g. "2025-03-26T..." or "2025-03-26")
-  const dayPart = dateStr.split("T")[0]; // YYYY-MM-DD
-  const [year, month, day] = dayPart.split("-").map(Number);
-
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`;
-
-  if (dayPart === todayStr) return "오늘";
-  if (dayPart === yesterdayStr) return "어제";
-  if (year === today.getFullYear()) return `${month}월 ${day}일`;
-  return `${year}년 ${month}월 ${day}일`;
 }
 
 export function ExpenseListClient({
@@ -72,17 +56,7 @@ export function ExpenseListClient({
   const categoryMap = new Map(categories.map((cat) => [cat.uuid, cat]));
 
   // 날짜별 그룹핑
-  const groups: { dateKey: string; label: string; items: Expense[] }[] = [];
-  const seenDates = new Map<string, number>(); // dateKey → index in groups
-
-  for (const expense of expenses) {
-    const dayPart = expense.date.split("T")[0];
-    if (!seenDates.has(dayPart)) {
-      seenDates.set(dayPart, groups.length);
-      groups.push({ dateKey: dayPart, label: getDateLabel(dayPart), items: [] });
-    }
-    groups[seenDates.get(dayPart)!].items.push(expense);
-  }
+  const groups = groupByDate(expenses);
 
   return (
     <>
