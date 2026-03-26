@@ -10,6 +10,7 @@ import { useTimeZone } from "@/lib/client/timezone-context";
 import type { CategoryResponse } from "@/types/category";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { CalendarDays, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -86,6 +87,14 @@ export function ExpenseFilters({
   };
 
   const applyCustomDate = () => {
+    if (!customStart || !customEnd) {
+      toast.error("시작일과 종료일을 모두 입력해주세요");
+      return;
+    }
+    if (customStart > customEnd) {
+      toast.error("종료일은 시작일 이후여야 합니다");
+      return;
+    }
     setActiveRange("custom");
     setShowCustomDate(false);
     navigate({ startDate: customStart, endDate: customEnd });

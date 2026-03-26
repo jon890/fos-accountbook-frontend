@@ -185,10 +185,7 @@
 
   /* 필터 칩 활성 상태 */
   .chip-active {
-    background-color: rgb(31 41 55); /* gray-800 */
-    color: #fff;
-    border-color: transparent;
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.08);
+    @apply bg-gray-800 text-white border-transparent shadow-sm;
   }
 
   .animate-float {
