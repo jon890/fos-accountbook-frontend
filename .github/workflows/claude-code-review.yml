@@ -48,22 +48,68 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           allowed_bots: "*"
           prompt: |
-            REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            You are a senior code reviewer for the fos-accountbook project (Next.js 16 family budget app).
 
-            이 프로젝트는 Next.js 16 기반의 가족 가계부 웹 앱입니다.
-            CLAUDE.md의 가이드를 참고하여 PR 변경사항을 리뷰해주세요.
+            ## Your Task
 
-            다음 관점에서 검토해주세요:
-            - **TypeScript**: strict mode 준수, `any` 타입 사용 여부
-            - **컴포넌트 경계**: Server/Client Component 구분이 올바른지
-            - **스타일**: 하드코딩 색상 대신 시맨틱 CSS 클래스 사용 여부 (CLAUDE.md 참고)
-            - **보안**: Server Actions에서 인증/권한 검사 누락 여부
-            - **코드 품질**: 잠재적 버그, 엣지 케이스, 에러 처리
-            - **금지사항**: `alert()` 사용, 인라인 스타일 남용 등
-            - **테스트**: 새 로직에 대한 테스트 커버리지 적절성
+            Review PR #${{ github.event.pull_request.number }} in ${{ github.repository }} and post **exactly one** review comment using `gh pr comment`.
 
-            리뷰는 `gh pr comment` 명령으로 PR에 코멘트로 남겨주세요.
-            피드백은 건설적이고 구체적으로, 한국어로 작성해도 됩니다.
+            ## Step-by-step Instructions
 
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
+            1. Run `gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}` to read the actual diff
+            2. Run `gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }}` to read the PR description
+            3. Analyze the changes against the rules below
+            4. Post ONE structured comment with `gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "..."`
+
+            ## Review Rules (CLAUDE.md)
+
+            **🔴 Must fix before merge:**
+            - `any` TypeScript type usage
+            - Missing auth check in Server Actions
+            - `alert()` / `confirm()` / `prompt()` usage → must use `toast` (sonner)
+            - Hardcoded color values (e.g. `from-blue-500 to-purple-600`) → use semantic classes (`gradient-expense`, `gradient-income`, etc.)
+            - Empty catch blocks with no user feedback
+
+            **🟡 Should fix (important):**
+            - Wrong Server/Client Component boundary (`"use client"` added unnecessarily)
+            - `console.log` / `console.error` left in production code
+            - Missing input validation at system boundaries
+            - State not reset on dialog reopen
+
+            **🟢 Nice to have:**
+            - Test coverage for new logic
+            - Accessibility attributes (aria-label, aria-expanded)
+
+            ## Comment Format
+
+            Write the comment in Korean. Use this exact structure:
+
+            ```
+            ## 코드 리뷰 — [PR 제목 요약]
+
+            [한 줄 전체 평가]
+
+            ---
+
+            ### 🔴 머지 전 필수 수정 (있는 경우만)
+            ...
+
+            ### 🟡 개선 권장 (있는 경우만)
+            ...
+
+            ### 🟢 잘 된 점
+            ...
+
+            ---
+            🤖 Reviewed with [Claude Code](https://claude.com/claude-code)
+            ```
+
+            ## Critical Rules
+
+            - **DO NOT post test comments** — this is a real production review
+            - **Post exactly ONE comment** — do not call `gh pr comment` more than once
+            - **Only include sections that have content** — omit empty sections entirely
+            - **Be specific** — reference exact file names and line numbers when citing issues
+            - **If there are zero issues**, write a short positive review with the 🟢 section only
+
+          claude_args: '--allowed-tools "Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*)"'
