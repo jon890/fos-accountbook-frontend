@@ -40,9 +40,6 @@ export async function getMonthlyDailyStatsAction(year: number, month: number) {
     const endDate = `${year}-${String(month).padStart(2, "0")}-${lastDay}`;
 
     // 병렬로 데이터 조회 (최대 1000개로 가정)
-    console.log(
-      `[Calendar] Fetching stats for family ${familyUuid} from ${startDate} to ${endDate}`,
-    );
     const [expensesResult, incomesResult] = await Promise.all([
       serverApiGet<{ items: ExpenseResponse[] }>(
         `/families/${familyUuid}/expenses?size=1000&startDate=${startDate}&endDate=${endDate}`,
@@ -57,8 +54,6 @@ export async function getMonthlyDailyStatsAction(year: number, month: number) {
         return { items: [] as IncomeResponse[] };
       }),
     ]);
-    console.log(`[Calendar] Expenses count: ${expensesResult?.items?.length}`);
-    console.log(`[Calendar] Incomes count: ${incomesResult?.items?.length}`);
 
     // 일별 집계
     const dailyMap = new Map<string, { income: number; expense: number }>();

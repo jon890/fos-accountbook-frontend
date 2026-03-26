@@ -118,22 +118,32 @@ export function ExpenseFilters({
   return (
     <div className="space-y-2.5">
       {/* 필터 칩 바 */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
+      <div
+        role="group"
+        aria-label="거래 내역 필터"
+        className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5"
+      >
         {/* 기간 빠른 선택 */}
         <button
           onClick={() => applyQuickRange("thisMonth")}
+          aria-pressed={activeRange === "thisMonth"}
+          aria-label="이번달 기간 선택"
           className={cn(chipBase, activeRange === "thisMonth" ? chipActive : chipInactive)}
         >
           이번달
         </button>
         <button
           onClick={() => applyQuickRange("3months")}
+          aria-pressed={activeRange === "3months"}
+          aria-label="최근 3개월 기간 선택"
           className={cn(chipBase, activeRange === "3months" ? chipActive : chipInactive)}
         >
           3개월
         </button>
         <button
           onClick={() => applyQuickRange("1year")}
+          aria-pressed={activeRange === "1year"}
+          aria-label="최근 1년 기간 선택"
           className={cn(chipBase, activeRange === "1year" ? chipActive : chipInactive)}
         >
           1년
@@ -144,6 +154,9 @@ export function ExpenseFilters({
             setShowCustomDate(next);
             if (next) setActiveRange("custom");
           }}
+          aria-expanded={showCustomDate}
+          aria-controls="custom-date-panel"
+          aria-label="날짜 직접 설정"
           className={cn(
             chipBase,
             "flex items-center gap-1",
@@ -155,19 +168,20 @@ export function ExpenseFilters({
         </button>
 
         {/* 구분선 */}
-        <div className="w-px h-5 bg-gray-200 shrink-0" />
+        <div className="w-px h-5 bg-gray-200 shrink-0" aria-hidden="true" />
 
         {/* 카테고리 필터 */}
         {hasActiveCategory ? (
           <button
             onClick={clearCategory}
+            aria-label={`${selectedCategoryObj?.name} 카테고리 필터 해제`}
             className={cn(
               chipBase,
               "flex items-center gap-1.5 bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
             )}
           >
             {selectedCategoryObj?.icon} {selectedCategoryObj?.name}
-            <X className="w-3 h-3" />
+            <X className="w-3 h-3" aria-hidden="true" />
           </button>
         ) : (
           <Select value={selectedCategory} onValueChange={handleCategoryChange}>
@@ -191,22 +205,28 @@ export function ExpenseFilters({
 
       {/* 날짜 직접 입력 (펼치기) */}
       {showCustomDate && (
-        <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
+        <div
+          id="custom-date-panel"
+          className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100"
+        >
           <Input
             type="date"
             value={customStart}
             onChange={(e) => setCustomStart(e.target.value)}
+            aria-label="시작일"
             className="h-8 text-xs flex-1 min-w-0"
           />
-          <span className="text-gray-400 text-xs shrink-0">~</span>
+          <span className="text-gray-400 text-xs shrink-0" aria-hidden="true">~</span>
           <Input
             type="date"
             value={customEnd}
             onChange={(e) => setCustomEnd(e.target.value)}
+            aria-label="종료일"
             className="h-8 text-xs flex-1 min-w-0"
           />
           <button
             onClick={applyCustomDate}
+            aria-label="날짜 범위 적용"
             className="px-3 py-1.5 rounded-lg bg-gray-800 text-white text-xs font-semibold hover:bg-gray-700 transition-colors shrink-0"
           >
             적용
