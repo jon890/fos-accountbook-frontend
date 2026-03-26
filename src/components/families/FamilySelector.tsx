@@ -238,7 +238,7 @@ export function FamilySelector({
             >
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 gradient-income rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-14 h-14 gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     <User className="w-7 h-7 text-white" />
                   </div>
                   <div className="flex-1">

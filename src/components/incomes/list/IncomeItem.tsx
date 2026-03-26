@@ -38,15 +38,17 @@ export function IncomeItem({
   const [isDeleting, setIsDeleting] = useState(false);
   const { timezone } = useTimeZone();
 
-  const handleDelete = async () => {
+  const handleDelete = async (): Promise<boolean> => {
     setIsDeleting(true);
     try {
       const result = await deleteIncomeAction(familyUuid, income.uuid);
 
       if (result.success) {
         toast.success("수입이 삭제되었습니다");
+        return true;
       } else {
         toast.error(result.error?.message || "삭제에 실패했습니다");
+        return false;
       }
     } finally {
       setIsDeleting(false);
@@ -201,7 +203,11 @@ export function IncomeItem({
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>취소</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
+              onClick={async (e) => {
+                e.preventDefault();
+                const success = await handleDelete();
+                if (success) setIsDeleteDialogOpen(false);
+              }}
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
