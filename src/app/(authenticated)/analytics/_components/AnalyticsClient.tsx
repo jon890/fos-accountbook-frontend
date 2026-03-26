@@ -1,5 +1,6 @@
 "use client";
 
+import { getDashboardStatsAction } from "@/app/actions/dashboard/get-dashboard-stats-action";
 import { getMonthlyDailyStatsAction } from "@/app/actions/dashboard/get-monthly-daily-stats-action";
 import { getExpensesAction } from "@/app/actions/expense/get-expenses-action";
 import type { DailyTransactionSummary } from "@/app/actions/dashboard/get-monthly-daily-stats-action";
@@ -87,19 +88,24 @@ export function AnalyticsClient({
       const lastDay = new Date(newYear, newMonth, 0).getDate();
       const end = `${newYear}-${String(newMonth).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
 
-      const [daily, exps] = await Promise.all([
+      const now = new Date();
+      const isNewCurrentMonth = newYear === now.getFullYear() && newMonth === now.getMonth() + 1;
+
+      const [daily, exps, dashboardStats] = await Promise.all([
         getMonthlyDailyStatsAction(newYear, newMonth),
         getExpensesAction({ familyId: familyUuid, startDate: start, endDate: end, limit: 1000 }),
+        isNewCurrentMonth ? getDashboardStatsAction() : Promise.resolve(null),
       ]);
 
       setYear(newYear);
       setMonth(newMonth);
       setDailyStats(daily.success ? daily.data : []);
       setExpenses(exps.success ? exps.data.items : []);
-      // 새로 이동한 월이 현재 월이 아니면 stats 무효화
-      const now = new Date();
-      const isNewCurrentMonth = newYear === now.getFullYear() && newMonth === now.getMonth() + 1;
-      if (!isNewCurrentMonth) setStats(null);
+      if (isNewCurrentMonth) {
+        setStats(dashboardStats && dashboardStats.success ? dashboardStats.data : null);
+      } else {
+        setStats(null);
+      }
       setIsPending(false);
     });
   };

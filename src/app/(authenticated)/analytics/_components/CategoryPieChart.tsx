@@ -43,7 +43,7 @@ export function CategoryPieChart({ data }: CategoryPieChartProps) {
           contentStyle={{
             fontSize: 12,
             borderRadius: 8,
-            border: "1px solid #f3f4f6",
+            border: "1px solid var(--border)",
           }}
         />
       </PieChart>
