@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/client/utils";
@@ -65,13 +66,14 @@ export function BudgetClient({
             <p className="text-sm text-muted-foreground mb-6">
               월별 예산을 설정하면 지출을 효과적으로 관리할 수 있어요
             </p>
-            <button
+            <Button
+              variant="default"
               onClick={() => router.push("/settings")}
-              className="flex items-center gap-2 px-4 py-2 gradient-budget text-white text-sm font-medium rounded-lg shadow-sm hover:opacity-90 transition-opacity"
+              className="gradient-budget text-white shadow-sm hover:opacity-90 transition-opacity"
             >
               <Settings className="w-4 h-4" />
               예산 설정하기
-            </button>
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -195,13 +197,14 @@ export function BudgetClient({
 
       {/* 예산 설정 링크 */}
       {hasBudget && (
-        <button
+        <Button
+          variant="outline"
           onClick={() => router.push("/settings")}
-          className="w-full flex items-center justify-center gap-2 py-3 border border-border rounded-xl text-sm text-muted-foreground hover:bg-muted transition-colors"
+          className="w-full rounded-xl text-muted-foreground"
         >
           <Settings className="w-4 h-4" />
           예산 수정하기
-        </button>
+        </Button>
       )}
     </div>
   );
