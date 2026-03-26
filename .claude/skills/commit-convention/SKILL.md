@@ -18,7 +18,7 @@ pnpm lint & pnpm tsc --noEmit & wait
 
 # 2. 변경된 파일과 관련된 테스트만 실행 (빠름)
 STAGED=$(git diff --staged --name-only)
-[ -n "$STAGED" ] && pnpm jest --findRelatedTests $STAGED || pnpm jest
+[ -n "$STAGED" ] && pnpm jest --findRelatedTests $STAGED --passWithNoTests || pnpm jest
 ```
 
 - **에러가 있으면 먼저 수정하고 커밋한다.**
