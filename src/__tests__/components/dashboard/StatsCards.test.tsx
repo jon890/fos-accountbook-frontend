@@ -180,25 +180,25 @@ describe("StatsCards", () => {
       });
     });
 
-    it("예산 초과 시 빨간색 그라데이션이 적용된다", () => {
+    it("예산 초과 시 지출 그라데이션이 적용된다", () => {
       const overBudgetData = {
         ...mockData,
         remainingBudget: -100000,
       };
 
-      const { container } = render(<StatsCards data={overBudgetData} />);
+      render(<StatsCards data={overBudgetData} />);
 
       const budgetCard = screen.getByText("예산 초과").closest("div")!
         .parentElement!.parentElement;
-      expect(budgetCard).toHaveClass("from-red-500");
+      expect(budgetCard).toHaveClass("gradient-expense");
     });
 
-    it("예산이 남았을 때 주황색 그라데이션이 적용된다", () => {
-      const { container } = render(<StatsCards data={mockData} />);
+    it("예산이 남았을 때 예산 그라데이션이 적용된다", () => {
+      render(<StatsCards data={mockData} />);
 
       const budgetCard = screen.getByText("예산 남은 금액").closest("div")!
         .parentElement!.parentElement;
-      expect(budgetCard).toHaveClass("from-amber-500");
+      expect(budgetCard).toHaveClass("gradient-budget");
     });
   });
 });
