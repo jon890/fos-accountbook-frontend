@@ -171,7 +171,7 @@ export function SettingsPageClient({
                 !selectedFamily ||
                 selectedFamily === currentDefaultFamily
               }
-              className="bg-blue-600 hover:bg-blue-700"
+              className="gradient-primary hover:opacity-90 text-white"
             >
               {isSaving ? "저장 중..." : "기본 가족으로 설정"}
             </Button>

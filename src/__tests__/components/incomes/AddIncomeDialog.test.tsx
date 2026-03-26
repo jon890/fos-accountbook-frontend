@@ -27,7 +27,7 @@ jest.mock("@/app/actions/category/get-categories-action");
 jest.mock("@/app/actions/income/create-income-action");
 
 import { getFamilyCategoriesAction } from "@/app/actions/category/get-categories-action";
-import { createIncomeAction } from "@/app/actions/income/create-income-action";
+import { createIncomeAction as _createIncomeAction } from "@/app/actions/income/create-income-action";
 import { AddIncomeDialog } from "@/components/incomes/dialogs/AddIncomeDialog";
 import { render, screen, waitFor } from "@testing-library/react";
 jest.mock("sonner", () => ({

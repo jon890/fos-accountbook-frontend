@@ -73,7 +73,7 @@ export function InviteFamilyDialog({
       } else {
         toast.error(result.error.message);
       }
-    } catch (error) {
+    } catch {
       toast.error("초대 링크 생성에 실패했습니다");
     } finally {
       setIsCreating(false);
@@ -128,7 +128,7 @@ export function InviteFamilyDialog({
           <Button
             onClick={handleCreateInvitation}
             disabled={isCreating}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            className="w-full gradient-primary hover:opacity-90"
           >
             {isCreating ? (
               <>

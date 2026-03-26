@@ -8,7 +8,7 @@ export function StatsCardsSkeleton() {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 mb-4 md:mb-8">
       {/* 지출 카드 스켈레톤 */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 text-white border-0 shadow-xl animate-pulse">
+      <Card className="relative overflow-hidden gradient-expense text-white border-0 shadow-xl animate-pulse">
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
         <CardContent className="relative p-3 md:p-6">
           <div className="flex items-center justify-between mb-2 md:mb-4">
@@ -24,7 +24,7 @@ export function StatsCardsSkeleton() {
       </Card>
 
       {/* 수입 카드 스켈레톤 */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-500 via-green-600 to-green-700 text-white border-0 shadow-xl animate-pulse">
+      <Card className="relative overflow-hidden gradient-income text-white border-0 shadow-xl animate-pulse">
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
         <CardContent className="relative p-3 md:p-6">
           <div className="flex items-center justify-between mb-2 md:mb-4">
@@ -40,7 +40,7 @@ export function StatsCardsSkeleton() {
       </Card>
 
       {/* 예산 카드 스켈레톤 */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-amber-500 via-orange-600 to-orange-700 text-white border-0 shadow-xl animate-pulse">
+      <Card className="relative overflow-hidden gradient-budget text-white border-0 shadow-xl animate-pulse">
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
         <CardContent className="relative p-3 md:p-6">
           <div className="flex items-center justify-between mb-2 md:mb-4">
@@ -56,7 +56,7 @@ export function StatsCardsSkeleton() {
       </Card>
 
       {/* 가족 구성원 카드 스켈레톤 */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-700 text-white border-0 shadow-xl animate-pulse">
+      <Card className="relative overflow-hidden gradient-family text-white border-0 shadow-xl animate-pulse">
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
         <CardContent className="relative p-3 md:p-6">
           <div className="flex items-center justify-between mb-2 md:mb-4">

@@ -5,7 +5,6 @@ import {
   successResult,
   type ActionResult,
 } from "@/lib/errors";
-import { auth } from "@/lib/server";
 import { serverApiClient } from "@/lib/server/api/client";
 import { requireAuth } from "@/lib/server/auth/auth-helpers";
 
