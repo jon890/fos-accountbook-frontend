@@ -36,7 +36,10 @@ export function CategoryPieChart({ data }: CategoryPieChartProps) {
           ))}
         </Pie>
         <Tooltip
-          formatter={(value) => [`₩${formatAmount(Number(value))}`, ""]}
+          formatter={(value: number | string | ReadonlyArray<number | string> | undefined) => {
+            const num = Array.isArray(value) ? Number(value[0] ?? 0) : Number(value ?? 0);
+            return [`₩${formatAmount(num)}`, ""];
+          }}
           contentStyle={{
             fontSize: 12,
             borderRadius: 8,
