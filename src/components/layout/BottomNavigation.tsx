@@ -73,7 +73,7 @@ export function BottomNavigation() {
             {/* 지출 추가 */}
             <div className="relative -mt-4 md:-mt-6">
               <Button
-                className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl gradient-primary hover:opacity-90 shadow-lg hover:shadow-xl transition-all duration-200"
+                className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl gradient-expense hover:opacity-90 shadow-lg hover:shadow-xl transition-all duration-200"
                 onClick={() => setIsExpenseDialogOpen(true)}
               >
                 <Plus className="w-5 h-5 md:w-6 md:h-6 text-white" />

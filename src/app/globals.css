@@ -120,12 +120,12 @@
 
   /* 지출 — 로즈-레드 */
   .gradient-expense {
-    background-image: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+    background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
   }
 
   /* 수입 — 에메랄드 */
   .gradient-income {
-    background-image: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
   }
 
   /* 예산 — 앰버 */
@@ -175,6 +175,22 @@
 }
 
 @layer utilities {
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* 필터 칩 활성 상태 */
+  .chip-active {
+    background-color: rgb(31 41 55); /* gray-800 */
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.08);
+  }
+
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }
