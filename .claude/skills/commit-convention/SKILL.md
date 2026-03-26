@@ -10,15 +10,20 @@ description: |
 
 ## 커밋 전 필수 확인
 
-커밋 전에 항상 다음을 확인한다:
+커밋 전에 항상 다음을 순서대로 실행한다:
 
 ```bash
-pnpm lint        # ESLint 통과 확인
-pnpm tsc --noEmit  # TypeScript 타입 에러 없음 확인
+# 1. 린트 + 타입 체크 (병렬 실행)
+pnpm lint & pnpm tsc --noEmit & wait
+
+# 2. 변경된 파일과 관련된 테스트만 실행 (빠름)
+STAGED=$(git diff --staged --name-only)
+[ -n "$STAGED" ] && pnpm jest --findRelatedTests $STAGED || pnpm jest
 ```
 
 - **에러가 있으면 먼저 수정하고 커밋한다.**
 - `--no-verify` 플래그는 절대 사용하지 않는다.
+- staged 파일이 없으면 `pnpm jest`로 전체 테스트를 실행한다.
 
 ---
 
@@ -118,8 +123,8 @@ EOF
 
 커밋 전 이 순서로 확인한다:
 
-1. `pnpm lint` — 에러 없음
-2. `pnpm tsc --noEmit` — 타입 에러 없음
+1. `pnpm lint` + `pnpm tsc --noEmit` — 에러 없음 (병렬 실행 권장)
+2. `pnpm jest --findRelatedTests $(git diff --staged --name-only)` — 관련 테스트 통과
 3. `git diff --staged` — 의미 단위인지 확인
 4. 툴링 파일이 섞여 있으면 분리 스테이징
 5. HEREDOC으로 한글 커밋 메시지 작성
