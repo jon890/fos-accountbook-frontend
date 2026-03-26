@@ -4,7 +4,7 @@ import { AddExpenseDialog } from "@/components/expenses/dialogs/AddExpenseDialog
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/client/utils";
 import type { LucideIcon } from "lucide-react";
-import { CreditCard, Home, PiggyBank, Plus, Settings } from "lucide-react";
+import { BarChart3, CreditCard, Home, Plus, Settings } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -75,12 +75,12 @@ export function BottomNavigation() {
               </Button>
             </div>
 
-            {/* 예산 */}
+            {/* 분석 */}
             <NavButton
-              icon={PiggyBank}
-              label="예산"
-              isActive={isActive("/budget")}
-              onClick={() => router.push("/budget")}
+              icon={BarChart3}
+              label="분석"
+              isActive={isActive("/analytics")}
+              onClick={() => router.push("/analytics")}
             />
 
             {/* 설정 */}
