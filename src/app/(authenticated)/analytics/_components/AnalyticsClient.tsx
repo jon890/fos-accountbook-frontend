@@ -7,6 +7,7 @@ import type { DailyTransactionSummary } from "@/app/actions/dashboard/get-monthl
 import type { DashboardStats } from "@/types/dashboard";
 import type { Expense } from "@/types/expense";
 import { ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Wallet, BarChart2, PieChart as PieIcon } from "lucide-react";
+import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { startTransition, useState, useMemo } from "react";
 import type { DailyBarChartData } from "./DailyBarChart";
@@ -91,22 +92,27 @@ export function AnalyticsClient({
       const now = new Date();
       const isNewCurrentMonth = newYear === now.getFullYear() && newMonth === now.getMonth() + 1;
 
-      const [daily, exps, dashboardStats] = await Promise.all([
-        getMonthlyDailyStatsAction(newYear, newMonth),
-        getExpensesAction({ familyId: familyUuid, startDate: start, endDate: end, limit: 1000 }),
-        isNewCurrentMonth ? getDashboardStatsAction() : Promise.resolve(null),
-      ]);
+      try {
+        const [daily, exps, dashboardStats] = await Promise.all([
+          getMonthlyDailyStatsAction(newYear, newMonth),
+          getExpensesAction({ familyId: familyUuid, startDate: start, endDate: end, limit: 1000 }),
+          isNewCurrentMonth ? getDashboardStatsAction() : Promise.resolve(null),
+        ]);
 
-      setYear(newYear);
-      setMonth(newMonth);
-      setDailyStats(daily.success ? daily.data : []);
-      setExpenses(exps.success ? exps.data.items : []);
-      if (isNewCurrentMonth) {
-        setStats(dashboardStats && dashboardStats.success ? dashboardStats.data : null);
-      } else {
-        setStats(null);
+        setYear(newYear);
+        setMonth(newMonth);
+        setDailyStats(daily.success ? daily.data : []);
+        setExpenses(exps.success ? exps.data.items : []);
+        if (isNewCurrentMonth) {
+          setStats(dashboardStats && dashboardStats.success ? dashboardStats.data : null);
+        } else {
+          setStats(null);
+        }
+      } catch {
+        toast.error("데이터를 불러오는데 실패했습니다.");
+      } finally {
+        setIsPending(false);
       }
-      setIsPending(false);
     });
   };
 
