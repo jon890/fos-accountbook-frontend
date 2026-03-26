@@ -31,7 +31,7 @@ export interface Expense {
     name: string;
     color: string;
     icon: string;
-  };
+  } | null;
   amount: number;
   description: string | null;
   date: string;
