@@ -7,7 +7,6 @@ import type { LucideIcon } from "lucide-react";
 import { BarChart3, CreditCard, Home, Plus, Settings } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 
 interface NavButtonProps {
   icon: LucideIcon;
@@ -45,9 +44,6 @@ export function BottomNavigation() {
   const isTransactionsActive =
     pathname === "/transactions" || pathname === "/expenses";
 
-  const handleAnalyticsClick = () => {
-    toast.info("분석 기능은 준비 중입니다.");
-  };
 
   return (
     <>
@@ -84,8 +80,8 @@ export function BottomNavigation() {
             <NavButton
               icon={BarChart3}
               label="분석"
-              isActive={false}
-              onClick={handleAnalyticsClick}
+              isActive={isActive("/analytics")}
+              onClick={() => router.push("/analytics")}
             />
 
             {/* 설정 */}
