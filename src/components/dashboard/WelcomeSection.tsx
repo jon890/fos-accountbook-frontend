@@ -14,6 +14,7 @@ export function WelcomeSection({ userName, familyName }: WelcomeSectionProps) {
   const [todayLabel, setTodayLabel] = useState<string>("");
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTodayLabel(
       new Date().toLocaleDateString("ko-KR", {
         timeZone: timezone,

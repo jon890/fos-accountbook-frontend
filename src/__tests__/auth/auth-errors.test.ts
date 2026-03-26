@@ -68,14 +68,14 @@ describe("Authentication Error Handling", () => {
 
       testUrls.forEach(({ url, shouldBeValid }) => {
         try {
-          const urlObj = new URL(url);
+          const _urlObj = new URL(url);
           expect(shouldBeValid).toBe(true);
           // HTTP/HTTPS 프로토콜인지 확인하는 별도 로직
           const isHttpProtocol = /^https?:\/\//.test(url);
           if (url.startsWith("ftp")) {
             expect(isHttpProtocol).toBe(false);
           }
-        } catch (error) {
+        } catch {
           expect(shouldBeValid).toBe(false);
         }
       });

@@ -47,7 +47,7 @@ export function InvitePageClient({
       } else {
         toast.error(result.error.message);
       }
-    } catch (error) {
+    } catch {
       toast.error("초대 수락 중 오류가 발생했습니다");
     } finally {
       setIsAccepting(false);

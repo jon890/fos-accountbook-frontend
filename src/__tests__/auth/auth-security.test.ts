@@ -171,7 +171,7 @@ describe("Authentication Security", () => {
       const regularUser = { id: "user-123", role: "user" };
       const adminUser = { id: "admin-123", role: "admin" };
 
-      const adminAction = "delete-all-users";
+      const _adminAction = "delete-all-users";
 
       expect(regularUser.role).not.toBe("admin");
       expect(adminUser.role).toBe("admin");

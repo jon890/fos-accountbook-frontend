@@ -73,7 +73,7 @@ export function InviteFamilyDialog({
       } else {
         toast.error(result.error.message);
       }
-    } catch (error) {
+    } catch {
       toast.error("초대 링크 생성에 실패했습니다");
     } finally {
       setIsCreating(false);
