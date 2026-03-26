@@ -88,16 +88,11 @@ export function BudgetClient({
         >
           <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between mb-4">
-              <p
-                className={cn(
-                  "text-sm font-medium",
-                  isBudgetExceeded ? "text-rose-100" : "text-amber-100"
-                )}
-              >
+              <p className="text-sm font-medium gradient-card-label">
                 {isBudgetExceeded ? "예산 초과" : "예산 남은 금액"}
               </p>
               {isBudgetExceeded && (
-                <Badge className="bg-white/20 text-white border-0 text-xs">
+                <Badge className="gradient-card-overlay text-white border-0 text-xs">
                   <AlertTriangle className="w-3 h-3 mr-1" />
                   초과
                 </Badge>
@@ -110,27 +105,18 @@ export function BudgetClient({
                 ? Math.abs(remainingBudget).toLocaleString()
                 : remainingBudget.toLocaleString()}
             </p>
-            <p
-              className={cn(
-                "text-xs mb-4",
-                isBudgetExceeded ? "text-rose-200" : "text-amber-200"
-              )}
-            >
+            <p className="text-xs mb-4 gradient-card-sublabel">
               총 예산 ₩{budget.toLocaleString()}
             </p>
 
             <div className="space-y-1.5">
-              <div className="flex justify-between text-xs">
-                <span className={isBudgetExceeded ? "text-rose-200" : "text-amber-200"}>
-                  사용률
-                </span>
-                <span className={isBudgetExceeded ? "text-rose-200" : "text-amber-200"}>
-                  {usagePercent}%
-                </span>
+              <div className="flex justify-between text-xs gradient-card-sublabel">
+                <span>사용률</span>
+                <span>{usagePercent}%</span>
               </div>
               <Progress
                 value={isBudgetExceeded ? 100 : usagePercent}
-                className="h-2 bg-white/20"
+                className="h-2 gradient-card-overlay"
               />
             </div>
           </CardContent>
