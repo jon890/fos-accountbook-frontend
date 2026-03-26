@@ -94,6 +94,7 @@ export async function createIncomeAction(
     // 페이지 revalidate
     revalidatePath("/transactions");
     revalidatePath("/");
+    revalidatePath("/analytics");
 
     return {
       message: "수입이 성공적으로 추가되었습니다.",

@@ -25,7 +25,12 @@ import {
   requireAuthOrRedirect,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
+import { revalidatePath } from "next/cache";
 import type { Session } from "next-auth";
+
+const mockRevalidatePath = revalidatePath as jest.MockedFunction<
+  typeof revalidatePath
+>;
 
 const mockRequireAuth = requireAuthOrRedirect as jest.MockedFunction<
   typeof requireAuthOrRedirect
@@ -96,6 +101,9 @@ describe("Income Actions", () => {
           body: expect.any(String),
         })
       );
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/transactions");
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/");
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/analytics");
     });
 
     it("familyUuid가 없으면 에러를 반환한다", async () => {
@@ -167,6 +175,9 @@ describe("Income Actions", () => {
           method: "DELETE",
         })
       );
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/transactions");
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/");
+      expect(mockRevalidatePath).toHaveBeenCalledWith("/analytics");
     });
 
     it("API 호출 실패 시 에러를 반환한다", async () => {
