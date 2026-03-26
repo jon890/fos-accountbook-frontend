@@ -82,6 +82,7 @@ export async function createExpenseAction(
     // 내역 페이지 및 대시보드 revalidate
     revalidatePath("/transactions");
     revalidatePath("/");
+    revalidatePath("/analytics");
 
     return {
       message: "지출이 성공적으로 추가되었습니다.",

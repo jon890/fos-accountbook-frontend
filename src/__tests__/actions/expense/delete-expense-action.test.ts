@@ -128,8 +128,9 @@ describe("deleteExpenseAction", () => {
     await deleteExpenseAction("family-1", "expense-1");
 
     // Then
-    expect(mockRevalidatePath).toHaveBeenCalledTimes(2);
+    expect(mockRevalidatePath).toHaveBeenCalledTimes(3);
     expect(mockRevalidatePath).toHaveBeenCalledWith("/transactions");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/analytics");
   });
 });

@@ -99,6 +99,7 @@ export async function updateExpenseAction(
     // 관련 페이지 재검증
     revalidatePath("/transactions");
     revalidatePath("/");
+    revalidatePath("/analytics");
 
     return {
       success: true,

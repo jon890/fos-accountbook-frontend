@@ -44,6 +44,7 @@ export async function deleteExpenseAction(
     // 페이지 재검증
     revalidatePath("/transactions");
     revalidatePath("/");
+    revalidatePath("/analytics");
 
     return successResult(undefined);
   } catch (error) {
