@@ -10,6 +10,16 @@ import type { CategoryResponse } from "@/types/category";
 import { deleteIncomeAction } from "@/app/actions/income/delete-income-action";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface IncomeItemProps {
   income: Income;
@@ -24,14 +34,11 @@ export function IncomeItem({
 }: IncomeItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { timezone } = useTimeZone();
 
   const handleDelete = async () => {
-    if (!confirm("이 수입 내역을 삭제하시겠습니까?")) {
-      return;
-    }
-
     setIsDeleting(true);
     try {
       const result = await deleteIncomeAction(familyUuid, income.uuid);
@@ -121,7 +128,7 @@ export function IncomeItem({
               size="icon"
               onClick={(e) => {
                 e.stopPropagation();
-                handleDelete();
+                setIsDeleteDialogOpen(true);
               }}
               className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
               title="삭제"
@@ -162,7 +169,7 @@ export function IncomeItem({
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              handleDelete();
+              setIsDeleteDialogOpen(true);
             }}
             className="flex-1 h-7 text-xs gap-1 text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 transform transition-transform duration-300 hover:scale-105"
             disabled={isDeleting}
@@ -181,6 +188,28 @@ export function IncomeItem({
         familyUuid={familyUuid}
         categories={categories}
       />
+
+      {/* 삭제 확인 다이얼로그 */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>수입 내역 삭제</AlertDialogTitle>
+            <AlertDialogDescription>
+              이 수입 내역을 삭제하시겠습니까? 삭제 후 복구할 수 없습니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>취소</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? "삭제 중..." : "삭제"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

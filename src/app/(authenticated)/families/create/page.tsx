@@ -63,11 +63,11 @@ export default function CreateFamilyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4">
+    <div className="min-h-screen app-background p-4">
       <div className="max-w-md mx-auto pt-20">
         <Card className="glass-card">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <CardTitle className="text-2xl font-bold text-primary">
               가족 만들기
             </CardTitle>
             <CardDescription>
@@ -129,7 +129,7 @@ export default function CreateFamilyPage() {
               {/* 제출 버튼 */}
               <Button
                 type="submit"
-                className="w-full h-12 text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                className="w-full h-12 text-white gradient-primary hover:opacity-90"
                 disabled={isLoading}
               >
                 {isLoading ? (

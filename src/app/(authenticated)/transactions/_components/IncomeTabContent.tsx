@@ -20,7 +20,7 @@ export function IncomeTabContent({ familyUuid }: IncomeTabContentProps) {
     <>
       <Button
         onClick={() => setAddIncomeDialogOpen(true)}
-        className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700"
+        className="gradient-income hover:opacity-90 text-white"
       >
         <Plus className="w-4 h-4 mr-2" />
         수입 추가

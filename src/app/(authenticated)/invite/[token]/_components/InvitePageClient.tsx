@@ -59,16 +59,10 @@ export function InvitePageClient({
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-4"
-      style={{
-        background:
-          "linear-gradient(135deg, #f8fafc 0%, rgba(59, 130, 246, 0.1) 50%, rgba(99, 102, 241, 0.1) 100%)",
-      }}
-    >
+    <div className="min-h-screen flex items-center justify-center p-4 app-background">
       <Card className="max-w-md w-full border-0 shadow-2xl">
         <CardHeader className="text-center pb-4">
-          <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-20 h-20 gradient-family rounded-full flex items-center justify-center mx-auto mb-4">
             <Users className="w-10 h-10 text-white" />
           </div>
           <CardTitle className="text-2xl font-bold text-gray-900">
@@ -81,7 +75,7 @@ export function InvitePageClient({
 
         <CardContent className="space-y-6">
           {/* 가족 정보 */}
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 space-y-3">
+          <div className="bg-blue-50 rounded-2xl p-6 space-y-3">
             <div className="flex items-center space-x-3">
               <Users className="w-5 h-5 text-blue-600" />
               <div>
@@ -126,7 +120,7 @@ export function InvitePageClient({
             </Button>
             <Button
               onClick={handleAccept}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-200 rounded-2xl"
+              className="flex-1 gradient-family hover:opacity-90 shadow-lg hover:shadow-xl transition-all duration-200 rounded-2xl text-white"
               disabled={isAccepting}
             >
               {isAccepting ? (

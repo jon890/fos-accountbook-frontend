@@ -118,14 +118,7 @@ export function FamilySelector({
   }
 
   return (
-    <div
-      className="min-h-screen py-8"
-      style={{
-        minHeight: "100vh",
-        background:
-          "linear-gradient(135deg, #f8fafc 0%, rgba(59, 130, 246, 0.1) 50%, rgba(99, 102, 241, 0.1) 100%)",
-      }}
-    >
+    <div className="min-h-screen py-8 app-background">
       <div className="max-w-2xl mx-auto px-4">
         <div className="text-center mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -137,7 +130,7 @@ export function FamilySelector({
               {families.length > 0 && (
                 <Button
                   onClick={onCreateFamily}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="gradient-primary hover:opacity-90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
                   size="lg"
                 >
                   <Plus className="w-5 h-5 mr-2" />새 가족 만들기
@@ -245,7 +238,7 @@ export function FamilySelector({
             >
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-r from-green-500 to-green-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-14 h-14 gradient-income rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     <User className="w-7 h-7 text-white" />
                   </div>
                   <div className="flex-1">
@@ -267,7 +260,7 @@ export function FamilySelector({
             >
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 bg-gradient-to-r from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <div className="w-14 h-14 gradient-family rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                     <Users className="w-7 h-7 text-white" />
                   </div>
                   <div className="flex-1">

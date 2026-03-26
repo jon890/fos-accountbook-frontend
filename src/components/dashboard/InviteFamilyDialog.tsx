@@ -128,7 +128,7 @@ export function InviteFamilyDialog({
           <Button
             onClick={handleCreateInvitation}
             disabled={isCreating}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            className="w-full gradient-primary hover:opacity-90"
           >
             {isCreating ? (
               <>
