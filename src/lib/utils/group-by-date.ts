@@ -20,7 +20,10 @@ export function groupByDate<T extends { date: string }>(
       seenDates.set(dayPart, groups.length);
       groups.push({ dateKey: dayPart, label: getDateLabel(dayPart), items: [] });
     }
-    groups[seenDates.get(dayPart)!].items.push(item);
+    const idx = seenDates.get(dayPart);
+    if (idx !== undefined) {
+      groups[idx].items.push(item);
+    }
   }
 
   return groups;

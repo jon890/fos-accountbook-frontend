@@ -11,7 +11,6 @@ import type { Expense, ExpenseItemData } from "@/types/expense";
 import { groupByDate } from "@/lib/utils/group-by-date";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { groupByDate } from "@/lib/utils/group-by-date";
 import { DeleteExpenseDialog } from "../dialogs/DeleteExpenseDialog";
 import { EditExpenseDialog } from "../dialogs/EditExpenseDialog";
 import { ExpenseItem } from "./ExpenseItem";

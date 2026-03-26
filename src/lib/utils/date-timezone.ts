@@ -20,8 +20,11 @@ export function getMonthRange(timezone: string): {
     });
 
     const parts = formatter.formatToParts(now);
-    const year = parseInt(parts.find((p) => p.type === "year")?.value ?? "0");
-    const month = parseInt(parts.find((p) => p.type === "month")?.value ?? "1");
+    const yearValue = parts.find((p) => p.type === "year")?.value;
+    const monthValue = parts.find((p) => p.type === "month")?.value;
+    if (!yearValue || !monthValue) throw new Error("Invalid date parts");
+    const year = parseInt(yearValue);
+    const month = parseInt(monthValue);
 
     const firstOfMonth = new Date(year, month - 1, 1);
     return {
