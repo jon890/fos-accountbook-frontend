@@ -77,6 +77,7 @@ describe("updateExpenseAction", () => {
     );
     expect(mockedRevalidatePath).toHaveBeenCalledWith("/transactions");
     expect(mockedRevalidatePath).toHaveBeenCalledWith("/");
+    expect(mockedRevalidatePath).toHaveBeenCalledWith("/analytics");
   });
 
   it("필수 필드(expenseUuid)가 없으면 에러를 반환한다", async () => {
