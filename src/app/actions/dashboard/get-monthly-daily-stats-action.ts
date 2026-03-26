@@ -1,5 +1,6 @@
 "use server";
 
+import { endOfMonth, format, parseISO } from "date-fns";
 import { serverApiGet } from "@/lib/server/api";
 import { getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
 
@@ -34,10 +35,9 @@ export async function getMonthlyDailyStatsAction(year: number, month: number) {
   }
 
   try {
-    const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-    // 해당 월의 마지막 날 계산
-    const lastDay = new Date(year, month, 0).getDate();
-    const endDate = `${year}-${String(month).padStart(2, "0")}-${lastDay}`;
+    const firstOfMonth = new Date(year, month - 1, 1);
+    const startDate = format(firstOfMonth, "yyyy-MM-dd");
+    const endDate = format(endOfMonth(firstOfMonth), "yyyy-MM-dd");
 
     // 병렬로 데이터 조회 (최대 1000개로 가정)
     const [expensesResult, incomesResult] = await Promise.all([
@@ -61,7 +61,7 @@ export async function getMonthlyDailyStatsAction(year: number, month: number) {
     // 지출 집계
     if (expensesResult?.items) {
       expensesResult.items.forEach((expense) => {
-        const dateStr = expense.date.split("T")[0]; // YYYY-MM-DD
+        const dateStr = format(parseISO(expense.date), "yyyy-MM-dd");
         const current = dailyMap.get(dateStr) || { income: 0, expense: 0 };
         current.expense += expense.amount;
         dailyMap.set(dateStr, current);
@@ -71,7 +71,7 @@ export async function getMonthlyDailyStatsAction(year: number, month: number) {
     // 수입 집계
     if (incomesResult?.items) {
       incomesResult.items.forEach((income) => {
-        const dateStr = income.date.split("T")[0]; // YYYY-MM-DD
+        const dateStr = format(parseISO(income.date), "yyyy-MM-dd");
         const current = dailyMap.get(dateStr) || { income: 0, expense: 0 };
         current.income += income.amount;
         dailyMap.set(dateStr, current);
