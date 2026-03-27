@@ -34,6 +34,7 @@ export function IncomeItem({
 }: IncomeItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editKey, setEditKey] = useState(0);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { timezone } = useTimeZone();
@@ -117,6 +118,7 @@ export function IncomeItem({
               size="icon"
               onClick={(e) => {
                 e.stopPropagation();
+                setEditKey((k) => k + 1);
                 setIsEditDialogOpen(true);
               }}
               className="h-8 w-8"
@@ -184,7 +186,7 @@ export function IncomeItem({
 
       {/* 수정 다이얼로그 */}
       <EditIncomeDialog
-        key={String(isEditDialogOpen)}
+        key={editKey}
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         income={income}
