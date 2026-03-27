@@ -19,12 +19,9 @@ export class ServerApiError extends Error {
 /**
  * 백엔드 API 응답 타입
  */
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  message?: string;
-  error?: string;
-}
+export type ApiResponse<T> =
+  | { success: true; data: T; message?: string }
+  | { success: false; message?: string; error?: string };
 
 /**
  * 서버 사이드 API 호출 옵션

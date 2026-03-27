@@ -241,7 +241,10 @@ export async function serverApiGet<T>(endpoint: string): Promise<T> {
   const response = await serverApiClient<ApiResponse<T>>(endpoint, {
     method: "GET",
   });
-  return response.data as T;
+  if (!response.success) {
+    throw new ServerApiError(response.message || response.error || "API 오류");
+  }
+  return response.data;
 }
 
 /**
@@ -255,7 +258,10 @@ export async function serverApiPost<T>(
     method: "POST",
     body: body ? JSON.stringify(body) : undefined,
   });
-  return response.data as T;
+  if (!response.success) {
+    throw new ServerApiError(response.message || response.error || "API 오류");
+  }
+  return response.data;
 }
 
 /**
@@ -269,7 +275,10 @@ export async function serverApiPut<T>(
     method: "PUT",
     body: body ? JSON.stringify(body) : undefined,
   });
-  return response.data as T;
+  if (!response.success) {
+    throw new ServerApiError(response.message || response.error || "API 오류");
+  }
+  return response.data;
 }
 
 /**
@@ -279,5 +288,8 @@ export async function serverApiDelete<T>(endpoint: string): Promise<T> {
   const response = await serverApiClient<ApiResponse<T>>(endpoint, {
     method: "DELETE",
   });
-  return response.data as T;
+  if (!response.success) {
+    throw new ServerApiError(response.message || response.error || "API 오류");
+  }
+  return response.data;
 }
