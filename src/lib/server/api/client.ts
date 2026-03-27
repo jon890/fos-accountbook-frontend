@@ -141,10 +141,13 @@ async function createKyInstance(skipAuth: boolean = false) {
           const { response } = error;
 
           if (response) {
-            const errorData = (await response.json().catch(() => null)) as {
-              message?: string;
-              error?: string;
-            } | null;
+            const raw = await response.json().catch(() => null);
+            const errorData =
+              raw !== null &&
+              typeof raw === "object" &&
+              !Array.isArray(raw)
+                ? (raw as { message?: string; error?: string })
+                : null;
 
             // 에러 상세 로깅
             logApiError(
@@ -273,6 +276,23 @@ export async function serverApiPut<T>(
 ): Promise<T> {
   const response = await serverApiClient<ApiResponse<T>>(endpoint, {
     method: "PUT",
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  if (!response.success) {
+    throw new ServerApiError(response.message || response.error || "API 오류");
+  }
+  return response.data;
+}
+
+/**
+ * PATCH 요청
+ */
+export async function serverApiPatch<T>(
+  endpoint: string,
+  body?: unknown
+): Promise<T> {
+  const response = await serverApiClient<ApiResponse<T>>(endpoint, {
+    method: "PATCH",
     body: body ? JSON.stringify(body) : undefined,
   });
   if (!response.success) {

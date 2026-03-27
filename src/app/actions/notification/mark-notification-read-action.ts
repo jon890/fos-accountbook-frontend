@@ -1,12 +1,11 @@
 "use server";
 
-import { serverApiClient } from "@/lib/server/api/client";
+import { serverApiPatch } from "@/lib/server/api/client";
 import {
   requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
 import { revalidatePath } from "next/cache";
-import type { ApiResponse } from "@/lib/server/api/types";
 import type { Notification } from "@/types/actions/notification";
 import type { ActionResult } from "@/lib/errors";
 import { ErrorCode } from "@/lib/errors/error-code";
@@ -35,23 +34,17 @@ export async function markNotificationReadAction(
     }
 
     // 백엔드 API 호출
-    const response = await serverApiClient<ApiResponse<Notification>>(
-      `/notifications/${notificationUuid}/read`,
-      {
-        method: "PATCH",
-      }
+    // TODO: 백엔드 이슈 #74 반영 후 /families/${familyUuid}/notifications/${notificationUuid}/read 로 변경
+    const data = await serverApiPatch<Notification>(
+      `/notifications/${notificationUuid}/read`
     );
-
-    if (!response.success) {
-      throw new Error(response.message || "알림 데이터가 없습니다");
-    }
 
     // 알림 목록 재검증
     revalidatePath("/");
 
     return {
       success: true,
-      data: response.data,
+      data,
     };
   } catch (error) {
     console.error("[markNotificationReadAction] Error:", error);
