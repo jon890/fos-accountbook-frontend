@@ -51,10 +51,10 @@ export function StatsCards({ data }: StatsCardsProps) {
             <div className="p-1.5 md:p-3 bg-white/20 rounded-lg md:rounded-2xl backdrop-blur-sm">
               <TrendingUp className="w-3.5 h-3.5 md:w-6 md:h-6" />
             </div>
-            <ArrowUpRight className="w-3 h-3 md:w-5 md:h-5 text-rose-200" />
+            <ArrowUpRight className="w-3 h-3 md:w-5 md:h-5 gradient-card-sublabel" />
           </div>
           <div>
-            <p className="text-rose-100 text-[10px] md:text-sm font-medium mb-0.5 md:mb-1">
+            <p className="gradient-card-label text-[10px] md:text-sm font-medium mb-0.5 md:mb-1">
               이번 달 지출
             </p>
             <p className="text-base md:text-3xl font-bold mb-1 md:mb-2">
@@ -65,7 +65,7 @@ export function StatsCards({ data }: StatsCardsProps) {
                 value={budgetUsagePercent}
                 className="flex-1 h-1 md:h-2 bg-white/20"
               />
-              <span className="text-[9px] md:text-xs text-rose-200">
+              <span className="text-[9px] md:text-xs gradient-card-sublabel">
                 {budgetUsagePercent}%
               </span>
             </div>
@@ -83,16 +83,16 @@ export function StatsCards({ data }: StatsCardsProps) {
             <div className="p-1.5 md:p-3 bg-white/20 rounded-lg md:rounded-2xl backdrop-blur-sm">
               <TrendingUp className="w-3.5 h-3.5 md:w-6 md:h-6" />
             </div>
-            <ArrowUpRight className="w-3 h-3 md:w-5 md:h-5 text-emerald-200" />
+            <ArrowUpRight className="w-3 h-3 md:w-5 md:h-5 gradient-card-sublabel" />
           </div>
           <div>
-            <p className="text-emerald-100 text-[10px] md:text-sm font-medium mb-0.5 md:mb-1">
+            <p className="gradient-card-label text-[10px] md:text-sm font-medium mb-0.5 md:mb-1">
               이번 달 수입
             </p>
             <p className="text-base md:text-3xl font-bold mb-1 md:mb-2">
               ₩{data.monthlyIncome.toLocaleString()}
             </p>
-            <p className="text-[9px] md:text-xs text-emerald-200">
+            <p className="text-[9px] md:text-xs gradient-card-sublabel">
               순수익: ₩
               {(data.monthlyIncome - data.monthlyExpense).toLocaleString()}
             </p>
@@ -117,11 +117,11 @@ export function StatsCards({ data }: StatsCardsProps) {
                 초과
               </Badge>
             ) : (
-              <ArrowDownRight className="w-3 h-3 md:w-5 md:h-5 text-amber-200" />
+              <ArrowDownRight className="w-3 h-3 md:w-5 md:h-5 gradient-card-sublabel" />
             )}
           </div>
           <div>
-            <p className={`text-[10px] md:text-sm font-medium mb-0.5 md:mb-1 ${isBudgetExceeded ? "text-rose-100" : "text-amber-100"}`}>
+            <p className="gradient-card-label text-[10px] md:text-sm font-medium mb-0.5 md:mb-1">
               {isBudgetExceeded ? "예산 초과" : "예산 남은 금액"}
             </p>
             <p className="text-base md:text-3xl font-bold mb-1 md:mb-2">
@@ -136,12 +136,12 @@ export function StatsCards({ data }: StatsCardsProps) {
                   value={isBudgetExceeded ? 100 : remainingPercent}
                   className="flex-1 h-1 md:h-2 bg-white/20"
                 />
-                <span className={`text-[9px] md:text-xs ${isBudgetExceeded ? "text-rose-200" : "text-amber-200"}`}>
+                <span className="text-[9px] md:text-xs gradient-card-sublabel">
                   {isBudgetExceeded ? 0 : remainingPercent}%
                 </span>
               </div>
             ) : (
-              <p className={`text-[9px] md:text-xs ${isBudgetExceeded ? "text-rose-200" : "text-amber-200"}`}>
+              <p className="text-[9px] md:text-xs gradient-card-sublabel">
                 예산 미설정
               </p>
             )}
@@ -164,13 +164,13 @@ export function StatsCards({ data }: StatsCardsProps) {
             </Badge>
           </div>
           <div>
-            <p className="text-violet-100 text-[10px] md:text-sm font-medium mb-0.5 md:mb-1">
+            <p className="gradient-card-label text-[10px] md:text-sm font-medium mb-0.5 md:mb-1">
               가족 구성원
             </p>
             <p className="text-base md:text-3xl font-bold mb-1 md:mb-2">
               {data.familyMembers}명
             </p>
-            <p className="text-[9px] md:text-xs text-violet-200">함께 관리 중</p>
+            <p className="text-[9px] md:text-xs gradient-card-sublabel">함께 관리 중</p>
           </div>
         </CardContent>
       </Card>

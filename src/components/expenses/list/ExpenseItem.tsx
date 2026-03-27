@@ -30,7 +30,7 @@ export function ExpenseItem({ expense, onEdit, onDelete }: ExpenseItemProps) {
       {/* 메인 행 */}
       <div
         className={`flex items-center justify-between p-3 md:p-4 rounded-xl transition-colors duration-150 md:cursor-default cursor-pointer ${
-          isExpanded ? "bg-rose-50/60" : "bg-white hover:bg-gray-50/80"
+          isExpanded ? "bg-expense/5" : "bg-white hover:bg-gray-50/80"
         }`}
         onClick={(e) => {
           if (window.innerWidth < 768) {
@@ -60,7 +60,7 @@ export function ExpenseItem({ expense, onEdit, onDelete }: ExpenseItemProps) {
 
         {/* 오른쪽: 금액 + 데스크톱 액션 */}
         <div className="flex items-center gap-1 ml-3 shrink-0">
-          <p className="text-sm md:text-base font-bold text-rose-600 whitespace-nowrap">
+          <p className="text-sm md:text-base font-bold text-expense whitespace-nowrap">
             -₩{Number(amount).toLocaleString()}
           </p>
 
