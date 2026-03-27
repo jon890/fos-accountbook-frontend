@@ -30,6 +30,7 @@ jobs:
           REPO="${{ github.repository }}"
           PR_NUMBER="${{ github.event.pull_request.number }}"
 
+          # 이전 일반 코멘트 숨기기
           gh api "repos/$REPO/issues/$PR_NUMBER/comments" \
             --jq '.[] | select(.user.login == "claude[bot]") | .node_id' \
             | while read -r comment_node_id; do
@@ -46,14 +47,16 @@ jobs:
               fi
             done
 
-      - name: Run Claude Code Review (Parallel Agents)
+      - name: Run Claude Code Review (Parallel Agents + Inline Review)
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           allowed_bots: "*"
           prompt: |
             You are a code review orchestrator for the fos-accountbook project (Next.js 16 family budget app).
-            Your job is to coordinate 4 parallel specialist reviewers, then synthesize their findings into one structured comment.
+            Your job is to coordinate 4 parallel specialist reviewers, then:
+            1. Post inline review comments on specific changed lines via GitHub's review API
+            2. Post one general summary comment with all findings
 
             ## Step 1: Fetch PR Data
 
@@ -67,6 +70,33 @@ jobs:
 
             Launch all 4 agents simultaneously using the Agent tool.
             Pass the full diff content in each agent's prompt so they can work independently.
+
+            Each agent MUST format their findings using this EXACT structure (parse-friendly):
+
+            ```
+            FINDING_START
+            TYPE: INLINE
+            SEVERITY: 🔴
+            PATH: src/components/foo.tsx
+            LINE: 42
+            ISSUE: 문제 설명 (한국어)
+            FIX: 수정 제안 (한국어)
+            FINDING_END
+
+            FINDING_START
+            TYPE: GENERAL
+            SEVERITY: 🟡
+            ISSUE: 특정 라인을 꼬집기 어려운 일반적인 문제 (한국어)
+            FIX: 수정 제안 (한국어)
+            FINDING_END
+            ```
+
+            Rules for TYPE selection:
+            - Use `TYPE: INLINE` only when you can identify the EXACT file path and line number from the diff
+            - PATH must be a relative path matching the diff (e.g., `src/components/foo.tsx`)
+            - LINE must be the actual line number in the NEW file (right side of diff, lines starting with `+` or context)
+            - Use `TYPE: GENERAL` for findings that span multiple files or cannot be pinpointed to one line
+            - If no issues found at all, output: `NO_ISSUES`
 
             ---
 
@@ -86,11 +116,16 @@ jobs:
             - Incorrect return types on Server Actions or async functions
             - Type definitions that don't match actual API response shape
 
-            For each finding, output:
+            Output each finding using EXACTLY this format:
+
+            FINDING_START
+            TYPE: INLINE or GENERAL
             SEVERITY: 🔴 or 🟡
-            FILE: filename:line
-            ISSUE: brief description
-            FIX: suggested fix
+            PATH: exact/relative/path.tsx  (INLINE only — must match diff path exactly)
+            LINE: 42  (INLINE only — exact line number in the new file)
+            ISSUE: 한국어로 문제 설명
+            FIX: 한국어로 수정 제안
+            FINDING_END
 
             If no issues found, output: NO_ISSUES
             ```
@@ -118,11 +153,16 @@ jobs:
             - Inline `style={{ }}` when a Tailwind class can be used instead
             - Magic numbers/strings that should be constants
 
-            For each finding, output:
+            Output each finding using EXACTLY this format:
+
+            FINDING_START
+            TYPE: INLINE or GENERAL
             SEVERITY: 🔴 or 🟡
-            FILE: filename:line
-            ISSUE: brief description
-            FIX: suggested fix
+            PATH: exact/relative/path.tsx  (INLINE only — must match diff path exactly)
+            LINE: 42  (INLINE only — exact line number in the new file)
+            ISSUE: 한국어로 문제 설명
+            FIX: 한국어로 수정 제안
+            FINDING_END
 
             If no issues found, output: NO_ISSUES
             ```
@@ -140,7 +180,7 @@ jobs:
 
             Check for:
             🔴 MUST FIX:
-            - Server Actions missing authentication check (should call getServerSession or auth() at start)
+            - Server Actions missing authentication check (should call requireAuth() at start)
             - Environment variables without NEXT_PUBLIC_ prefix used in client components (exposes secrets)
             - Unvalidated user input passed directly to database queries or external APIs
             - Missing authorization: user can access other users' data
@@ -150,11 +190,16 @@ jobs:
             - Sensitive data logged to console
             - CSRF-vulnerable patterns
 
-            For each finding, output:
+            Output each finding using EXACTLY this format:
+
+            FINDING_START
+            TYPE: INLINE or GENERAL
             SEVERITY: 🔴 or 🟡
-            FILE: filename:line
-            ISSUE: brief description
-            FIX: suggested fix
+            PATH: exact/relative/path.tsx  (INLINE only — must match diff path exactly)
+            LINE: 42  (INLINE only — exact line number in the new file)
+            ISSUE: 한국어로 문제 설명
+            FIX: 한국어로 수정 제안
+            FINDING_END
 
             If no issues found, output: NO_ISSUES
             ```
@@ -183,28 +228,66 @@ jobs:
             - Missing loading.tsx or error.tsx for new routes
             - State not reset when dialog/modal reopens (common bug: stale form state)
 
-            For each finding, output:
+            Output each finding using EXACTLY this format:
+
+            FINDING_START
+            TYPE: INLINE or GENERAL
             SEVERITY: 🔴 or 🟡
-            FILE: filename:line
-            ISSUE: brief description
-            FIX: suggested fix
+            PATH: exact/relative/path.tsx  (INLINE only — must match diff path exactly)
+            LINE: 42  (INLINE only — exact line number in the new file)
+            ISSUE: 한국어로 문제 설명
+            FIX: 한국어로 수정 제안
+            FINDING_END
 
             If no issues found, output: NO_ISSUES
             ```
 
-            ## Step 3: Synthesize and Post
+            ## Step 3: Post Inline Review Comments
 
-            After all 4 agents complete, collect their findings and:
+            After all 4 agents complete, collect and deduplicate all FINDING_START/FINDING_END blocks.
 
-            1. **Deduplicate** — if multiple agents flagged the same issue, merge into one entry
-            2. **Classify** — group by 🔴 (any agent flagged critical) and 🟡 (recommendations)
-            3. **Identify praise** — note what was done well (clean architecture, good type safety, etc.)
-            4. **Post exactly ONE comment** using:
-               ```
-               gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "..."
-               ```
+            For all `TYPE: INLINE` findings, build a single GitHub PR review with inline comments.
 
-            ## Comment Format
+            Construct the JSON and run this command (replace the comments array with the actual parsed findings):
+
+            ```bash
+            gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+              --method POST \
+              --header "Content-Type: application/json" \
+              --input - <<'REVIEW_EOF'
+            {
+              "event": "COMMENT",
+              "comments": [
+                {
+                  "path": "src/example.tsx",
+                  "line": 42,
+                  "side": "RIGHT",
+                  "body": "🔴 **문제**: ...\n\n**수정**: ..."
+                }
+              ]
+            }
+            REVIEW_EOF
+            ```
+
+            Format each inline comment body as:
+            `{SEVERITY} **문제**: {ISSUE}\n\n**수정**: {FIX}`
+
+            Important rules:
+            - `path` must be a relative path exactly matching the diff (do NOT add leading `/`)
+            - `line` must be a number that appears in the diff for that file — if unsure, treat as GENERAL instead
+            - `side` is always `"RIGHT"` (new file side)
+            - If there are NO inline findings, skip this step entirely
+            - If the `gh api` call fails (e.g., 422 invalid line), log the error and continue to Step 4 without retrying
+
+            ## Step 4: Post General Summary Comment
+
+            Post exactly ONE general summary comment containing ALL findings (both INLINE and GENERAL):
+
+            ```
+            gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "..."
+            ```
+
+            ## Summary Comment Format
 
             Write in Korean. Use this exact structure:
 
@@ -233,14 +316,16 @@ jobs:
 
             ---
             🤖 Reviewed with [Claude Code](https://claude.com/claude-code) (parallel agents: TypeScript · Conventions · Security · Architecture)
+            💬 인라인 코멘트는 **Files changed** 탭에서 확인하세요
             ```
 
             ## Critical Rules
 
             - **DO NOT post test comments** — this is a real production review
-            - **Post exactly ONE comment** — do not call `gh pr comment` more than once
+            - **Post exactly ONE general comment** (Step 4) — do not call `gh pr comment` more than once
+            - **Inline review (Step 3) and general comment (Step 4) are separate** — always post both if there are findings
             - **Only include sections that have content** — omit empty 🔴 or 🟡 sections entirely
             - **Be specific** — reference exact file names and line numbers
-            - **If zero issues found**, write a short positive review with 🟢 section only
+            - **If zero issues found**, skip Step 3 and write a short positive review with 🟢 section only in Step 4
 
-          claude_args: '--allowedTools "Agent,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*)" --disallowedTools "Read,Write,Edit,Glob,Grep,LS"'
+          claude_args: '--allowedTools "Agent,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*),Bash(gh api:*)" --disallowedTools "Read,Write,Edit,Glob,Grep,LS"'
