@@ -20,11 +20,12 @@ jest.mock("next/cache");
 
 import { updateIncomeAction } from "@/app/actions/income/update-income-action";
 import { serverApiClient } from "@/lib/server/api/client";
-import { requireAuth } from "@/lib/server/auth/auth-helpers";
+import { requireAuth, getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
 import { revalidatePath } from "next/cache";
 import type { Session } from "next-auth";
 
 const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;
+const mockGetSelectedFamilyUuid = getSelectedFamilyUuid as jest.MockedFunction<typeof getSelectedFamilyUuid>;
 const mockServerApiClient = serverApiClient as jest.MockedFunction<
   typeof serverApiClient
 >;
@@ -41,6 +42,7 @@ describe("updateIncomeAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRequireAuth.mockResolvedValue(mockSession);
+    mockGetSelectedFamilyUuid.mockResolvedValue("family-1");
   });
 
   it("수입 수정 성공 시 /transactions, /, /analytics를 revalidate한다", async () => {

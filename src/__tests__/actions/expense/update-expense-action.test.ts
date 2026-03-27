@@ -13,6 +13,7 @@ import { updateExpenseAction } from "@/app/actions/expense/update-expense-action
 // Mock modules
 jest.mock("@/lib/server/auth/auth-helpers", () => ({
   requireAuth: jest.fn().mockResolvedValue({ user: { id: "test-user" } }),
+  getSelectedFamilyUuid: jest.fn().mockResolvedValue("family-uuid"),
 }));
 
 jest.mock("@/lib/server/api/client", () => ({
