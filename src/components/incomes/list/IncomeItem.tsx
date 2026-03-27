@@ -64,7 +64,7 @@ export function IncomeItem({
     <div
       className={`p-2.5 md:p-4 rounded-xl md:rounded-2xl bg-gradient-to-r ${
         isExpanded
-          ? "from-income/10 to-white border-income/30"
+          ? "from-income/10 to-background border-income/30"
           : "from-gray-50 to-white border-gray-100"
       } hover:shadow-md transition-all duration-300 group`}
     >
