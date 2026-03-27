@@ -39,7 +39,7 @@ export async function getUnreadCountAction(
 
     return {
       success: true,
-      data: data.unreadCount ?? 0,
+      data: data.unreadCount,
     };
   } catch (error) {
     console.error("[getUnreadCountAction] Error:", error);

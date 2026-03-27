@@ -76,6 +76,7 @@ export function NotificationItem({
 
     setIsReading(true);
     const result = await markNotificationReadAction(
+      notification.familyUuid,
       notification.notificationUuid
     );
     if (result.success) {
