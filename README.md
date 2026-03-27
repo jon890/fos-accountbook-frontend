@@ -20,6 +20,8 @@
 - ✅ 지출/수입 기록 및 분석
 - ✅ 카테고리별 통계
 - ✅ 가족 초대 시스템
+- ✅ 알림 시스템 (예산 초과 알림)
+- ✅ 월별 지출/수입 분석 페이지
 - ✅ 모바일 최적화 UI
 
 ## 🏗️ 프로젝트 구조
@@ -31,6 +33,7 @@ src/
 │   │   ├── layout.tsx            # 인증 체크 Layout
 │   │   ├── dashboard/            # 대시보드
 │   │   ├── transactions/         # 거래 내역
+│   │   ├── analytics/            # 지출/수입 분석
 │   │   ├── categories/           # 카테고리 관리
 │   │   ├── families/             # 가족 관리
 │   │   ├── settings/             # 설정
@@ -44,7 +47,8 @@ src/
 │   │   ├── income/               # 수입 관련
 │   │   ├── category/             # 카테고리 관련
 │   │   ├── family/               # 가족 관련
-│   │   └── ...
+│   │   ├── notification/         # 알림 관련
+│   │   └── dashboard/            # 대시보드 통계
 │   └── api/auth/                 # NextAuth API Routes
 │
 ├── components/                   # React 컴포넌트
@@ -53,6 +57,7 @@ src/
 │   ├── dashboard/                # 대시보드 컴포넌트
 │   ├── expenses/                 # 지출 컴포넌트
 │   ├── incomes/                  # 수입 컴포넌트
+│   ├── notifications/            # 알림 컴포넌트
 │   └── ...
 │
 ├── lib/                          # 유틸리티
@@ -60,12 +65,12 @@ src/
 │   │   └── api/                  # 클라이언트 API 호출
 │   ├── server/                   # 서버 전용
 │   │   ├── api/                  # 서버 API 클라이언트 (ky)
-│   │   │   ├── client.ts         # API 클라이언트
+│   │   │   ├── client.ts         # API 클라이언트 + 타입 안전 wrapper
 │   │   │   ├── logging.ts        # 요청/응답 로깅
-│   │   │   └── types.ts          # 타입 정의
+│   │   │   └── types.ts          # ApiResponse<T> 판별 유니온 타입
 │   │   └── auth/                 # NextAuth 설정
 │   ├── env/                      # 환경변수 (Zod 검증)
-│   ├── errors/                   # 에러 처리
+│   ├── errors/                   # 에러 처리 (ActionError, ActionResult)
 │   └── utils/                    # 유틸리티 함수
 │
 ├── types/                        # TypeScript 타입
@@ -113,6 +118,112 @@ export default async function AuthenticatedLayout({ children }) {
 4. API 호출 시 쿠키에서 토큰 자동 추출
 ```
 
+## 🔒 Server Actions 보안 패턴
+
+모든 Server Action은 다음 순서로 보안 검증을 수행합니다:
+
+```typescript
+export async function deleteExpenseAction(
+  familyUuid: string,
+  expenseUuid: string
+): Promise<ActionResult<void>> {
+  // 1. 인증 확인
+  await requireAuth();
+
+  // 2. familyUuid 소유권 검증 (IDOR 방지)
+  const sessionFamilyUuid = await getSelectedFamilyUuid();
+  if (!sessionFamilyUuid) {
+    throw ActionError.familyNotSelected();
+  }
+  if (familyUuid !== sessionFamilyUuid) {
+    throw ActionError.unauthorized("권한이 없습니다.");
+  }
+
+  // 3. 입력값 검증
+  if (!expenseUuid) {
+    throw ActionError.invalidInput("expenseUuid", expenseUuid, "필수 값입니다");
+  }
+
+  // 4. API 호출
+  await serverApiClient(`/families/${familyUuid}/expenses/${expenseUuid}`, {
+    method: "DELETE",
+  });
+}
+```
+
+## 📦 API 클라이언트
+
+### ApiResponse<T> 타입 시스템
+
+백엔드 응답은 판별 유니온(discriminated union) 타입으로 타입 안전하게 처리합니다:
+
+```typescript
+// src/lib/server/api/types.ts
+type ApiResponse<T> =
+  | { success: true; data: T }
+  | { success: false; message?: string; code?: string };
+```
+
+### Server Actions에서 API 호출
+
+```typescript
+// ky 기반 서버 API 클라이언트 (타입 안전 wrapper)
+import { serverApiGet, serverApiPost, serverApiPut, serverApiDelete } from "@/lib/server/api/client";
+
+// GET 요청 — 성공 시 T 반환, 실패 시 ServerApiError throw
+const expenses = await serverApiGet<Expense[]>("/families/{uuid}/expenses");
+
+// POST 요청
+const newExpense = await serverApiPost<Expense>("/families/{uuid}/expenses", {
+  amount: 50000,
+  categoryUuid: "...",
+  description: "점심",
+});
+
+// 에러는 try/catch로 처리 후 ActionResult로 변환
+try {
+  const data = await serverApiGet<T>(url);
+  return { success: true, data };
+} catch (error) {
+  return handleActionError(error, "실패 메시지");
+}
+```
+
+### 클라이언트 컴포넌트에서 API 호출
+
+```typescript
+"use client";
+
+import { apiGet, apiPost } from "@/lib/client/api";
+
+// 쿠키 자동 전송
+const families = await apiGet<Family[]>("/families");
+```
+
+## 🎨 스타일링 컨벤션
+
+Tailwind CSS v4를 사용하며, 하드코딩 색상 대신 **시맨틱 CSS 클래스**를 사용합니다:
+
+| 시맨틱 클래스       | 용도               |
+| ------------------- | ------------------ |
+| `gradient-expense`  | 지출 (로즈-레드)   |
+| `gradient-income`   | 수입 (에메랄드)    |
+| `gradient-budget`   | 예산 (앰버)        |
+| `gradient-family`   | 가족 (바이올렛)    |
+| `gradient-category` | 카테고리 (인디고)  |
+| `gradient-primary`  | 기본 액션 (블루)   |
+| `text-destructive`  | 삭제/오류 텍스트   |
+| `bg-card`           | 카드 배경          |
+| `border-border`     | 테두리             |
+
+```typescript
+// ❌ 하드코딩 색상 금지
+<div className="from-blue-500 to-purple-600 text-red-500 bg-white" />
+
+// ✅ 시맨틱 클래스 사용
+<div className="gradient-primary text-destructive bg-card" />
+```
+
 ## 🛠️ 개발 환경 설정
 
 ### 환경변수
@@ -153,36 +264,6 @@ pnpm test
 pnpm lint
 ```
 
-## 📦 API 클라이언트
-
-### Server Actions에서 API 호출
-
-```typescript
-// ky 기반 서버 API 클라이언트
-import { serverApiGet, serverApiPost } from "@/lib/server/api";
-
-// GET 요청
-const expenses = await serverApiGet<Expense[]>("/expenses");
-
-// POST 요청
-const newExpense = await serverApiPost<Expense>("/expenses", {
-  amount: 50000,
-  categoryUuid: "...",
-  description: "점심",
-});
-```
-
-### 클라이언트 컴포넌트에서 API 호출
-
-```typescript
-"use client";
-
-import { apiGet, apiPost } from "@/lib/client/api";
-
-// 쿠키 자동 전송
-const families = await apiGet<Family[]>("/families");
-```
-
 ## 🧪 테스트
 
 ```bash
@@ -195,6 +276,31 @@ pnpm test:coverage
 # Watch 모드
 pnpm test:watch
 ```
+
+테스트 파일은 `src/__tests__/` 하위에 위치하며, Server Actions 단위 테스트를 포함합니다.
+
+```typescript
+// Server Action 테스트 패턴
+/** @jest-environment node */
+jest.mock("@/lib/server/auth/auth-helpers");
+jest.mock("@/lib/server/api/client");
+
+const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;
+const mockGetSelectedFamilyUuid = getSelectedFamilyUuid as jest.MockedFunction<typeof getSelectedFamilyUuid>;
+
+beforeEach(() => {
+  mockRequireAuth.mockResolvedValue(mockSession);
+  mockGetSelectedFamilyUuid.mockResolvedValue("family-1");
+});
+```
+
+## 🤖 CI/CD — 자동 코드 리뷰
+
+PR이 생성되면 Claude가 자동으로 코드 리뷰를 수행합니다 (`.github/workflows/claude-code-review.yml`):
+
+- **인라인 리뷰**: 파일 변경 라인에 직접 코멘트
+- **전체 요약**: PR 코멘트로 종합 리뷰 제공
+- 병렬 에이전트 방식으로 빠른 리뷰
 
 ## 🔗 관련 프로젝트
 

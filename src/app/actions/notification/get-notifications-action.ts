@@ -1,8 +1,10 @@
 "use server";
 
-import { serverApiClient } from "@/lib/server/api/client";
-import { requireAuth } from "@/lib/server/auth/auth-helpers";
-import type { ApiResponse } from "@/lib/server/api/types";
+import { serverApiGet } from "@/lib/server/api/client";
+import {
+  requireAuth,
+  getSelectedFamilyUuid,
+} from "@/lib/server/auth/auth-helpers";
 import type { NotificationListResponse } from "@/types/actions/notification";
 import type { ActionResult } from "@/lib/errors";
 import { ErrorCode } from "@/lib/errors/error-code";
@@ -17,20 +19,26 @@ export async function getNotificationsAction(
     // 인증 확인
     await requireAuth();
 
-    // 백엔드 API 호출
-    const response = await serverApiClient<
-      ApiResponse<NotificationListResponse>
-    >(`/families/${familyUuid}/notifications`, {
-      method: "GET",
-    });
-
-    if (!response.data) {
-      throw new Error("알림 데이터가 없습니다");
+    // familyUuid 소유권 검증
+    const sessionFamilyUuid = await getSelectedFamilyUuid();
+    if (!sessionFamilyUuid || familyUuid !== sessionFamilyUuid) {
+      return {
+        success: false,
+        error: {
+          code: ErrorCode.NOTIFICATION_FETCH_FAILED,
+          message: "권한이 없습니다.",
+        },
+      };
     }
+
+    // 백엔드 API 호출
+    const data = await serverApiGet<NotificationListResponse>(
+      `/families/${familyUuid}/notifications`
+    );
 
     return {
       success: true,
-      data: response.data,
+      data,
     };
   } catch (error) {
     console.error("[getNotificationsAction] Error:", error);
