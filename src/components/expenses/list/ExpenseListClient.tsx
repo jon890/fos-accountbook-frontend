@@ -107,6 +107,7 @@ export function ExpenseListClient({
 
       {editingExpense && (
         <EditExpenseDialog
+          key={editingExpense.uuid}
           open={!!editingExpense}
           onOpenChange={(open) => {
             if (!open) setEditingExpense(null);
