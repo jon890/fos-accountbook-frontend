@@ -64,7 +64,7 @@ export function IncomeItem({
     <div
       className={`p-2.5 md:p-4 rounded-xl md:rounded-2xl bg-gradient-to-r ${
         isExpanded
-          ? "from-emerald-50 to-white border-emerald-200"
+          ? "from-income/10 to-white border-income/30"
           : "from-gray-50 to-white border-gray-100"
       } hover:shadow-md transition-all duration-300 group`}
     >
@@ -81,7 +81,7 @@ export function IncomeItem({
       >
         <div className="flex items-center space-x-2 md:space-x-4 flex-1 min-w-0">
           {/* 카테고리 아이콘 */}
-          <div className="w-9 h-9 md:w-12 md:h-12 bg-emerald-100 rounded-lg md:rounded-2xl flex items-center justify-center text-base md:text-xl shadow-sm shrink-0">
+          <div className="w-9 h-9 md:w-12 md:h-12 bg-income/15 rounded-lg md:rounded-2xl flex items-center justify-center text-base md:text-xl shadow-sm shrink-0">
             {income.category.icon}
           </div>
 
@@ -105,7 +105,7 @@ export function IncomeItem({
         {/* 금액 & 데스크톱 버튼 */}
         <div className="flex items-center gap-1.5 md:gap-2 ml-2 shrink-0">
           <div className="text-right">
-            <p className="text-xs md:text-lg font-bold text-emerald-600 whitespace-nowrap">
+            <p className="text-xs md:text-lg font-bold text-income whitespace-nowrap">
               +₩{income.amount.toLocaleString()}
             </p>
           </div>
@@ -150,7 +150,7 @@ export function IncomeItem({
       >
         <div
           className={`flex items-center gap-1.5 pt-2 border-t ${
-            isExpanded ? "border-emerald-200" : "border-gray-100"
+            isExpanded ? "border-income/30" : "border-gray-100"
           } transition-colors duration-300`}
         >
           <Button

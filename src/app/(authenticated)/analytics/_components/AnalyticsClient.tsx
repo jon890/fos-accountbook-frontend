@@ -325,7 +325,7 @@ export function AnalyticsClient({
                     {expense.date.split("T")[0]}
                   </p>
                 </div>
-                <p className="text-sm font-bold text-rose-500 shrink-0">
+                <p className="text-sm font-bold text-expense shrink-0">
                   -₩{formatAmount(Number(expense.amount))}
                 </p>
               </div>
