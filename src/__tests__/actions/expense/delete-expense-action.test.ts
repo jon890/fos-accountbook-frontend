@@ -22,11 +22,17 @@ jest.mock("next/cache");
 import { deleteExpenseAction } from "@/app/actions/expense/delete-expense-action";
 import { ActionError } from "@/lib/errors";
 import { serverApiClient } from "@/lib/server/api/client";
-import { requireAuth } from "@/lib/server/auth/auth-helpers";
+import {
+  requireAuth,
+  getSelectedFamilyUuid,
+} from "@/lib/server/auth/auth-helpers";
 import type { Session } from "next-auth";
 import { revalidatePath } from "next/cache";
 
 const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;
+const mockGetSelectedFamilyUuid = getSelectedFamilyUuid as jest.MockedFunction<
+  typeof getSelectedFamilyUuid
+>;
 const mockServerApiClient = serverApiClient as jest.MockedFunction<
   typeof serverApiClient
 >;
@@ -46,6 +52,7 @@ describe("deleteExpenseAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockRequireAuth.mockResolvedValue(mockSession);
+    mockGetSelectedFamilyUuid.mockResolvedValue("family-1");
   });
 
   it("유효한 파라미터로 지출 삭제에 성공한다", async () => {
@@ -67,9 +74,24 @@ describe("deleteExpenseAction", () => {
     expect(mockRevalidatePath).toHaveBeenCalledWith("/");
   });
 
-  it("familyUuid가 없으면 에러를 반환한다", async () => {
+  it("familyUuid가 세션과 다르면 권한 에러를 반환한다", async () => {
     // Given & When
-    const result = await deleteExpenseAction("", "expense-1");
+    const result = await deleteExpenseAction("attacker-family-uuid", "expense-1");
+
+    // Then
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error?.message).toContain("권한");
+    }
+    expect(mockServerApiClient).not.toHaveBeenCalled();
+  });
+
+  it("세션에 가족 정보가 없으면 에러를 반환한다", async () => {
+    // Given
+    mockGetSelectedFamilyUuid.mockResolvedValueOnce(null);
+
+    // When
+    const result = await deleteExpenseAction("family-1", "expense-1");
 
     // Then
     expect(result.success).toBe(false);
