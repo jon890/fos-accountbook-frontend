@@ -1,7 +1,3 @@
-/**
- * 수입 삭제 Server Action
- */
-
 "use server";
 
 import {
@@ -11,7 +7,10 @@ import {
   type ActionResult,
 } from "@/lib/errors";
 import { serverApiClient } from "@/lib/server/api/client";
-import { requireAuth } from "@/lib/server/auth/auth-helpers";
+import {
+  requireAuth,
+  getSelectedFamilyUuid,
+} from "@/lib/server/auth/auth-helpers";
 import { revalidatePath } from "next/cache";
 
 export async function deleteIncomeAction(
@@ -22,9 +21,13 @@ export async function deleteIncomeAction(
     // 인증 확인
     await requireAuth();
 
-    // familyUuid 검증
-    if (!familyUuid) {
+    // familyUuid 소유권 검증
+    const sessionFamilyUuid = await getSelectedFamilyUuid();
+    if (!sessionFamilyUuid) {
       throw ActionError.familyNotSelected();
+    }
+    if (familyUuid !== sessionFamilyUuid) {
+      throw ActionError.unauthorized("권한이 없습니다.");
     }
 
     // incomeUuid 검증
