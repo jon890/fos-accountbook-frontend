@@ -93,7 +93,7 @@ export function EditIncomeDialog({
               </span>
             </div>
             {state.errors?.amount && (
-              <p className="text-sm text-red-500">{state.errors.amount[0]}</p>
+              <p className="text-sm text-destructive">{state.errors.amount[0]}</p>
             )}
           </div>
 
@@ -109,7 +109,7 @@ export function EditIncomeDialog({
                 id="categoryId"
                 name="categoryId"
                 defaultValue={income.categoryUuid}
-                className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 required
               >
                 <option value="">카테고리를 선택하세요</option>
@@ -121,7 +121,7 @@ export function EditIncomeDialog({
               </select>
             )}
             {state.errors?.categoryUuid && (
-              <p className="text-sm text-red-500">
+              <p className="text-sm text-destructive">
                 {state.errors.categoryUuid[0]}
               </p>
             )}
@@ -138,7 +138,7 @@ export function EditIncomeDialog({
               required
             />
             {state.errors?.date && (
-              <p className="text-sm text-red-500">{state.errors.date[0]}</p>
+              <p className="text-sm text-destructive">{state.errors.date[0]}</p>
             )}
           </div>
 
@@ -152,7 +152,7 @@ export function EditIncomeDialog({
               defaultValue={income.description || ""}
             />
             {state.errors?.description && (
-              <p className="text-sm text-red-500">
+              <p className="text-sm text-destructive">
                 {state.errors.description[0]}
               </p>
             )}
