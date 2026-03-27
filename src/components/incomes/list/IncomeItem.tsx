@@ -34,7 +34,6 @@ export function IncomeItem({
 }: IncomeItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editKey, setEditKey] = useState(0);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { timezone } = useTimeZone();
@@ -66,7 +65,7 @@ export function IncomeItem({
       className={`p-2.5 md:p-4 rounded-xl md:rounded-2xl bg-gradient-to-r ${
         isExpanded
           ? "from-income/10 to-background border-income/30"
-          : "from-gray-50 to-white border-gray-100"
+          : "from-muted to-card border-border"
       } hover:shadow-md transition-all duration-300 group`}
     >
       {/* 메인 컨텐츠 */}
@@ -88,10 +87,10 @@ export function IncomeItem({
 
           {/* 카테고리명 + 설명 */}
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-gray-900 text-xs md:text-base truncate">
+            <p className="font-semibold text-foreground text-xs md:text-base truncate">
               {income.category.name}
             </p>
-            <div className="flex items-center gap-1 text-[10px] md:text-sm text-gray-500 mt-0.5">
+            <div className="flex items-center gap-1 text-[10px] md:text-sm text-muted-foreground mt-0.5">
               <span>{formatExpenseDate(income.date, timezone)}</span>
               {income.description && (
                 <>
@@ -118,7 +117,6 @@ export function IncomeItem({
               size="icon"
               onClick={(e) => {
                 e.stopPropagation();
-                setEditKey((k) => k + 1);
                 setIsEditDialogOpen(true);
               }}
               className="h-8 w-8"
@@ -134,7 +132,7 @@ export function IncomeItem({
                 e.stopPropagation();
                 setIsDeleteDialogOpen(true);
               }}
-              className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
+              className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
               title="삭제"
               disabled={isDeleting}
             >
@@ -152,7 +150,7 @@ export function IncomeItem({
       >
         <div
           className={`flex items-center gap-1.5 pt-2 border-t ${
-            isExpanded ? "border-income/30" : "border-gray-100"
+            isExpanded ? "border-income/30" : "border-border"
           } transition-colors duration-300`}
         >
           <Button
@@ -175,7 +173,7 @@ export function IncomeItem({
               e.stopPropagation();
               setIsDeleteDialogOpen(true);
             }}
-            className="flex-1 h-7 text-xs gap-1 text-red-600 hover:bg-red-50 hover:text-red-700 border-red-200 transform transition-transform duration-300 hover:scale-105"
+            className="flex-1 h-7 text-xs gap-1 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30 transform transition-transform duration-300 hover:scale-105"
             disabled={isDeleting}
           >
             <Trash2 className="h-3 w-3" />
@@ -186,7 +184,7 @@ export function IncomeItem({
 
       {/* 수정 다이얼로그 */}
       <EditIncomeDialog
-        key={editKey}
+        key={income.uuid}
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         income={income}

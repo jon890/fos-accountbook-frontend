@@ -99,7 +99,7 @@ export function EditExpenseDialog({
               </span>
             </div>
             {state.errors?.amount && (
-              <p className="text-sm text-red-500">{state.errors.amount[0]}</p>
+              <p className="text-sm text-destructive">{state.errors.amount[0]}</p>
             )}
           </div>
 
@@ -115,7 +115,7 @@ export function EditExpenseDialog({
                 id="categoryId"
                 name="categoryId"
                 defaultValue={expense.categoryUuid}
-                className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="w-full rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 required
               >
                 <option value="">카테고리를 선택하세요</option>
@@ -127,7 +127,7 @@ export function EditExpenseDialog({
               </select>
             )}
             {state.errors?.categoryId && (
-              <p className="text-sm text-red-500">
+              <p className="text-sm text-destructive">
                 {state.errors.categoryId[0]}
               </p>
             )}
@@ -144,7 +144,7 @@ export function EditExpenseDialog({
               required
             />
             {state.errors?.date && (
-              <p className="text-sm text-red-500">{state.errors.date[0]}</p>
+              <p className="text-sm text-destructive">{state.errors.date[0]}</p>
             )}
           </div>
 
@@ -158,7 +158,7 @@ export function EditExpenseDialog({
               defaultValue={expense.description || ""}
             />
             {state.errors?.description && (
-              <p className="text-sm text-red-500">
+              <p className="text-sm text-destructive">
                 {state.errors.description[0]}
               </p>
             )}
