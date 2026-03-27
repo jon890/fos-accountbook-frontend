@@ -2,7 +2,10 @@
 
 import { endOfMonth, format, parseISO } from "date-fns";
 import { serverApiGet } from "@/lib/server/api";
-import { getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
+import {
+  requireAuth,
+  getSelectedFamilyUuid,
+} from "@/lib/server/auth/auth-helpers";
 
 interface ExpenseResponse {
   uuid: string;
@@ -29,6 +32,8 @@ export interface DailyTransactionSummary {
  * (API가 없으므로 목록 조회 후 집계)
  */
 export async function getMonthlyDailyStatsAction(year: number, month: number) {
+  await requireAuth();
+
   const familyUuid = await getSelectedFamilyUuid();
   if (!familyUuid) {
     return { success: false, error: "가족이 선택되지 않았습니다.", data: [] };

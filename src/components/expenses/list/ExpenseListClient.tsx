@@ -71,7 +71,7 @@ export function ExpenseListClient({
                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">
                   {label}
                 </span>
-                <span className="text-xs font-semibold text-rose-500">
+                <span className="text-xs font-semibold text-expense">
                   -₩{groupTotal.toLocaleString()}
                 </span>
               </div>
