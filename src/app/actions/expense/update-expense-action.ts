@@ -6,7 +6,10 @@
 
 import { ActionError } from "@/lib/errors";
 import { serverApiClient } from "@/lib/server/api/client";
-import { requireAuth } from "@/lib/server/auth/auth-helpers";
+import {
+  requireAuth,
+  getSelectedFamilyUuid,
+} from "@/lib/server/auth/auth-helpers";
 import type { UpdateExpenseFormState, ExpenseResponse } from "@/types/expense";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -54,6 +57,12 @@ export async function updateExpenseAction(
 
     const { expenseUuid, familyUuid, amount, description, categoryId, date } =
       validatedFields.data;
+
+    // familyUuid 소유권 검증: 세션의 가족과 요청 가족이 일치하는지 확인
+    const sessionFamilyUuid = await getSelectedFamilyUuid();
+    if (familyUuid !== sessionFamilyUuid) {
+      return { success: false, message: "권한이 없습니다.", errors: {} };
+    }
 
     // 최소 하나의 필드는 수정되어야 함
     if (!categoryId && !amount && description === undefined && !date) {
