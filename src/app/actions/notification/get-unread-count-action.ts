@@ -1,8 +1,7 @@
 "use server";
 
-import { serverApiClient } from "@/lib/server/api/client";
+import { serverApiGet } from "@/lib/server/api/client";
 import { requireAuth } from "@/lib/server/auth/auth-helpers";
-import type { ApiResponse } from "@/lib/server/api/types";
 import type { ActionResult } from "@/lib/errors";
 import { ErrorCode } from "@/lib/errors/error-code";
 import type { UnreadCountResponse } from "@/types/actions/notification";
@@ -19,17 +18,13 @@ export async function getUnreadCountAction(
 
     // 백엔드 API 호출
     // 백엔드는 { unreadCount: number } 형태로 반환
-    const response = await serverApiClient<ApiResponse<UnreadCountResponse>>(
-      `/families/${familyUuid}/notifications/unread-count`,
-      {
-        method: "GET",
-      }
+    const data = await serverApiGet<UnreadCountResponse>(
+      `/families/${familyUuid}/notifications/unread-count`
     );
 
-    // response.data는 { unreadCount: number } 형태
     return {
       success: true,
-      data: response.data?.unreadCount ?? 0,
+      data: data.unreadCount,
     };
   } catch (error) {
     console.error("[getUnreadCountAction] Error:", error);

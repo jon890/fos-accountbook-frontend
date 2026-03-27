@@ -26,8 +26,8 @@ export async function markNotificationReadAction(
       }
     );
 
-    if (!response.data) {
-      throw new Error("알림 데이터가 없습니다");
+    if (!response.success) {
+      throw new Error(response.message || "알림 데이터가 없습니다");
     }
 
     // 알림 목록 재검증
