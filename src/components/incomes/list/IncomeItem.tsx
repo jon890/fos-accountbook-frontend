@@ -184,7 +184,7 @@ export function IncomeItem({
 
       {/* 수정 다이얼로그 */}
       <EditIncomeDialog
-        key={income.uuid}
+        key={isEditDialogOpen ? income.uuid : "closed"}
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
         income={income}
