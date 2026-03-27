@@ -67,4 +67,40 @@ describe("updateIncomeAction", () => {
     expect(mockRevalidatePath).toHaveBeenCalledWith("/");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/analytics");
   });
+
+  it("familyUuid가 세션과 다르면 권한 에러를 반환한다", async () => {
+    // Given
+    const formData = new FormData();
+    formData.append("incomeUuid", "income-1");
+    formData.append("familyUuid", "attacker-family-uuid");
+    formData.append("amount", "50000");
+
+    const initialState = { success: false, message: "", errors: {} };
+
+    // When
+    const result = await updateIncomeAction(initialState, formData);
+
+    // Then
+    expect(result.success).toBe(false);
+    expect(result.message).toBe("권한이 없습니다.");
+  });
+
+  it("세션에 가족 정보가 없으면 에러를 반환한다", async () => {
+    // Given
+    mockGetSelectedFamilyUuid.mockResolvedValueOnce(null);
+
+    const formData = new FormData();
+    formData.append("incomeUuid", "income-1");
+    formData.append("familyUuid", "family-1");
+    formData.append("amount", "50000");
+
+    const initialState = { success: false, message: "", errors: {} };
+
+    // When
+    const result = await updateIncomeAction(initialState, formData);
+
+    // Then
+    expect(result.success).toBe(false);
+    expect(result.message).toBe("가족 정보를 찾을 수 없습니다.");
+  });
 });

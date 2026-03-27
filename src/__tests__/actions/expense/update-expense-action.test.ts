@@ -1,32 +1,40 @@
 /**
  * Update Expense Action 테스트
+ * @jest-environment node
  *
  * 테스트 범위:
  * - Zod 검증
  * - 성공/실패 플로우
  * - API 통신 모킹
  * - 에러 처리
+ * - familyUuid 소유권 검증
  */
 
+jest.mock("@/lib/env/server.env", () => ({
+  serverEnv: {
+    BACKEND_API_URL: "http://localhost:8080",
+  },
+}));
+jest.mock("@/lib/server/auth/auth", () => ({
+  handlers: {},
+  auth: jest.fn(),
+  signIn: jest.fn(),
+  signOut: jest.fn(),
+}));
+jest.mock("@/lib/server/auth/auth-helpers");
+jest.mock("@/lib/server/api/client");
+jest.mock("next/cache");
+
 import { updateExpenseAction } from "@/app/actions/expense/update-expense-action";
-
-// Mock modules
-jest.mock("@/lib/server/auth/auth-helpers", () => ({
-  requireAuth: jest.fn().mockResolvedValue({ user: { id: "test-user" } }),
-  getSelectedFamilyUuid: jest.fn().mockResolvedValue("family-uuid"),
-}));
-
-jest.mock("@/lib/server/api/client", () => ({
-  serverApiClient: jest.fn(),
-}));
-
-jest.mock("next/cache", () => ({
-  revalidatePath: jest.fn(),
-}));
-
 import { serverApiClient } from "@/lib/server/api/client";
+import { requireAuth, getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
 import { revalidatePath } from "next/cache";
+import type { Session } from "next-auth";
 
+const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;
+const mockGetSelectedFamilyUuid = getSelectedFamilyUuid as jest.MockedFunction<
+  typeof getSelectedFamilyUuid
+>;
 const mockedServerApiClient = serverApiClient as jest.MockedFunction<
   typeof serverApiClient
 >;
@@ -34,9 +42,16 @@ const mockedRevalidatePath = revalidatePath as jest.MockedFunction<
   typeof revalidatePath
 >;
 
+const mockSession: Session = {
+  user: { userUuid: "user-1" },
+  expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+};
+
 describe("updateExpenseAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockRequireAuth.mockResolvedValue(mockSession);
+    mockGetSelectedFamilyUuid.mockResolvedValue("family-uuid");
   });
 
   const createFormData = (data: Record<string, string>) => {
@@ -196,5 +211,43 @@ describe("updateExpenseAction", () => {
     // Then
     expect(result.success).toBe(false);
     expect(result.message).toBe("수정할 내용이 없습니다");
+  });
+
+  it("familyUuid가 세션과 다르면 권한 에러를 반환한다", async () => {
+    // Given
+    const formData = createFormData({
+      expenseUuid: "test-uuid",
+      familyUuid: "attacker-family-uuid",
+      amount: "50000",
+    });
+
+    const initialState = { success: false, message: "", errors: {} };
+
+    // When
+    const result = await updateExpenseAction(initialState, formData);
+
+    // Then
+    expect(result.success).toBe(false);
+    expect(result.message).toBe("권한이 없습니다.");
+  });
+
+  it("세션에 가족 정보가 없으면 에러를 반환한다", async () => {
+    // Given
+    mockGetSelectedFamilyUuid.mockResolvedValueOnce(null);
+
+    const formData = createFormData({
+      expenseUuid: "test-uuid",
+      familyUuid: "family-uuid",
+      amount: "50000",
+    });
+
+    const initialState = { success: false, message: "", errors: {} };
+
+    // When
+    const result = await updateExpenseAction(initialState, formData);
+
+    // Then
+    expect(result.success).toBe(false);
+    expect(result.message).toBe("가족 정보를 찾을 수 없습니다.");
   });
 });
