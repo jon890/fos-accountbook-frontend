@@ -1,7 +1,3 @@
-/**
- * 지출 수정 Server Action
- */
-
 "use server";
 
 import { ActionError } from "@/lib/errors";
