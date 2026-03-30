@@ -74,7 +74,7 @@ export async function updateCategoryAction(
 
     const familyUuid = await getSelectedFamilyUuid();
     if (!familyUuid) {
-      throw ActionError.invalidInput("familyUuid", familyUuid, "가족 UUID가 없습니다");
+      throw ActionError.familyNotSelected();
     }
 
     const category = await serverApiPut<CategoryResponse>(

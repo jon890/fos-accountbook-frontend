@@ -35,7 +35,7 @@ export async function deleteCategoryAction(
 
     const familyUuid = await getSelectedFamilyUuid();
     if (!familyUuid) {
-      throw ActionError.invalidInput("familyUuid", familyUuid, "가족 UUID가 없습니다");
+      throw ActionError.familyNotSelected();
     }
 
     await serverApiDelete(`/families/${familyUuid}/categories/${categoryUuid}`);
