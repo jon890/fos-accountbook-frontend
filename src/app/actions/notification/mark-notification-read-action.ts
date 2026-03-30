@@ -34,9 +34,8 @@ export async function markNotificationReadAction(
     }
 
     // 백엔드 API 호출
-    // TODO: 백엔드 이슈 #74 반영 후 /families/${familyUuid}/notifications/${notificationUuid}/read 로 변경
     const data = await serverApiPatch<Notification>(
-      `/notifications/${notificationUuid}/read`
+      `/families/${familyUuid}/notifications/${notificationUuid}/read`
     );
 
     // 알림 목록 재검증

@@ -11,7 +11,10 @@ import {
   type ActionResult,
 } from "@/lib/errors";
 import { serverApiDelete } from "@/lib/server/api";
-import { requireAuth } from "@/lib/server/auth/auth-helpers";
+import {
+  requireAuth,
+  getSelectedFamilyUuid,
+} from "@/lib/server/auth/auth-helpers";
 import { revalidatePath } from "next/cache";
 
 export async function deleteCategoryAction(
@@ -30,7 +33,12 @@ export async function deleteCategoryAction(
       );
     }
 
-    await serverApiDelete(`/categories/${categoryUuid}`);
+    const familyUuid = await getSelectedFamilyUuid();
+    if (!familyUuid) {
+      throw ActionError.invalidInput("familyUuid", familyUuid, "가족 UUID가 없습니다");
+    }
+
+    await serverApiDelete(`/families/${familyUuid}/categories/${categoryUuid}`);
 
     revalidatePath("/");
     revalidatePath("/categories");
