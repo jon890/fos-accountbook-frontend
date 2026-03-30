@@ -1,4 +1,4 @@
-import { getExpensesAction } from "@/app/actions/expense/get-expenses-action";
+import { getExpensesAction } from "@/actions/expense/get-expenses-action";
 import { Card, CardContent } from "@/components/ui/card";
 import type { CategoryResponse } from "@/types/category";
 import { ExpenseListClient } from "./ExpenseListClient";
@@ -25,7 +25,7 @@ export async function ExpenseList({
 }: ExpenseListProps) {
   // Server Action으로 지출 목록 조회
   const result = await getExpensesAction({
-    familyId,
+    familyUuid: familyId,
     categoryId,
     startDate,
     endDate,

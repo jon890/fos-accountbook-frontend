@@ -1,5 +1,5 @@
-import { getFamiliesAction } from "@/app/actions/family/get-families-action";
-import { getUserProfileAction } from "@/app/actions/user/get-user-profile-action";
+import { getFamiliesAction } from "@/actions/family/get-families-action";
+import { getUserProfileAction } from "@/actions/user/get-user-profile-action";
 import { SettingsPageClient } from "./_components/SettingsPageClient";
 import { requireActionSuccess } from "@/lib/server/action-result-handler";
 

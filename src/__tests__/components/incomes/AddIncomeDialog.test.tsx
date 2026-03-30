@@ -29,10 +29,10 @@ jest.mock("next/cache", () => ({
   revalidatePath: jest.fn(),
 }));
 
-jest.mock("@/app/actions/category/get-categories-action");
-jest.mock("@/app/actions/income/create-income-action");
+jest.mock("@/actions/category/get-categories-action");
+jest.mock("@/actions/income/create-income-action");
 
-import { getFamilyCategoriesAction } from "@/app/actions/category/get-categories-action";
+import { getFamilyCategoriesAction } from "@/actions/category/get-categories-action";
 import { AddIncomeDialog } from "@/components/incomes/dialogs/AddIncomeDialog";
 import { render, screen, waitFor } from "@testing-library/react";
 jest.mock("sonner", () => ({

@@ -4,7 +4,7 @@
 
 "use client";
 
-import { updateIncomeAction } from "@/app/actions/income/update-income-action";
+import { updateIncomeAction } from "@/actions/income/update-income-action";
 import type { UpdateIncomeFormState, Income } from "@/types/income";
 import { Button } from "@/components/ui/button";
 import {
@@ -120,9 +120,9 @@ export function EditIncomeDialog({
                 ))}
               </select>
             )}
-            {state.errors?.categoryUuid && (
+            {state.errors?.categoryId && (
               <p className="text-sm text-destructive">
-                {state.errors.categoryUuid[0]}
+                {state.errors.categoryId[0]}
               </p>
             )}
           </div>

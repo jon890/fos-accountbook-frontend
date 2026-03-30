@@ -1,6 +1,6 @@
 "use client";
 
-import { createFamilyAction } from "@/app/actions/family/create-family-action";
+import { createFamilyAction } from "@/actions/family/create-family-action";
 import { Button } from "@/components/ui/button";
 import {
   Card,

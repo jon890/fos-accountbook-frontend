@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import { CategoryList } from "@/app/(authenticated)/categories/_components/CategoryList";
 import { CategoryResponse } from "@/types/category";
 
-jest.mock("@/app/actions/category/delete-category-action", () => ({
+jest.mock("@/actions/category/delete-category-action", () => ({
   deleteCategoryAction: jest.fn(),
 }));
 

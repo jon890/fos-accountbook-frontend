@@ -2,9 +2,9 @@
  * Income Actions 통합 테스트
  */
 
-import { createIncomeAction } from "@/app/actions/income/create-income-action";
-import { deleteIncomeAction } from "@/app/actions/income/delete-income-action";
-import { serverApiClient } from "@/lib/server/api/client";
+import { createIncomeAction } from "@/actions/income/create-income-action";
+import { deleteIncomeAction } from "@/actions/income/delete-income-action";
+import { serverApiPost, serverApiDelete } from "@/lib/server/api/client";
 
 // Mock modules
 jest.mock("@/lib/server/auth/auth-helpers", () => ({
@@ -14,7 +14,8 @@ jest.mock("@/lib/server/auth/auth-helpers", () => ({
 }));
 
 jest.mock("@/lib/server/api/client", () => ({
-  serverApiClient: jest.fn(),
+  serverApiPost: jest.fn(),
+  serverApiDelete: jest.fn(),
 }));
 
 jest.mock("next/cache", () => ({
@@ -47,9 +48,8 @@ const mockSession: Session = {
 const mockGetSelectedFamilyUuid = getSelectedFamilyUuid as jest.MockedFunction<
   typeof getSelectedFamilyUuid
 >;
-const mockServerApiClient = serverApiClient as jest.MockedFunction<
-  typeof serverApiClient
->;
+const mockServerApiPost = serverApiPost as jest.MockedFunction<typeof serverApiPost>;
+const mockServerApiDelete = serverApiDelete as jest.MockedFunction<typeof serverApiDelete>;
 
 describe("Income Actions", () => {
   beforeEach(() => {
@@ -62,18 +62,7 @@ describe("Income Actions", () => {
       mockRequireAuth.mockResolvedValue(mockSession);
       mockGetSelectedFamilyUuid.mockResolvedValue("family-1");
 
-      mockServerApiClient.mockResolvedValue({
-        data: {
-          uuid: "income-1",
-          familyUuid: "family-1",
-          categoryUuid: "category-1",
-          amount: "50000",
-          description: "월급",
-          date: "2024-10-21T00:00:00Z",
-          createdAt: "2024-10-21T00:00:00Z",
-          updatedAt: "2024-10-21T00:00:00Z",
-        },
-      });
+      mockServerApiPost.mockResolvedValue(undefined);
 
       const formData = new FormData();
       formData.append("familyUuid", "family-1");
@@ -94,12 +83,9 @@ describe("Income Actions", () => {
       // Then
       expect(result.success).toBe(true);
       expect(result.message).toBe("수입이 성공적으로 추가되었습니다.");
-      expect(mockServerApiClient).toHaveBeenCalledWith(
+      expect(mockServerApiPost).toHaveBeenCalledWith(
         "/families/family-1/incomes",
-        expect.objectContaining({
-          method: "POST",
-          body: expect.any(String),
-        })
+        expect.any(Object)
       );
       expect(mockRevalidatePath).toHaveBeenCalledWith("/transactions");
       expect(mockRevalidatePath).toHaveBeenCalledWith("/");
@@ -162,18 +148,15 @@ describe("Income Actions", () => {
       // Given
       mockRequireAuth.mockResolvedValue(mockSession);
 
-      mockServerApiClient.mockResolvedValue({});
+      mockServerApiDelete.mockResolvedValue(undefined);
 
       // When
       const result = await deleteIncomeAction("family-1", "income-1");
 
       // Then
       expect(result.success).toBe(true);
-      expect(mockServerApiClient).toHaveBeenCalledWith(
-        "/families/family-1/incomes/income-1",
-        expect.objectContaining({
-          method: "DELETE",
-        })
+      expect(mockServerApiDelete).toHaveBeenCalledWith(
+        "/families/family-1/incomes/income-1"
       );
       expect(mockRevalidatePath).toHaveBeenCalledWith("/transactions");
       expect(mockRevalidatePath).toHaveBeenCalledWith("/");
@@ -184,7 +167,7 @@ describe("Income Actions", () => {
       // Given
       mockRequireAuth.mockResolvedValue(mockSession);
 
-      mockServerApiClient.mockRejectedValue(new Error("API Error"));
+      mockServerApiDelete.mockRejectedValue(new Error("API Error"));
 
       // When
       const result = await deleteIncomeAction("family-1", "income-1");

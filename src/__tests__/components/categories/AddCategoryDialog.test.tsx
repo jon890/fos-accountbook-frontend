@@ -1,10 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AddCategoryDialog } from "@/app/(authenticated)/categories/_components/AddCategoryDialog";
-import { createCategoryAction } from "@/app/actions/category/create-category-action";
+import { createCategoryAction } from "@/actions/category/create-category-action";
 
 // Mock server action
-jest.mock("@/app/actions/category/create-category-action", () => ({
+jest.mock("@/actions/category/create-category-action", () => ({
   createCategoryAction: jest.fn(),
 }));
 

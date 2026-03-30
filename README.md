@@ -42,14 +42,27 @@ src/
 │   │   ├── signin/               # 로그인
 │   │   ├── signout/              # 로그아웃
 │   │   └── error/                # 에러
-│   ├── actions/                  # Server Actions
-│   │   ├── expense/              # 지출 관련
-│   │   ├── income/               # 수입 관련
-│   │   ├── category/             # 카테고리 관련
-│   │   ├── family/               # 가족 관련
-│   │   ├── notification/         # 알림 관련
-│   │   └── dashboard/            # 대시보드 통계
 │   └── api/auth/                 # NextAuth API Routes
+│
+├── actions/                      # Server Actions (Controller) — 인증·검증·revalidatePath
+│   ├── expense/
+│   ├── income/
+│   ├── category/
+│   ├── family/
+│   ├── dashboard/
+│   ├── invitation/
+│   ├── notification/
+│   └── user/
+│
+├── services/                     # 비즈니스 로직 — API 호출·쿼리 빌딩·데이터 변환
+│   ├── expense/
+│   ├── income/
+│   ├── category/
+│   ├── family/
+│   ├── dashboard/
+│   ├── invitation/
+│   ├── notification/
+│   └── user/
 │
 ├── components/                   # React 컴포넌트
 │   ├── ui/                       # shadcn/ui 기본 컴포넌트
@@ -118,36 +131,50 @@ export default async function AuthenticatedLayout({ children }) {
 4. API 호출 시 쿠키에서 토큰 자동 추출
 ```
 
+## 🏗️ 아키텍처 — 데이터 흐름
+
+계층형 아키텍처(Layered Architecture)를 따릅니다.
+
+```
+Page (app/)
+  → Action (actions/) — 인증, Zod 검증, revalidatePath
+    → Service (services/) — API 호출, 쿼리 빌딩, 데이터 변환
+      → lib/server/api — HTTP 클라이언트 (ky)
+```
+
+| 레이어 | 책임 | 금지 |
+|--------|------|------|
+| `actions/` | `"use server"`, 인증, Zod 검증, revalidatePath | API 직접 호출, 비즈니스 로직 |
+| `services/` | API 호출, 쿼리 빌딩, 변환, 오케스트레이션 | `"use server"`, revalidatePath, requireAuth |
+
 ## 🔒 Server Actions 보안 패턴
 
 모든 Server Action은 다음 순서로 보안 검증을 수행합니다:
 
 ```typescript
+// actions/expense/delete-expense-action.ts
 export async function deleteExpenseAction(
   familyUuid: string,
   expenseUuid: string
 ): Promise<ActionResult<void>> {
-  // 1. 인증 확인
-  await requireAuth();
+  try {
+    // 1. 인증 확인
+    await requireAuth();
 
-  // 2. familyUuid 소유권 검증 (IDOR 방지)
-  const sessionFamilyUuid = await getSelectedFamilyUuid();
-  if (!sessionFamilyUuid) {
-    throw ActionError.familyNotSelected();
-  }
-  if (familyUuid !== sessionFamilyUuid) {
-    throw ActionError.unauthorized("권한이 없습니다.");
-  }
+    // 2. familyUuid 소유권 검증 (IDOR 방지)
+    const sessionFamilyUuid = await getSelectedFamilyUuid();
+    if (!sessionFamilyUuid || familyUuid !== sessionFamilyUuid) {
+      throw ActionError.unauthorized("권한이 없습니다.");
+    }
 
-  // 3. 입력값 검증
-  if (!expenseUuid) {
-    throw ActionError.invalidInput("expenseUuid", expenseUuid, "필수 값입니다");
-  }
+    // 3. 비즈니스 로직은 service에 위임
+    await expenseService.deleteExpense(familyUuid, expenseUuid);
 
-  // 4. API 호출
-  await serverApiClient(`/families/${familyUuid}/expenses/${expenseUuid}`, {
-    method: "DELETE",
-  });
+    revalidatePath("/transactions");
+    return successResult(undefined);
+  } catch (error) {
+    return handleActionError(error, "지출 삭제에 실패했습니다");
+  }
 }
 ```
 

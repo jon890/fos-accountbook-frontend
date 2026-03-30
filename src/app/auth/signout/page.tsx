@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { signOutAction } from "@/app/actions/auth/signout-action";
+import { signOutAction } from "@/actions/auth/signout-action";
 import { LogOut } from "lucide-react";
 import Link from "next/link";
 

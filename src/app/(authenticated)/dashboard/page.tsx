@@ -7,9 +7,9 @@
  * - 통계, 최근 지출 등 렌더링
  */
 
-import { getDashboardStatsAction } from "@/app/actions/dashboard/get-dashboard-stats-action";
-import { getRecentExpensesAction } from "@/app/actions/dashboard/get-recent-expenses-action";
-import { getFamiliesAction } from "@/app/actions/family/get-families-action";
+import { getDashboardStatsAction } from "@/actions/dashboard/get-dashboard-stats-action";
+import { getRecentExpensesAction } from "@/actions/dashboard/get-recent-expenses-action";
+import { getFamiliesAction } from "@/actions/family/get-families-action";
 import { CalendarView } from "@/components/dashboard/CalendarView";
 import { DashboardClient } from "@/components/dashboard/DashboardClient";
 import { StatsCards } from "@/components/dashboard/StatsCards";

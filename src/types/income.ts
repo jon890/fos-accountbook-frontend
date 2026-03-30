@@ -63,7 +63,7 @@ export interface UpdateIncomeRequest {
  * 수입 목록 조회 파라미터
  */
 export interface GetIncomesParams {
-  familyId: string;
+  familyUuid: string;
   categoryId?: string;
   startDate?: string;
   endDate?: string;
@@ -83,7 +83,7 @@ export type CreateIncomeFormState = {
   errors?: {
     amount?: string[];
     description?: string[];
-    categoryUuid?: string[];
+    categoryId?: string[];
     date?: string[];
   };
   message?: string;
@@ -97,7 +97,7 @@ export type UpdateIncomeFormState = {
   errors?: {
     amount?: string[];
     description?: string[];
-    categoryUuid?: string[];
+    categoryId?: string[];
     date?: string[];
   };
   message?: string;

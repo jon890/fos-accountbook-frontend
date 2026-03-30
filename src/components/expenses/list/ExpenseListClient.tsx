@@ -5,7 +5,7 @@
 
 "use client";
 
-import { getFamilyCategoriesAction } from "@/app/actions/category/get-categories-action";
+import { getFamilyCategoriesAction } from "@/actions/category/get-categories-action";
 import type { CategoryResponse } from "@/types/category";
 import type { Expense, ExpenseItemData } from "@/types/expense";
 import { groupByDate } from "@/lib/utils/group-by-date";
@@ -87,7 +87,7 @@ export function ExpenseListClient({
                     date: expense.date,
                     categoryUuid: expense.categoryUuid,
                     categoryName: category?.name || expense.category?.name || "기타",
-                    categoryColor: category?.color || expense.category?.color || "#6366f1",
+                    categoryColor: category?.color || expense.category?.color,
                     categoryIcon: category?.icon || expense.category?.icon || "💸",
                   };
                   return (

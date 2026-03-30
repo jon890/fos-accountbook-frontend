@@ -18,7 +18,7 @@ jest.mock("@/lib/server/auth/auth-helpers");
 jest.mock("@/lib/server/api/client");
 jest.mock("next/cache");
 
-import { updateIncomeAction } from "@/app/actions/income/update-income-action";
+import { updateIncomeAction } from "@/actions/income/update-income-action";
 import { serverApiClient } from "@/lib/server/api/client";
 import { requireAuth, getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
 import { revalidatePath } from "next/cache";

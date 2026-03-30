@@ -1,4 +1,4 @@
-import { getIncomesAction } from "@/app/actions/income/get-incomes-action";
+import { getIncomesAction } from "@/actions/income/get-incomes-action";
 import { Card, CardContent } from "@/components/ui/card";
 import type { CategoryResponse } from "@/types/category";
 import { IncomeListClient } from "./IncomeListClient";
@@ -24,7 +24,7 @@ export async function IncomeList({
 }: IncomeListProps) {
   // 수입 목록 조회
   const result = await getIncomesAction({
-    familyId,
+    familyUuid: familyId,
     categoryId,
     startDate,
     endDate,

@@ -1,8 +1,8 @@
 "use client";
 
-import { getFamiliesAction } from "@/app/actions/family/get-families-action";
-import { getSelectedFamilyAction } from "@/app/actions/family/get-selected-family-action";
-import { selectFamilyAction } from "@/app/actions/family/select-family-action";
+import { getFamiliesAction } from "@/actions/family/get-families-action";
+import { getSelectedFamilyAction } from "@/actions/family/get-selected-family-action";
+import { selectFamilyAction } from "@/actions/family/select-family-action";
 import {
   Select,
   SelectContent,

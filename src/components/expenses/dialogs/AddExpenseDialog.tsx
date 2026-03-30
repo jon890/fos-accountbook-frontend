@@ -4,10 +4,10 @@
 
 "use client";
 
-import { getFamilyCategoriesAction } from "@/app/actions/category/get-categories-action";
-import { createExpenseAction } from "@/app/actions/expense/create-expense-action";
-import type { CreateIncomeFormState } from "@/app/actions/income/create-income-action";
-import { createIncomeAction } from "@/app/actions/income/create-income-action";
+import { getFamilyCategoriesAction } from "@/actions/category/get-categories-action";
+import { createExpenseAction } from "@/actions/expense/create-expense-action";
+import type { CreateIncomeFormState } from "@/types/income";
+import { createIncomeAction } from "@/actions/income/create-income-action";
 import { cn } from "@/lib/client/utils";
 import { Button } from "@/components/ui/button";
 import {

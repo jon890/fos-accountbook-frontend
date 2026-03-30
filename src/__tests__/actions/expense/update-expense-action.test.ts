@@ -25,8 +25,8 @@ jest.mock("@/lib/server/auth/auth-helpers");
 jest.mock("@/lib/server/api/client");
 jest.mock("next/cache");
 
-import { updateExpenseAction } from "@/app/actions/expense/update-expense-action";
-import { serverApiClient } from "@/lib/server/api/client";
+import { updateExpenseAction } from "@/actions/expense/update-expense-action";
+import { serverApiPut } from "@/lib/server/api/client";
 import { requireAuth, getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
 import { revalidatePath } from "next/cache";
 import type { Session } from "next-auth";
@@ -35,8 +35,8 @@ const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;
 const mockGetSelectedFamilyUuid = getSelectedFamilyUuid as jest.MockedFunction<
   typeof getSelectedFamilyUuid
 >;
-const mockedServerApiClient = serverApiClient as jest.MockedFunction<
-  typeof serverApiClient
+const mockedServerApiClient = serverApiPut as jest.MockedFunction<
+  typeof serverApiPut
 >;
 const mockedRevalidatePath = revalidatePath as jest.MockedFunction<
   typeof revalidatePath
@@ -64,9 +64,7 @@ describe("updateExpenseAction", () => {
 
   it("유효한 데이터로 지출 수정에 성공한다", async () => {
     // Given
-    mockedServerApiClient.mockResolvedValueOnce({
-      data: { uuid: "test-uuid", amount: 50000 },
-    });
+    mockedServerApiClient.mockResolvedValueOnce(undefined);
 
     const formData = createFormData({
       expenseUuid: "test-uuid",
@@ -87,9 +85,7 @@ describe("updateExpenseAction", () => {
     expect(result.message).toBe("지출이 수정되었습니다");
     expect(mockedServerApiClient).toHaveBeenCalledWith(
       "/families/family-uuid/expenses/test-uuid",
-      expect.objectContaining({
-        method: "PUT",
-      })
+      expect.any(Object)
     );
     expect(mockedRevalidatePath).toHaveBeenCalledWith("/transactions");
     expect(mockedRevalidatePath).toHaveBeenCalledWith("/");
@@ -133,9 +129,7 @@ describe("updateExpenseAction", () => {
 
   it("금액만 수정해도 성공한다", async () => {
     // Given
-    mockedServerApiClient.mockResolvedValueOnce({
-      data: { uuid: "test-uuid" },
-    });
+    mockedServerApiClient.mockResolvedValueOnce(undefined);
 
     const formData = createFormData({
       expenseUuid: "test-uuid",
@@ -174,9 +168,7 @@ describe("updateExpenseAction", () => {
 
   it("날짜 형식을 ISO 8601로 변환한다", async () => {
     // Given
-    mockedServerApiClient.mockResolvedValueOnce({
-      data: { uuid: "test-uuid" },
-    });
+    mockedServerApiClient.mockResolvedValueOnce(undefined);
 
     const formData = createFormData({
       expenseUuid: "test-uuid",
@@ -191,9 +183,8 @@ describe("updateExpenseAction", () => {
     await updateExpenseAction(initialState, formData);
 
     // Then
-    const callArg = mockedServerApiClient.mock.calls[0][1];
-    const body = JSON.parse(callArg?.body as string);
-    expect(body.date).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    const callArg = mockedServerApiClient.mock.calls[0][1] as Record<string, unknown>;
+    expect(callArg?.date).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 
   it("아무것도 수정하지 않으면 에러를 반환한다", async () => {

@@ -3,7 +3,7 @@
  * 예산 관리 전용 페이지
  */
 
-import { getDashboardStatsAction } from "@/app/actions/dashboard/get-dashboard-stats-action";
+import { getDashboardStatsAction } from "@/actions/dashboard/get-dashboard-stats-action";
 import { BudgetClient } from "@/app/(authenticated)/budget/_components/BudgetClient";
 import { getActionDataOrDefault } from "@/lib/server/action-result-handler";
 import { auth } from "@/lib/server/auth";
