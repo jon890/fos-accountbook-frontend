@@ -128,8 +128,6 @@ export function formatExpenseDate(
       month: "long",
       day: "numeric",
       weekday: "short",
-      hour: "2-digit",
-      minute: "2-digit",
     });
 
     return formatter.format(date);
