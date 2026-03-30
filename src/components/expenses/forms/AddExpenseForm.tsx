@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
 import type { CreateExpenseFormState } from "@/types/expense";
 import type { CategoryResponse } from "@/types/category";
+import { toLocalDateInput } from "@/lib/utils/format";
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 
@@ -106,7 +107,7 @@ export function AddExpenseForm({
               id="date"
               name="date"
               type="date"
-              defaultValue={new Date().toISOString().split("T")[0]}
+              defaultValue={toLocalDateInput()}
               required
             />
             {state.errors?.date && (

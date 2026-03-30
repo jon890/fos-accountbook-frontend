@@ -107,10 +107,26 @@ export function formatRelativeTime(
 }
 
 /**
+ * Date 객체 또는 날짜 문자열을 input[type="date"]에 사용할 YYYY-MM-DD 형식으로 변환
+ * toISOString() 대신 로컬 시간 기준으로 계산하여 타임존 오프셋 문제를 방지
+ * @param date - 변환할 Date 객체 또는 ISO 날짜 문자열 (기본값: 현재 시각)
+ * @returns "YYYY-MM-DD" 형식의 문자열. 유효하지 않은 날짜이면 빈 문자열 반환
+ * @remarks 클라이언트(브라우저) 환경 전용 함수. 서버에서 사용 시 서버 타임존(UTC)이 적용됩니다.
+ */
+export function toLocalDateInput(date: Date | string = new Date()): string {
+  const dateObj = typeof date === "string" ? new Date(date) : date;
+  if (Number.isNaN(dateObj.getTime())) return "";
+  const year = dateObj.getFullYear();
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/**
  * 지출/수입 아이템용 날짜 포맷팅
  * @param dateString - ISO 8601 형식의 날짜 문자열
  * @param timezone - 시간대 (기본값: "Asia/Seoul")
- * @returns 포맷팅된 날짜 문자열 (예: "1월 15일 (수) 10:00")
+ * @returns 포맷팅된 날짜 문자열 (예: "1월 15일 (수)")
  */
 export function formatExpenseDate(
   dateString: string,
