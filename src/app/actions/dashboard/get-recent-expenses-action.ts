@@ -17,7 +17,6 @@ import {
 } from "@/lib/server/auth/auth-helpers";
 import { getCachedFamilyCategories } from "@/lib/server/cache";
 import type { RecentExpense } from "@/types/dashboard";
-import type { CategoryResponse } from "@/types/category";
 import type { ExpenseResponse } from "@/types/expense";
 import type { PaginationResponse } from "@/types/common";
 

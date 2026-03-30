@@ -1,4 +1,3 @@
-import { UserProfile } from "@/types";
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import Naver from "next-auth/providers/naver";
@@ -12,7 +11,8 @@ export const authConfig = {
      * 사용자의 가입 허용 여부 제어
      * https://authjs.dev/guides/restricting-user-access
      */
-    async signIn({ user, account, profile }) {
+    // 모든 사용자 허용 — 접근 제어 추가 시 user, account, profile 파라미터 사용
+    async signIn() {
       return true;
     },
 
