@@ -51,7 +51,8 @@ gh pr view <N> --comments
 🟢 잘 된 점: ...   ← 수정 불필요
 ```
 
-claude bot 외에도 GitHub formal review, 인라인 코드 댓글(`gh api .../pulls/N/comments`), 일반 텍스트 코멘트도 확인한다.
+claude bot 외에도 GitHub formal review, 인라인 코드 댓글(`gh api .../pulls/N/comments --jq '[.[] | {id,path,line,body}]'`), 일반 텍스트 코멘트도 확인한다.
+**토큰 절약**: `diff_hunk`, `html_url`, `_links`, `user`, `reactions` 등 불필요한 필드는 항상 jq로 제외한다.
 구조화 마커가 없더라도 "수정 요청", "변경 필요", "이슈" 등 수정을 암시하는 표현을 추출한다.
 
 파싱 결과를 아래 형식으로 정리해서 사용자에게 먼저 보여준다:
@@ -143,9 +144,10 @@ COMMIT_HASH=$(git rev-parse --short HEAD)
 
 ```bash
 gh api repos/<owner>/<repo>/pulls/<N>/comments \
-  --jq '.[] | {id: .id, path: .path, body: .body}'
+  --jq '[.[] | {id: .id, path: .path, line: .line, body: .body}]'
 ```
 
+**주의: `diff_hunk` 필드를 반드시 제외한다** — diff_hunk는 댓글당 수백~수천 토큰을 차지하며 reply 작성에 불필요하다.
 이미 1단계에서 수집한 인라인 댓글 목록의 `id`를 사용한다.
 
 ### 각 처리된 항목에 reply
