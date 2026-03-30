@@ -25,5 +25,5 @@ export default async function FamilySelectPage() {
   }
 
   // 3. 가족 선택 UI 렌더링
-  return <FamilySelectorPage families={familiesResult.data} />;
+  return <FamilySelectorPage />;
 }

@@ -5,15 +5,12 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { AddIncomeDialog } from "@/components/incomes/dialogs/AddIncomeDialog";
 
-interface IncomeTabContentProps {
-  familyUuid: string;
-}
-
 /**
  * Income Tab Content Component
  * Transactions 페이지의 수입 탭 전용 컴포넌트
+ * familyUuid는 AddIncomeDialog가 카테고리 페칭 시 직접 획득
  */
-export function IncomeTabContent({}: IncomeTabContentProps) {
+export function IncomeTabContent() {
   const [addIncomeDialogOpen, setAddIncomeDialogOpen] = useState(false);
 
   return (

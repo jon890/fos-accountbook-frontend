@@ -11,6 +11,7 @@ export const authConfig = {
      * 사용자의 가입 허용 여부 제어
      * https://authjs.dev/guides/restricting-user-access
      */
+    // 모든 사용자 허용 — 접근 제어 추가 시 user, account, profile 파라미터 사용
     async signIn() {
       return true;
     },

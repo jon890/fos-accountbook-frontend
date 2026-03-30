@@ -6,15 +6,11 @@ import type { Family } from "@/types/family";
 import { useRouter } from "next/navigation";
 import { FamilySelector } from "./FamilySelector";
 
-interface FamilySelectorPageProps {
-  families: Family[];
-}
-
 /**
  * 가족 선택 페이지 (Client Component)
- * Server Component에서 families를 받아서 FamilySelector를 렌더링
+ * FamilySelector가 직접 가족 목록을 페칭하므로 별도 prop이 필요 없음
  */
-export function FamilySelectorPage({}: FamilySelectorPageProps) {
+export function FamilySelectorPage() {
   const router = useRouter();
   const { refreshSession } = useSessionRefresh();
 

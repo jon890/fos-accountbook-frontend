@@ -35,7 +35,7 @@ export function ExpenseListClient({
     if (editingExpense && categories.length === 0) {
       loadCategories();
     }
-  }, [editingExpense, categories.length]);
+  }, [editingExpense, categories]);
 
   const loadCategories = async () => {
     setIsLoadingCategories(true);

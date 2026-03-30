@@ -77,7 +77,7 @@ export function TransactionsPageClient({
           {activeTab === "expenses" ? (
             <ExpenseTabContent categories={categories} familyUuid={familyUuid} />
           ) : (
-            <IncomeTabContent familyUuid={familyUuid} />
+            <IncomeTabContent />
           )}
         </div>
       </div>
