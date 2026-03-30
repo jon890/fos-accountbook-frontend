@@ -100,10 +100,11 @@ claude bot 외에도 GitHub formal review, 인라인 코드 댓글(`gh api .../p
 수정 후 반드시 실행:
 
 ```bash
-pnpm lint && pnpm tsc --noEmit
+pnpm lint && pnpm tsc --noEmit && pnpm test --passWithNoTests
 ```
 
 에러가 있으면 수정하고 다시 실행한다. `--no-verify`는 절대 사용하지 않는다.
+`--passWithNoTests`는 테스트 파일이 없는 경우를 위한 안전장치이며, 기존 테스트가 깨지면 반드시 수정한다.
 
 ---
 
