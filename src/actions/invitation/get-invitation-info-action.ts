@@ -16,6 +16,8 @@ import {
 
 export type { InvitationInfoData };
 
+// 공개 액션: 로그인 전 초대 미리보기를 위해 requireAuth() 생략
+// (service 내부에서 skipAuth: true 사용)
 export async function getInvitationInfoAction(
   token: string
 ): Promise<ActionResult<InvitationInfoData>> {

@@ -1,4 +1,5 @@
 import { serverApiGet, serverApiPost, serverApiPut } from "@/lib/server/api/client";
+import { ActionError } from "@/lib/errors";
 import type {
   CreateFamilyData,
   CreateFamilyResult,
@@ -36,7 +37,6 @@ export async function selectFamily(familyUuid: string): Promise<void> {
   const families = await getFamilies();
   const familyExists = families.some((f) => f.uuid === familyUuid);
   if (!familyExists) {
-    const { ActionError } = await import("@/lib/errors");
     throw ActionError.entityNotFound("가족", familyUuid);
   }
   await setDefaultFamily(familyUuid);

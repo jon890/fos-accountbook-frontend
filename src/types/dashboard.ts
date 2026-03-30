@@ -27,7 +27,7 @@ export interface RecentExpense {
   category: {
     uuid: string;
     name: string;
-    color: string;
+    color: string | undefined;
     icon: string;
   };
 }

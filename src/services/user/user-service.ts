@@ -1,10 +1,8 @@
-import { serverApiClient, serverApiPut } from "@/lib/server/api/client";
+import { serverApiGet, serverApiPut } from "@/lib/server/api/client";
 import type { UserProfile } from "@/types";
 
 export async function getUserProfile(): Promise<UserProfile> {
-  return serverApiClient<UserProfile>("/users/me/profile", {
-    method: "GET",
-  });
+  return serverApiGet<UserProfile>("/users/me/profile");
 }
 
 export async function setDefaultFamily(familyUuid: string): Promise<void> {

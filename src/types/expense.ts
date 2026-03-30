@@ -135,6 +135,6 @@ export interface ExpenseItemData
   description?: string | null | undefined; // UI에서 null, undefined 모두 허용
   date: string; // ISO 8601 형식 문자열
   categoryName: string;
-  categoryColor: string;
+  categoryColor: string | undefined;
   categoryIcon: string;
 }

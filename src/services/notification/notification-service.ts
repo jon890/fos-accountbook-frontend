@@ -3,7 +3,6 @@ import {
   serverApiPatch,
   serverApiPost,
 } from "@/lib/server/api/client";
-import { ErrorCode } from "@/lib/errors/error-code";
 import { ActionError } from "@/lib/errors";
 import type {
   Notification,
@@ -52,4 +51,3 @@ export async function markAllNotificationsRead(
   await serverApiPost<void>(`/families/${familyUuid}/notifications/mark-all-read`);
 }
 
-export { ErrorCode };

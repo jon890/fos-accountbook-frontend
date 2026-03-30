@@ -101,7 +101,7 @@ export async function getRecentExpenses(
       category: {
         uuid: expense.categoryUuid,
         name: category?.name || "Unknown",
-        color: category?.color || "#6366f1",
+        color: category?.color,
         icon: category?.icon || "💰",
       },
     };

@@ -87,7 +87,7 @@ export function ExpenseListClient({
                     date: expense.date,
                     categoryUuid: expense.categoryUuid,
                     categoryName: category?.name || expense.category?.name || "기타",
-                    categoryColor: category?.color || expense.category?.color || "#6366f1",
+                    categoryColor: category?.color || expense.category?.color,
                     categoryIcon: category?.icon || expense.category?.icon || "💸",
                   };
                   return (

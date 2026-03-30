@@ -43,7 +43,7 @@ export function ExpenseItem({ expense, onEdit, onDelete }: ExpenseItemProps) {
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div
             className="w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center shrink-0 text-base md:text-lg"
-            style={{ backgroundColor: `${categoryColor}18` }}
+            style={categoryColor ? { backgroundColor: `${categoryColor}18` } : undefined}
           >
             {categoryIcon}
           </div>
