@@ -33,14 +33,27 @@ src/
 │   │   ├── categories/       # 카테고리 관리
 │   │   ├── settings/         # 사용자 설정
 │   │   └── families/         # 가족 관리
-│   ├── actions/              # Next.js Server Actions
-│   │   ├── expense/
-│   │   ├── income/
-│   │   ├── category/
-│   │   └── family/
 │   ├── api/auth/             # NextAuth API Route
 │   ├── globals.css           # 전역 스타일 + CSS 변수 테마
 │   └── layout.tsx            # Root Layout
+├── actions/                  # Server Actions — Controller 역할 (인증·검증·revalidatePath)
+│   ├── expense/
+│   ├── income/
+│   ├── category/
+│   ├── family/
+│   ├── dashboard/
+│   ├── invitation/
+│   ├── notification/
+│   └── user/
+├── services/                 # 비즈니스 로직 레이어 (API 호출·쿼리 빌딩·변환)
+│   ├── expense/
+│   ├── income/
+│   ├── category/
+│   ├── family/
+│   ├── dashboard/
+│   ├── invitation/
+│   ├── notification/
+│   └── user/
 ├── components/
 │   ├── ui/                   # Shadcn 기반 기본 컴포넌트
 │   ├── layout/               # Header, BottomNavigation
@@ -50,6 +63,23 @@ src/
 │   └── categories/           # 카테고리 관련 컴포넌트
 └── __tests__/                # 테스트 파일
 ```
+
+## 아키텍처 — 데이터 흐름
+
+계층형 아키텍처(Layered Architecture)를 따른다.
+
+```
+Page (app/)
+  → Action (actions/) — 인증, Zod 검증, revalidatePath
+    → Service (services/) — API 호출, 쿼리 빌딩, 데이터 변환
+      → lib/server/api — HTTP 클라이언트
+```
+
+| 레이어 | 책임 | 금지 |
+|--------|------|------|
+| `actions/` | `"use server"`, 인증, Zod 검증, revalidatePath | API 직접 호출, 비즈니스 로직 |
+| `services/` | API 호출, 쿼리 빌딩, 변환, 오케스트레이션 | `"use server"`, revalidatePath, requireAuth |
+| `lib/server/api/` | HTTP 클라이언트 | — |
 
 ## 코딩 컨벤션
 
@@ -61,7 +91,8 @@ src/
 ### React / Next.js
 - **Server Component가 기본** — 클라이언트 상태가 필요한 경우에만 `"use client"` 추가
 - `"use client"` 지시어는 파일 최상단 첫 줄에 위치
-- Server Actions는 `src/app/actions/` 하위에 위치, `"use server"` 지시어 필수
+- Server Actions는 `src/actions/` 하위에 위치, `"use server"` 지시어 필수
+- 비즈니스 로직(API 호출, 쿼리 빌딩)은 `src/services/`에 위치 — actions에 직접 작성 금지
 - `useRouter`, `useState`, `useEffect` 등 훅은 Client Component에서만 사용
 - 데이터 페칭은 Server Component에서 직접 처리 (fetch 또는 DB 직접 접근)
 
@@ -94,7 +125,7 @@ src/
 
 - 테스트 파일 위치: `src/__tests__/`
 - 실행: `pnpm test` / `pnpm test:ci` (CI 환경)
-- Server Actions에 비즈니스 로직이 있다면 단위 테스트 권장
+- Service 함수(순수 비즈니스 로직)는 단위 테스트 권장
 - UI 컴포넌트는 Testing Library로 사용자 상호작용 중심 테스트
 
 ## PR 리뷰 포인트
