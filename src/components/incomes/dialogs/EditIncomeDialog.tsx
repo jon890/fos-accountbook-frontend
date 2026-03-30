@@ -120,9 +120,9 @@ export function EditIncomeDialog({
                 ))}
               </select>
             )}
-            {state.errors?.categoryUuid && (
+            {state.errors?.categoryId && (
               <p className="text-sm text-destructive">
-                {state.errors.categoryUuid[0]}
+                {state.errors.categoryId[0]}
               </p>
             )}
           </div>

@@ -83,7 +83,7 @@ export type CreateIncomeFormState = {
   errors?: {
     amount?: string[];
     description?: string[];
-    categoryUuid?: string[];
+    categoryId?: string[];
     date?: string[];
   };
   message?: string;
@@ -97,7 +97,7 @@ export type UpdateIncomeFormState = {
   errors?: {
     amount?: string[];
     description?: string[];
-    categoryUuid?: string[];
+    categoryId?: string[];
     date?: string[];
   };
   message?: string;

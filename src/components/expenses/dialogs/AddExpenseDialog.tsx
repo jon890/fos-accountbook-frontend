@@ -6,7 +6,7 @@
 
 import { getFamilyCategoriesAction } from "@/actions/category/get-categories-action";
 import { createExpenseAction } from "@/actions/expense/create-expense-action";
-import type { CreateIncomeFormState } from "@/actions/income/create-income-action";
+import type { CreateIncomeFormState } from "@/types/income";
 import { createIncomeAction } from "@/actions/income/create-income-action";
 import { cn } from "@/lib/client/utils";
 import { Button } from "@/components/ui/button";
