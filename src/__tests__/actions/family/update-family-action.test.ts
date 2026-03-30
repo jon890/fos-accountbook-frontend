@@ -8,7 +8,7 @@ jest.mock("@/lib/server/auth/auth-helpers", () => ({
 }));
 
 jest.mock("@/lib/server/api/client", () => ({
-  serverApiClient: jest.fn(),
+  serverApiPut: jest.fn(),
 }));
 
 jest.mock("next/cache", () => ({
@@ -16,13 +16,13 @@ jest.mock("next/cache", () => ({
 }));
 
 import { updateFamilyAction } from "@/actions/family/update-family-action";
-import { serverApiClient } from "@/lib/server/api/client";
+import { serverApiPut } from "@/lib/server/api/client";
 import { requireAuth } from "@/lib/server/auth/auth-helpers";
 import { revalidatePath } from "next/cache";
 
 const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;
-const mockServerApiClient = serverApiClient as jest.MockedFunction<
-  typeof serverApiClient
+const mockServerApiClient = serverApiPut as jest.MockedFunction<
+  typeof serverApiPut
 >;
 const mockRevalidatePath = revalidatePath as jest.MockedFunction<
   typeof revalidatePath
@@ -38,17 +38,14 @@ describe("updateFamilyAction", () => {
     const mockSession = { user: { id: "test-user" } };
     mockRequireAuth.mockResolvedValue(mockSession as never);
     mockServerApiClient.mockResolvedValue({
-      success: true,
-      data: {
-        uuid: "family-123",
-        name: "수정된 가족",
-        monthlyBudget: 1000000,
-        createdAt: "2024-01-01T00:00:00Z",
-        updatedAt: "2024-01-02T00:00:00Z",
-        memberCount: 2,
-        expenseCount: 5,
-        categoryCount: 10,
-      },
+      uuid: "family-123",
+      name: "수정된 가족",
+      monthlyBudget: 1000000,
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-02T00:00:00Z",
+      memberCount: 2,
+      expenseCount: 5,
+      categoryCount: 10,
     });
 
     // When
@@ -66,11 +63,8 @@ describe("updateFamilyAction", () => {
     }
 
     expect(mockServerApiClient).toHaveBeenCalledWith("/families/family-123", {
-      method: "PUT",
-      body: JSON.stringify({
-        name: "수정된 가족",
-        monthlyBudget: 1000000,
-      }),
+      name: "수정된 가족",
+      monthlyBudget: 1000000,
     });
 
     expect(mockRevalidatePath).toHaveBeenCalledWith("/");
@@ -83,17 +77,14 @@ describe("updateFamilyAction", () => {
     const mockSession = { user: { id: "test-user" } };
     mockRequireAuth.mockResolvedValue(mockSession as never);
     mockServerApiClient.mockResolvedValue({
-      success: true,
-      data: {
-        uuid: "family-123",
-        name: "기존 가족명",
-        monthlyBudget: 2000000,
-        createdAt: "2024-01-01T00:00:00Z",
-        updatedAt: "2024-01-02T00:00:00Z",
-        memberCount: 2,
-        expenseCount: 5,
-        categoryCount: 10,
-      },
+      uuid: "family-123",
+      name: "기존 가족명",
+      monthlyBudget: 2000000,
+      createdAt: "2024-01-01T00:00:00Z",
+      updatedAt: "2024-01-02T00:00:00Z",
+      memberCount: 2,
+      expenseCount: 5,
+      categoryCount: 10,
     });
 
     // When
@@ -108,10 +99,7 @@ describe("updateFamilyAction", () => {
     }
 
     expect(mockServerApiClient).toHaveBeenCalledWith("/families/family-123", {
-      method: "PUT",
-      body: JSON.stringify({
-        monthlyBudget: 2000000,
-      }),
+      monthlyBudget: 2000000,
     });
   });
 

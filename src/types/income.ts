@@ -63,7 +63,7 @@ export interface UpdateIncomeRequest {
  * 수입 목록 조회 파라미터
  */
 export interface GetIncomesParams {
-  familyId: string;
+  familyUuid: string;
   categoryId?: string;
   startDate?: string;
   endDate?: string;

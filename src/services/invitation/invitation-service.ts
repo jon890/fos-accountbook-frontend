@@ -1,6 +1,6 @@
 import { serverEnv } from "@/lib/env/server.env";
 import { ActionError } from "@/lib/errors";
-import { serverApiClient } from "@/lib/server/api/client";
+import { serverApiClient, serverApiDelete, serverApiGet, serverApiPost } from "@/lib/server/api/client";
 import type {
   AcceptInvitationRequest,
   CreateInvitationRequest,
@@ -28,13 +28,7 @@ export async function createInvitationLink(
   familyUuid: string
 ): Promise<InvitationInfo> {
   const requestBody: CreateInvitationRequest = { expiresInHours: 24 };
-  const invitationResponse = await serverApiClient<{
-    data: InvitationResponse;
-  }>(`/invitations/families/${familyUuid}`, {
-    method: "POST",
-    body: JSON.stringify(requestBody),
-  });
-  const invitation = invitationResponse.data;
+  const invitation = await serverApiPost<InvitationResponse>(`/invitations/families/${familyUuid}`, requestBody);
 
   const now = new Date();
   const expiresAt = new Date(invitation.expiresAt);
@@ -53,12 +47,10 @@ export async function createInvitationLink(
 export async function getActiveInvitations(
   familyUuid: string
 ): Promise<InvitationInfo[]> {
-  const invitationsResponse = await serverApiClient<{
-    data: InvitationResponse[];
-  }>(`/invitations/families/${familyUuid}`, { method: "GET" });
+  const invitations = await serverApiGet<InvitationResponse[]>(`/invitations/families/${familyUuid}`);
 
   const now = new Date();
-  return invitationsResponse.data.map((inv) => toInvitationInfo(inv, now));
+  return invitations.map((inv) => toInvitationInfo(inv, now));
 }
 
 export interface InvitationInfoData {
@@ -120,10 +112,7 @@ export async function acceptInvitation(token: string): Promise<void> {
   }
 
   const requestBody: AcceptInvitationRequest = { token };
-  await serverApiClient(`/invitations/accept`, {
-    method: "POST",
-    body: JSON.stringify(requestBody),
-  });
+  await serverApiPost<void>(`/invitations/accept`, requestBody);
 }
 
 export async function deleteInvitation(invitationUuid: string): Promise<void> {
@@ -135,7 +124,5 @@ export async function deleteInvitation(invitationUuid: string): Promise<void> {
     );
   }
 
-  await serverApiClient(`/invitations/${invitationUuid}`, {
-    method: "DELETE",
-  });
+  await serverApiDelete<void>(`/invitations/${invitationUuid}`);
 }

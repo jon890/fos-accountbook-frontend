@@ -24,7 +24,7 @@ export async function IncomeList({
 }: IncomeListProps) {
   // 수입 목록 조회
   const result = await getIncomesAction({
-    familyId,
+    familyUuid: familyId,
     categoryId,
     startDate,
     endDate,

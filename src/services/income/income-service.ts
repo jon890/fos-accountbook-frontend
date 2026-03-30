@@ -1,9 +1,8 @@
-import { serverApiClient, serverApiGet } from "@/lib/server/api/client";
+import { serverApiDelete, serverApiGet, serverApiPost, serverApiPut } from "@/lib/server/api/client";
 import type {
   CreateIncomeRequest,
   GetIncomesParams,
   GetIncomesResponse,
-  IncomeResponse,
 } from "@/types/income";
 
 export async function createIncome(
@@ -21,18 +20,12 @@ export async function createIncome(
     description: data.description,
     date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
   };
-  await serverApiClient<{ data: IncomeResponse }>(
-    `/families/${familyUuid}/incomes`,
-    {
-      method: "POST",
-      body: JSON.stringify(requestBody),
-    }
-  );
+  await serverApiPost<void>(`/families/${familyUuid}/incomes`, requestBody);
 }
 
 export async function getIncomes(
-  familyId: string,
-  params: Omit<GetIncomesParams, "familyId">
+  familyUuid: string,
+  params: Omit<GetIncomesParams, "familyUuid">
 ): Promise<GetIncomesResponse> {
   const queryParams = new URLSearchParams();
   if (params.categoryId) queryParams.set("categoryUuid", params.categoryId);
@@ -42,7 +35,7 @@ export async function getIncomes(
   queryParams.set("size", String(params.limit || 25));
 
   const queryString = queryParams.toString();
-  const endpoint = `/families/${familyId}/incomes${
+  const endpoint = `/families/${familyUuid}/incomes${
     queryString ? `?${queryString}` : ""
   }`;
 
@@ -71,23 +64,12 @@ export async function updateIncome(
   if (data.description !== undefined) updateData.description = data.description;
   if (data.date) updateData.date = new Date(data.date).toISOString();
 
-  await serverApiClient<{ data: IncomeResponse }>(
-    `/families/${familyUuid}/incomes/${incomeUuid}`,
-    {
-      method: "PUT",
-      body: JSON.stringify(updateData),
-    }
-  );
+  await serverApiPut<void>(`/families/${familyUuid}/incomes/${incomeUuid}`, updateData);
 }
 
 export async function deleteIncome(
   familyUuid: string,
   incomeUuid: string
 ): Promise<void> {
-  await serverApiClient(
-    `/families/${familyUuid}/incomes/${incomeUuid}`,
-    {
-      method: "DELETE",
-    }
-  );
+  await serverApiDelete<void>(`/families/${familyUuid}/incomes/${incomeUuid}`);
 }

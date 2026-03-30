@@ -21,7 +21,7 @@ jest.mock("next/cache");
 
 import { deleteExpenseAction } from "@/actions/expense/delete-expense-action";
 import { ActionError } from "@/lib/errors";
-import { serverApiClient } from "@/lib/server/api/client";
+import { serverApiDelete } from "@/lib/server/api/client";
 import {
   requireAuth,
   getSelectedFamilyUuid,
@@ -33,8 +33,8 @@ const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;
 const mockGetSelectedFamilyUuid = getSelectedFamilyUuid as jest.MockedFunction<
   typeof getSelectedFamilyUuid
 >;
-const mockServerApiClient = serverApiClient as jest.MockedFunction<
-  typeof serverApiClient
+const mockServerApiClient = serverApiDelete as jest.MockedFunction<
+  typeof serverApiDelete
 >;
 const mockRevalidatePath = revalidatePath as jest.MockedFunction<
   typeof revalidatePath
@@ -57,7 +57,7 @@ describe("deleteExpenseAction", () => {
 
   it("유효한 파라미터로 지출 삭제에 성공한다", async () => {
     // Given
-    mockServerApiClient.mockResolvedValue({});
+    mockServerApiClient.mockResolvedValue(undefined);
 
     // When
     const result = await deleteExpenseAction("family-1", "expense-1");
@@ -65,10 +65,7 @@ describe("deleteExpenseAction", () => {
     // Then
     expect(result.success).toBe(true);
     expect(mockServerApiClient).toHaveBeenCalledWith(
-      "/families/family-1/expenses/expense-1",
-      expect.objectContaining({
-        method: "DELETE",
-      })
+      "/families/family-1/expenses/expense-1"
     );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/transactions");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/");
@@ -144,7 +141,7 @@ describe("deleteExpenseAction", () => {
 
   it("삭제 성공 시 페이지를 재검증한다", async () => {
     // Given
-    mockServerApiClient.mockResolvedValue({});
+    mockServerApiClient.mockResolvedValue(undefined);
 
     // When
     await deleteExpenseAction("family-1", "expense-1");

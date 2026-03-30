@@ -1,11 +1,10 @@
 import {
-  serverApiClient,
   serverApiGet,
   serverApiPatch,
+  serverApiPost,
 } from "@/lib/server/api/client";
 import { ErrorCode } from "@/lib/errors/error-code";
 import { ActionError } from "@/lib/errors";
-import type { ApiResponse } from "@/lib/server/api/types";
 import type {
   Notification,
   NotificationListResponse,
@@ -50,12 +49,7 @@ export async function markNotificationRead(
 export async function markAllNotificationsRead(
   familyUuid: string
 ): Promise<void> {
-  await serverApiClient<ApiResponse<void>>(
-    `/families/${familyUuid}/notifications/mark-all-read`,
-    {
-      method: "POST",
-    }
-  );
+  await serverApiPost<void>(`/families/${familyUuid}/notifications/mark-all-read`);
 }
 
 export { ErrorCode };

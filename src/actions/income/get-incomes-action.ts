@@ -20,14 +20,14 @@ export async function getIncomesAction(
 ): Promise<ActionResult<GetIncomesResponse>> {
   try {
     await requireAuth();
-    const familyId = params.familyId || (await getSelectedFamilyUuid());
-    if (!familyId) {
+    const familyUuid = params.familyUuid || (await getSelectedFamilyUuid());
+    if (!familyUuid) {
       return handleActionError(
         new Error("가족이 선택되지 않았습니다"),
         "수입 목록 조회에 실패했습니다"
       );
     }
-    return successResult(await getIncomes(familyId, params));
+    return successResult(await getIncomes(familyUuid, params));
   } catch (error) {
     return handleActionError(error, "수입 목록 조회에 실패했습니다");
   }

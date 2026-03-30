@@ -29,7 +29,7 @@ export default async function AnalyticsPage() {
   const [statsResult, dailyResult, expensesResult] = await Promise.all([
     getDashboardStatsAction(),
     getMonthlyDailyStatsAction(year, month),
-    getExpensesAction({ familyId: familyUuid, startDate, endDate, limit: 1000 }),
+    getExpensesAction({ familyUuid: familyUuid, startDate, endDate, limit: 1000 }),
   ]);
 
   return (

@@ -23,13 +23,13 @@ export async function getExpensesAction(
   try {
     await requireAuth();
 
-    const familyId = await getSelectedFamilyUuid();
-    if (!familyId) {
+    const familyUuid = await getSelectedFamilyUuid();
+    if (!familyUuid) {
       throw ActionError.familyNotSelected();
     }
 
     const { categoryId, startDate, endDate, page, limit } = params;
-    return successResult(await getExpenses(familyId, { categoryId, startDate, endDate, page, limit }));
+    return successResult(await getExpenses(familyUuid, { categoryId, startDate, endDate, page, limit }));
   } catch (error) {
     return handleActionError(error, "지출 조회에 실패했습니다");
   }

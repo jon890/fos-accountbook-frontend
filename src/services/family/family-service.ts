@@ -1,4 +1,4 @@
-import { serverApiClient } from "@/lib/server/api/client";
+import { serverApiGet, serverApiPost, serverApiPut } from "@/lib/server/api/client";
 import type {
   CreateFamilyData,
   CreateFamilyResult,
@@ -9,52 +9,27 @@ import type {
 export async function createFamily(
   data: CreateFamilyData
 ): Promise<CreateFamilyResult> {
-  const result = await serverApiClient<{ data: CreateFamilyResult }>(
-    "/families",
-    {
-      method: "POST",
-      body: JSON.stringify(data),
-    }
-  );
+  const result = await serverApiPost<CreateFamilyResult>("/families", data);
 
   // Set default family after creation
-  await serverApiClient("/users/me/profile", {
-    method: "PUT",
-    body: JSON.stringify({ defaultFamilyUuid: result.data.uuid }),
-  });
+  await serverApiPut<void>("/users/me/profile", { defaultFamilyUuid: result.uuid });
 
-  return result.data;
+  return result;
 }
 
 export async function getFamilies(): Promise<Family[]> {
-  const result = await serverApiClient<{ data: Family[] }>("/families", {
-    method: "GET",
-  });
-  return result.data;
+  return serverApiGet<Family[]>("/families");
 }
 
 export async function getFamilyById(familyUuid: string): Promise<Family> {
-  const result = await serverApiClient<{ data: Family }>(
-    `/families/${familyUuid}`,
-    {
-      method: "GET",
-    }
-  );
-  return result.data;
+  return serverApiGet<Family>(`/families/${familyUuid}`);
 }
 
 export async function updateFamily(
   familyUuid: string,
   data: UpdateFamilyRequest
 ): Promise<Family> {
-  const result = await serverApiClient<{ data: Family }>(
-    `/families/${familyUuid}`,
-    {
-      method: "PUT",
-      body: JSON.stringify(data),
-    }
-  );
-  return result.data;
+  return serverApiPut<Family>(`/families/${familyUuid}`, data);
 }
 
 export async function selectFamily(familyUuid: string): Promise<void> {
@@ -68,8 +43,5 @@ export async function selectFamily(familyUuid: string): Promise<void> {
 }
 
 export async function setDefaultFamily(familyUuid: string): Promise<void> {
-  await serverApiClient("/users/me/profile", {
-    method: "PUT",
-    body: JSON.stringify({ defaultFamilyUuid: familyUuid }),
-  });
+  await serverApiPut<void>("/users/me/profile", { defaultFamilyUuid: familyUuid });
 }

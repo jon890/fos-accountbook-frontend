@@ -95,7 +95,7 @@ export function AnalyticsClient({
       try {
         const [daily, exps, dashboardStats] = await Promise.all([
           getMonthlyDailyStatsAction(newYear, newMonth),
-          getExpensesAction({ familyId: familyUuid, startDate: start, endDate: end, limit: 1000 }),
+          getExpensesAction({ familyUuid: familyUuid, startDate: start, endDate: end, limit: 1000 }),
           isNewCurrentMonth ? getDashboardStatsAction() : Promise.resolve(null),
         ]);
 

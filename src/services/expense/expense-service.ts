@@ -1,8 +1,7 @@
-import { serverApiClient, serverApiGet } from "@/lib/server/api/client";
+import { serverApiDelete, serverApiGet, serverApiPost, serverApiPut } from "@/lib/server/api/client";
 import { ActionError } from "@/lib/errors";
 import type {
   CreateExpenseRequest,
-  ExpenseResponse,
   GetExpensesParams,
   GetExpensesResponse,
 } from "@/types/expense";
@@ -22,18 +21,12 @@ export async function createExpense(
     description: data.description,
     date: data.date ? new Date(data.date).toISOString() : new Date().toISOString(),
   };
-  await serverApiClient<{ data: ExpenseResponse }>(
-    `/families/${familyUuid}/expenses`,
-    {
-      method: "POST",
-      body: JSON.stringify(requestBody),
-    }
-  );
+  await serverApiPost<void>(`/families/${familyUuid}/expenses`, requestBody);
 }
 
 export async function getExpenses(
-  familyId: string,
-  params: Omit<GetExpensesParams, "familyId">
+  familyUuid: string,
+  params: Omit<GetExpensesParams, "familyUuid">
 ): Promise<GetExpensesResponse> {
   const { categoryId, startDate, endDate, page = 1, limit = 25 } = params;
 
@@ -54,7 +47,7 @@ export async function getExpenses(
   if (endDate) queryParams += `&endDate=${endDate}`;
 
   return serverApiGet<GetExpensesResponse>(
-    `/families/${familyId}/expenses?${queryParams}`
+    `/families/${familyUuid}/expenses?${queryParams}`
   );
 }
 
@@ -80,23 +73,12 @@ export async function updateExpense(
   if (data.description !== undefined) updateData.description = data.description;
   if (data.date) updateData.date = new Date(data.date).toISOString();
 
-  await serverApiClient<{ data: ExpenseResponse }>(
-    `/families/${familyUuid}/expenses/${expenseUuid}`,
-    {
-      method: "PUT",
-      body: JSON.stringify(updateData),
-    }
-  );
+  await serverApiPut<void>(`/families/${familyUuid}/expenses/${expenseUuid}`, updateData);
 }
 
 export async function deleteExpense(
   familyUuid: string,
   expenseUuid: string
 ): Promise<void> {
-  await serverApiClient<{ data: ExpenseResponse }>(
-    `/families/${familyUuid}/expenses/${expenseUuid}`,
-    {
-      method: "DELETE",
-    }
-  );
+  await serverApiDelete<void>(`/families/${familyUuid}/expenses/${expenseUuid}`);
 }

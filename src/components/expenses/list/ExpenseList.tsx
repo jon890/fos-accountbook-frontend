@@ -25,7 +25,7 @@ export async function ExpenseList({
 }: ExpenseListProps) {
   // Server Action으로 지출 목록 조회
   const result = await getExpensesAction({
-    familyId,
+    familyUuid: familyId,
     categoryId,
     startDate,
     endDate,
