@@ -5,16 +5,12 @@
 "use server";
 
 import { ActionError } from "@/lib/errors";
-import { serverApiClient } from "@/lib/server/api/client";
 import {
   requireAuthOrRedirect,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
-import type {
-  CreateExpenseFormState,
-  CreateExpenseRequest,
-  ExpenseResponse,
-} from "@/types/expense";
+import { createExpense } from "@/services/expense/expense-service";
+import type { CreateExpenseFormState } from "@/types/expense";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -31,18 +27,13 @@ export async function createExpenseAction(
   formData: FormData
 ): Promise<CreateExpenseFormState> {
   try {
-    // 인증 확인
     await requireAuthOrRedirect();
 
-    // 선택된 가족 UUID 가져오기
     const familyUuid = await getSelectedFamilyUuid();
-
-    // 선택된 가족이 없으면 에러
     if (!familyUuid) {
       throw ActionError.familyNotSelected();
     }
 
-    // 폼 데이터 파싱
     const rawData = {
       amount: Number(formData.get("amount")),
       description: formData.get("description")?.toString(),
@@ -50,9 +41,7 @@ export async function createExpenseAction(
       date: formData.get("date")?.toString(),
     };
 
-    // 데이터 검증
     const validatedFields = createExpenseSchema.safeParse(rawData);
-
     if (!validatedFields.success) {
       return {
         errors: validatedFields.error.flatten().fieldErrors,
@@ -61,25 +50,8 @@ export async function createExpenseAction(
       };
     }
 
-    const { amount, description, categoryId, date } = validatedFields.data;
+    await createExpense(familyUuid, validatedFields.data);
 
-    // 백엔드 API 호출 (HTTP-only 쿠키에서 자동으로 Access Token 전달)
-    const requestBody: CreateExpenseRequest = {
-      categoryUuid: categoryId,
-      amount,
-      description,
-      date: date ? new Date(date).toISOString() : new Date().toISOString(),
-    };
-
-    await serverApiClient<{ data: ExpenseResponse }>(
-      `/families/${familyUuid}/expenses`,
-      {
-        method: "POST",
-        body: JSON.stringify(requestBody),
-      }
-    );
-
-    // 내역 페이지 및 대시보드 revalidate
     revalidatePath("/transactions");
     revalidatePath("/");
     revalidatePath("/analytics");
@@ -89,16 +61,9 @@ export async function createExpenseAction(
       success: true,
     };
   } catch (error) {
-    console.error("지출 추가 중 오류:", error);
-
-    // ActionError 처리
     if (error instanceof ActionError) {
-      return {
-        message: error.message,
-        success: false,
-      };
+      return { message: error.message, success: false };
     }
-
     return {
       message: "지출 추가 중 오류가 발생했습니다. 다시 시도해주세요.",
       success: false,

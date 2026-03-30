@@ -5,41 +5,23 @@
 "use server";
 
 import {
-  ActionError,
   handleActionError,
   successResult,
   type ActionResult,
 } from "@/lib/errors";
-import { serverApiClient } from "@/lib/server/api/client";
 import { requireAuth } from "@/lib/server/auth/auth-helpers";
+import { deleteInvitation } from "@/services/invitation/invitation-service";
 import { revalidatePath } from "next/cache";
 
 export async function deleteInvitationAction(
   invitationUuid: string
 ): Promise<ActionResult<void>> {
   try {
-    // 인증 확인
     await requireAuth();
-
-    // UUID 검증
-    if (!invitationUuid || invitationUuid.trim().length === 0) {
-      throw ActionError.invalidInput(
-        "초대 UUID",
-        invitationUuid,
-        "UUID는 필수입니다"
-      );
-    }
-
-    // 초대 취소 (DELETE)
-    await serverApiClient(`/invitations/${invitationUuid}`, {
-      method: "DELETE",
-    });
-
+    await deleteInvitation(invitationUuid);
     revalidatePath("/");
-
     return successResult(undefined);
   } catch (error) {
-    console.error("Failed to delete invitation:", error);
     return handleActionError(error, "초대 링크 삭제에 실패했습니다");
   }
 }

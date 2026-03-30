@@ -14,29 +14,23 @@ import {
   requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
-import { getCachedFamilyCategories } from "@/lib/server/cache";
+import { getCategories } from "@/services/category/category-service";
 import type { CategoryResponse } from "@/types/category";
 
 export async function getFamilyCategoriesAction(
   familyUuid?: string
 ): Promise<ActionResult<CategoryResponse[]>> {
   try {
-    // 인증 확인
     await requireAuth();
 
-    // familyUuid가 없으면 기본값 가져오기
     const selectedFamilyUuid = familyUuid || (await getSelectedFamilyUuid());
-
-    // 선택된 가족이 없으면 에러
     if (!selectedFamilyUuid) {
       throw ActionError.familyNotSelected();
     }
 
-    const categories = await getCachedFamilyCategories(selectedFamilyUuid);
-
+    const categories = await getCategories(selectedFamilyUuid);
     return successResult(categories);
   } catch (error) {
-    console.error("Failed to fetch categories:", error);
     return handleActionError(error, "카테고리 목록을 불러오는데 실패했습니다");
   }
 }

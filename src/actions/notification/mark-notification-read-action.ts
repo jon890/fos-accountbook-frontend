@@ -1,10 +1,10 @@
 "use server";
 
-import { serverApiPatch } from "@/lib/server/api/client";
 import {
   requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
+import { markNotificationRead } from "@/services/notification/notification-service";
 import { revalidatePath } from "next/cache";
 import type { Notification } from "@/types/actions/notification";
 import { ActionError, type ActionResult } from "@/lib/errors";
@@ -21,10 +21,8 @@ export async function markNotificationReadAction(
   notificationUuid: string
 ): Promise<ActionResult<Notification>> {
   try {
-    // 인증 확인
     await requireAuth();
 
-    // notificationUuid 형식 검증
     if (!UUID_REGEX.test(notificationUuid)) {
       return ActionError.invalidInput(
         "notificationUuid",
@@ -33,7 +31,6 @@ export async function markNotificationReadAction(
       ).toFailureResult();
     }
 
-    // familyUuid 소유권 검증
     const sessionFamilyUuid = await getSelectedFamilyUuid();
     if (!sessionFamilyUuid) {
       return ActionError.familyNotSelected().toFailureResult();
@@ -45,20 +42,10 @@ export async function markNotificationReadAction(
       ).toFailureResult();
     }
 
-    // 백엔드 API 호출
-    const data = await serverApiPatch<Notification>(
-      `/families/${familyUuid}/notifications/${notificationUuid}/read`
-    );
-
-    // 알림 목록 재검증
+    const data = await markNotificationRead(familyUuid, notificationUuid);
     revalidatePath("/");
-
-    return {
-      success: true,
-      data,
-    };
-  } catch (error) {
-    console.error("[markNotificationReadAction] Error:", error);
+    return { success: true, data };
+  } catch {
     return {
       success: false,
       error: {

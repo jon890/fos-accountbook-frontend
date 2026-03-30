@@ -15,17 +15,14 @@ import {
   type ActionResult,
 } from "@/lib/errors";
 import { requireAuth } from "@/lib/server/auth/auth-helpers";
-import { setDefaultFamilyAction } from "../user/set-default-family-action";
-import { getFamiliesAction } from "./get-families-action";
+import { selectFamily } from "@/services/family/family-service";
 
 export async function selectFamilyAction(
   familyUuid: string
 ): Promise<ActionResult<void>> {
   try {
-    // 인증 확인
     await requireAuth();
 
-    // UUID 검증
     if (!familyUuid || familyUuid.trim().length === 0) {
       throw ActionError.invalidInput(
         "가족 UUID",
@@ -34,26 +31,9 @@ export async function selectFamilyAction(
       );
     }
 
-    // 가족이 존재하는지 확인
-    const familiesResult = await getFamiliesAction();
-    if (!familiesResult.success) {
-      throw ActionError.internalError("가족 목록을 불러오는데 실패했습니다");
-    }
-
-    const familyExists = familiesResult.data.some((f) => f.uuid === familyUuid);
-    if (!familyExists) {
-      throw ActionError.entityNotFound("가족", familyUuid);
-    }
-
-    // 프로필의 defaultFamilyUuid 업데이트
-    const result = await setDefaultFamilyAction(familyUuid);
-    if (!result.success) {
-      throw ActionError.internalError("기본 가족 설정에 실패했습니다");
-    }
-
+    await selectFamily(familyUuid);
     return successResult(undefined);
   } catch (error) {
-    console.error("Failed to select family:", error);
     return handleActionError(error, "가족 선택에 실패했습니다");
   }
 }

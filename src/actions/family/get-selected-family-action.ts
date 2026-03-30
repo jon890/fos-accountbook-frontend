@@ -17,10 +17,8 @@ export async function getSelectedFamilyAction(): Promise<
 > {
   try {
     const selectedFamilyUuid = await getSelectedFamilyUuid();
-
     return successResult(selectedFamilyUuid);
   } catch (error) {
-    console.error("Failed to get selected family:", error);
     return handleActionError(error, "선택된 가족을 불러오는데 실패했습니다");
   }
 }

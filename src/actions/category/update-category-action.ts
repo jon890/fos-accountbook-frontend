@@ -10,12 +10,12 @@ import {
   successResult,
   type ActionResult,
 } from "@/lib/errors";
-import { serverApiPut } from "@/lib/server/api";
 import {
   requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
 import { updateCategorySchema } from "@/lib/schemas/category";
+import { updateCategory } from "@/services/category/category-service";
 import type { CategoryResponse, UpdateCategoryInput } from "@/types/category";
 import { revalidatePath } from "next/cache";
 
@@ -24,15 +24,12 @@ export async function updateCategoryAction(
   data: UpdateCategoryInput
 ): Promise<ActionResult<CategoryResponse>> {
   try {
-    // 인증 확인
     await requireAuth();
 
-    // 입력값 검증 (Zod)
     const validationResult = updateCategorySchema.safeParse(data);
     if (!validationResult.success) {
       const flattened = validationResult.error.flatten();
 
-      // 필드 에러 처리
       const firstField = Object.keys(flattened.fieldErrors)[0];
       if (firstField) {
         const message =
@@ -46,7 +43,6 @@ export async function updateCategoryAction(
         );
       }
 
-      // Root 에러(refine) 처리
       if (flattened.formErrors.length > 0) {
         throw ActionError.invalidInput(
           "수정 데이터",
@@ -63,7 +59,6 @@ export async function updateCategoryAction(
     }
     const validData = validationResult.data;
 
-    // UUID 검증
     if (!categoryUuid) {
       throw ActionError.invalidInput(
         "카테고리 UUID",
@@ -77,17 +72,13 @@ export async function updateCategoryAction(
       throw ActionError.familyNotSelected();
     }
 
-    const category = await serverApiPut<CategoryResponse>(
-      `/families/${familyUuid}/categories/${categoryUuid}`,
-      validData
-    );
+    const category = await updateCategory(familyUuid, categoryUuid, validData);
 
     revalidatePath("/");
     revalidatePath("/categories");
 
     return successResult(category);
   } catch (error) {
-    console.error("Failed to update category:", error);
     return handleActionError(error, "카테고리 수정에 실패했습니다");
   }
 }

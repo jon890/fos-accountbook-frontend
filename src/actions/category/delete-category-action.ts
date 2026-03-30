@@ -10,21 +10,19 @@ import {
   successResult,
   type ActionResult,
 } from "@/lib/errors";
-import { serverApiDelete } from "@/lib/server/api";
 import {
   requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
+import { deleteCategory } from "@/services/category/category-service";
 import { revalidatePath } from "next/cache";
 
 export async function deleteCategoryAction(
   categoryUuid: string
 ): Promise<ActionResult<void>> {
   try {
-    // 인증 확인
     await requireAuth();
 
-    // UUID 검증
     if (!categoryUuid) {
       throw ActionError.invalidInput(
         "카테고리 UUID",
@@ -38,14 +36,13 @@ export async function deleteCategoryAction(
       throw ActionError.familyNotSelected();
     }
 
-    await serverApiDelete(`/families/${familyUuid}/categories/${categoryUuid}`);
+    await deleteCategory(familyUuid, categoryUuid);
 
     revalidatePath("/");
     revalidatePath("/categories");
 
     return successResult(undefined);
   } catch (error) {
-    console.error("Failed to delete category:", error);
     return handleActionError(error, "카테고리 삭제에 실패했습니다");
   }
 }

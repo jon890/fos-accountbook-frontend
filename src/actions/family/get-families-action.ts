@@ -9,24 +9,16 @@ import {
   successResult,
   type ActionResult,
 } from "@/lib/errors";
-import { serverApiClient } from "@/lib/server/api/client";
 import { requireAuth } from "@/lib/server/auth/auth-helpers";
+import { getFamilies } from "@/services/family/family-service";
 import type { Family } from "@/types/family";
 
 export async function getFamiliesAction(): Promise<ActionResult<Family[]>> {
   try {
-    // 인증 확인
     await requireAuth();
-
-    const result = await serverApiClient<{
-      data: Family[];
-    }>("/families", {
-      method: "GET",
-    });
-
-    return successResult(result.data);
+    const families = await getFamilies();
+    return successResult(families);
   } catch (error) {
-    console.error("Failed to get families:", error);
     return handleActionError(error, "가족 목록을 불러오는데 실패했습니다");
   }
 }

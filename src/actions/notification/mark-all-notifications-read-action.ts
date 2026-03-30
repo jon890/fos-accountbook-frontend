@@ -1,12 +1,11 @@
 "use server";
 
-import { serverApiClient } from "@/lib/server/api/client";
 import {
   requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
+import { markAllNotificationsRead } from "@/services/notification/notification-service";
 import { revalidatePath } from "next/cache";
-import type { ApiResponse } from "@/lib/server/api/types";
 import type { ActionResult } from "@/lib/errors";
 import { ErrorCode } from "@/lib/errors/error-code";
 
@@ -17,10 +16,8 @@ export async function markAllNotificationsReadAction(
   familyUuid: string
 ): Promise<ActionResult<void>> {
   try {
-    // 인증 확인
     await requireAuth();
 
-    // familyUuid 소유권 검증
     const sessionFamilyUuid = await getSelectedFamilyUuid();
     if (!sessionFamilyUuid || familyUuid !== sessionFamilyUuid) {
       return {
@@ -32,23 +29,10 @@ export async function markAllNotificationsReadAction(
       };
     }
 
-    // 백엔드 API 호출
-    await serverApiClient<ApiResponse<void>>(
-      `/families/${familyUuid}/notifications/mark-all-read`,
-      {
-        method: "POST",
-      }
-    );
-
-    // 알림 목록 재검증
+    await markAllNotificationsRead(familyUuid);
     revalidatePath("/");
-
-    return {
-      success: true,
-      data: undefined,
-    };
-  } catch (error) {
-    console.error("[markAllNotificationsReadAction] Error:", error);
+    return { success: true, data: undefined };
+  } catch {
     return {
       success: false,
       error: {

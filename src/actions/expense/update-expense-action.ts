@@ -1,12 +1,12 @@
 "use server";
 
 import { ActionError } from "@/lib/errors";
-import { serverApiClient } from "@/lib/server/api/client";
 import {
   requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
-import type { UpdateExpenseFormState, ExpenseResponse } from "@/types/expense";
+import { updateExpense } from "@/services/expense/expense-service";
+import type { UpdateExpenseFormState } from "@/types/expense";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -25,24 +25,18 @@ export async function updateExpenseAction(
   formData: FormData
 ): Promise<UpdateExpenseFormState> {
   try {
-    // 인증 확인
     await requireAuth();
 
-    // FormData에서 데이터 추출
     const rawData = {
       expenseUuid: formData.get("expenseUuid")?.toString(),
       familyUuid: formData.get("familyUuid")?.toString(),
-      amount: formData.get("amount")
-        ? Number(formData.get("amount"))
-        : undefined,
+      amount: formData.get("amount") ? Number(formData.get("amount")) : undefined,
       description: formData.get("description")?.toString(),
       categoryId: formData.get("categoryId")?.toString(),
       date: formData.get("date")?.toString(),
     };
 
-    // Zod 스키마로 데이터 검증
     const validatedFields = updateExpenseSchema.safeParse(rawData);
-
     if (!validatedFields.success) {
       return {
         errors: validatedFields.error.flatten().fieldErrors,
@@ -54,7 +48,6 @@ export async function updateExpenseAction(
     const { expenseUuid, familyUuid, amount, description, categoryId, date } =
       validatedFields.data;
 
-    // familyUuid 소유권 검증: 세션의 가족과 요청 가족이 일치하는지 확인
     const sessionFamilyUuid = await getSelectedFamilyUuid();
     if (!sessionFamilyUuid) {
       return { success: false, message: "가족 정보를 찾을 수 없습니다.", errors: {} };
@@ -63,68 +56,26 @@ export async function updateExpenseAction(
       return { success: false, message: "권한이 없습니다.", errors: {} };
     }
 
-    // 최소 하나의 필드는 수정되어야 함
     if (!categoryId && !amount && description === undefined && !date) {
-      return {
-        success: false,
-        message: "수정할 내용이 없습니다",
-        errors: {},
-      };
+      return { success: false, message: "수정할 내용이 없습니다", errors: {} };
     }
 
-    // 백엔드 요청 데이터 구성
-    const updateData: {
-      categoryUuid?: string;
-      amount?: number;
-      description?: string;
-      date?: string;
-    } = {};
-
-    if (categoryId) {
-      updateData.categoryUuid = categoryId;
-    }
-
-    if (amount !== undefined) {
-      updateData.amount = amount;
-    }
-
-    if (description !== undefined) {
-      updateData.description = description;
-    }
-
-    if (date) {
-      updateData.date = new Date(date).toISOString();
-    }
-
-    // 백엔드 API 호출
-    await serverApiClient<{
-      data: ExpenseResponse;
-    }>(`/families/${familyUuid}/expenses/${expenseUuid}`, {
-      method: "PUT",
-      body: JSON.stringify(updateData),
+    await updateExpense(familyUuid, expenseUuid, {
+      amount,
+      description,
+      categoryId,
+      date,
     });
 
-    // 관련 페이지 재검증
     revalidatePath("/transactions");
     revalidatePath("/");
     revalidatePath("/analytics");
 
-    return {
-      success: true,
-      message: "지출이 수정되었습니다",
-    };
+    return { success: true, message: "지출이 수정되었습니다" };
   } catch (error) {
-    console.error("Failed to update expense:", error);
-
-    // ActionError 처리
     if (error instanceof ActionError) {
-      return {
-        success: false,
-        message: error.message,
-        errors: {},
-      };
+      return { success: false, message: error.message, errors: {} };
     }
-
     return {
       success: false,
       message: "지출 수정 중 오류가 발생했습니다. 다시 시도해주세요.",
