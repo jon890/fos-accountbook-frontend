@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { SubmitButton } from "@/components/ui/submit-button";
 import type { UpdateExpenseFormState } from "@/types/expense";
 import type { CategoryResponse } from "@/types/category";
+import { toLocalDateInput } from "@/lib/utils/format";
 import { Loader2 } from "lucide-react";
 import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
@@ -53,10 +54,10 @@ export function EditExpenseDialog({
 }: EditExpenseDialogProps) {
   const [state, formAction] = useActionState(updateExpenseAction, initialState);
 
-  // 날짜를 YYYY-MM-DD 형식으로 변환
+  // 날짜를 YYYY-MM-DD 형식으로 변환 (로컬 시간 기준, UTC 오프셋 문제 방지)
   const dateObj =
     typeof expense.date === "string" ? new Date(expense.date) : expense.date;
-  const formattedDate = dateObj.toISOString().split("T")[0];
+  const formattedDate = toLocalDateInput(dateObj);
 
   // 성공 시 처리
   useEffect(() => {
