@@ -7,7 +7,12 @@ import {
 import { markNotificationRead } from "@/services/notification/notification-service";
 import { revalidatePath } from "next/cache";
 import type { Notification } from "@/types/actions/notification";
-import { ActionError, type ActionResult } from "@/lib/errors";
+import {
+  ActionError,
+  handleActionError,
+  successResult,
+  type ActionResult,
+} from "@/lib/errors";
 import { ErrorCode } from "@/lib/errors/error-code";
 
 const UUID_REGEX =
@@ -44,14 +49,8 @@ export async function markNotificationReadAction(
 
     const data = await markNotificationRead(familyUuid, notificationUuid);
     revalidatePath("/");
-    return { success: true, data };
-  } catch {
-    return {
-      success: false,
-      error: {
-        code: ErrorCode.NOTIFICATION_READ_FAILED,
-        message: "알림 읽음 처리에 실패했습니다",
-      },
-    };
+    return successResult(data);
+  } catch (error) {
+    return handleActionError(error, "알림 읽음 처리에 실패했습니다");
   }
 }

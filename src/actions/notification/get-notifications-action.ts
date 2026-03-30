@@ -1,13 +1,17 @@
 "use server";
 
 import {
+  ActionError,
+  handleActionError,
+  successResult,
+  type ActionResult,
+} from "@/lib/errors";
+import {
   requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
 import { getNotifications } from "@/services/notification/notification-service";
 import type { NotificationListResponse } from "@/types/actions/notification";
-import type { ActionResult } from "@/lib/errors";
-import { ErrorCode } from "@/lib/errors/error-code";
 
 /**
  * 가족의 알림 목록을 조회합니다.
@@ -19,25 +23,16 @@ export async function getNotificationsAction(
     await requireAuth();
 
     const sessionFamilyUuid = await getSelectedFamilyUuid();
-    if (!sessionFamilyUuid || familyUuid !== sessionFamilyUuid) {
-      return {
-        success: false,
-        error: {
-          code: ErrorCode.NOTIFICATION_FETCH_FAILED,
-          message: "권한이 없습니다.",
-        },
-      };
+    if (!sessionFamilyUuid) {
+      throw ActionError.familyNotSelected();
+    }
+    if (familyUuid !== sessionFamilyUuid) {
+      throw new ActionError("F003", "해당 가족의 구성원이 아닙니다");
     }
 
     const data = await getNotifications(familyUuid);
-    return { success: true, data };
-  } catch {
-    return {
-      success: false,
-      error: {
-        code: ErrorCode.NOTIFICATION_FETCH_FAILED,
-        message: "알림 목록을 가져오는데 실패했습니다",
-      },
-    };
+    return successResult(data);
+  } catch (error) {
+    return handleActionError(error, "알림 목록을 가져오는데 실패했습니다");
   }
 }

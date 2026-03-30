@@ -20,32 +20,32 @@ Page (app/)
 
 ## 각 액션 파일의 책임
 
-| 책임 | 위치 |
-|------|------|
-| `"use server"` 지시어 | ✅ Action |
-| 인증 확인 (`requireAuth`, `requireAuthOrRedirect`) | ✅ Action |
-| FormData 파싱 | ✅ Action |
-| Zod 입력 검증 | ✅ Action |
-| 가족 UUID 소유권 검증 | ✅ Action |
-| `revalidatePath` | ✅ Action |
-| 에러 핸들링 / 응답 포맷 | ✅ Action |
-| API 호출 (`serverApiClient`) | ❌ Service로 위임 |
-| 쿼리 파라미터 빌딩 | ❌ Service로 위임 |
-| 날짜 변환 / 데이터 변환 | ❌ Service로 위임 |
-| 액션 간 오케스트레이션 | ❌ Service로 위임 |
+| 책임                                               | 위치              |
+| -------------------------------------------------- | ----------------- |
+| `"use server"` 지시어                              | ✅ Action         |
+| 인증 확인 (`requireAuth`, `requireAuthOrRedirect`) | ✅ Action         |
+| FormData 파싱                                      | ✅ Action         |
+| Zod 입력 검증                                      | ✅ Action         |
+| 가족 UUID 소유권 검증                              | ✅ Action         |
+| `revalidatePath`                                   | ✅ Action         |
+| 에러 핸들링 / 응답 포맷                            | ✅ Action         |
+| API 호출 (`serverApiClient`)                       | ❌ Service로 위임 |
+| 쿼리 파라미터 빌딩                                 | ❌ Service로 위임 |
+| 날짜 변환 / 데이터 변환                            | ❌ Service로 위임 |
+| 액션 간 오케스트레이션                             | ❌ Service로 위임 |
 
 ## Subdirectories
 
-| Directory       | Purpose                                         |
-| --------------- | ----------------------------------------------- |
-| `expense/`      | 지출 CRUD Controller                            |
-| `income/`       | 수입 CRUD Controller                            |
-| `category/`     | 카테고리 CRUD Controller                        |
-| `family/`       | 가족 생성/조회/업데이트 Controller              |
-| `user/`         | 유저 프로필/설정 Controller                     |
-| `dashboard/`    | 대시보드 통계 Controller                        |
-| `invitation/`   | 가족 초대 Controller                            |
-| `notification/` | 알림 Controller                                 |
+| Directory       | Purpose                                           |
+| --------------- | ------------------------------------------------- |
+| `expense/`      | 지출 CRUD Controller                              |
+| `income/`       | 수입 CRUD Controller                              |
+| `category/`     | 카테고리 CRUD Controller                          |
+| `family/`       | 가족 생성/조회/업데이트 Controller                |
+| `user/`         | 유저 프로필/설정 Controller                       |
+| `dashboard/`    | 대시보드 통계 Controller                          |
+| `invitation/`   | 가족 초대 Controller                              |
+| `notification/` | 알림 Controller                                   |
 | `auth/`         | 로그인/로그아웃 (NextAuth 직접 호출, 서비스 없음) |
 
 ## For AI Agents
@@ -64,12 +64,17 @@ Page (app/)
 ```ts
 "use server";
 
-import { requireAuth, getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
+import {
+  requireAuth,
+  getSelectedFamilyUuid,
+} from "@/lib/server/auth/auth-helpers";
 import { handleActionError, successResult, ActionError } from "@/lib/errors";
 import { someService } from "@/services/domain/some-service";
 import { revalidatePath } from "next/cache";
 
-export async function someAction(params: Params): Promise<ActionResult<Result>> {
+export async function someAction(
+  params: Params,
+): Promise<ActionResult<Result>> {
   try {
     await requireAuth();
     const familyId = await getSelectedFamilyUuid();

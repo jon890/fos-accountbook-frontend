@@ -1,6 +1,5 @@
 "use server";
 
-import { ActionError } from "@/lib/errors";
 import {
   requireAuth,
   getSelectedFamilyUuid,
@@ -72,10 +71,7 @@ export async function updateExpenseAction(
     revalidatePath("/analytics");
 
     return { success: true, message: "지출이 수정되었습니다" };
-  } catch (error) {
-    if (error instanceof ActionError) {
-      return { success: false, message: error.message, errors: {} };
-    }
+  } catch {
     return {
       success: false,
       message: "지출 수정 중 오류가 발생했습니다. 다시 시도해주세요.",

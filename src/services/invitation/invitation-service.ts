@@ -1,34 +1,12 @@
 import { serverEnv } from "@/lib/env/server.env";
 import { ActionError } from "@/lib/errors";
 import { serverApiClient } from "@/lib/server/api/client";
-import { getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
-import type { FamilyResponse } from "@/types/family";
 import type {
   AcceptInvitationRequest,
   CreateInvitationRequest,
   InvitationInfo,
   InvitationResponse,
 } from "@/types/invitation";
-
-async function resolveFamilyUuid(): Promise<string> {
-  let familyUuid = await getSelectedFamilyUuid();
-
-  if (!familyUuid) {
-    const familiesResponse = await serverApiClient<{ data: FamilyResponse[] }>(
-      "/families",
-      { method: "GET" }
-    );
-    const families = familiesResponse.data;
-
-    if (!families || families.length === 0) {
-      throw ActionError.entityNotFound("가족");
-    }
-
-    familyUuid = families[0].uuid;
-  }
-
-  return familyUuid;
-}
 
 function toInvitationInfo(
   inv: InvitationResponse,
@@ -46,9 +24,9 @@ function toInvitationInfo(
   };
 }
 
-export async function createInvitationLink(): Promise<InvitationInfo> {
-  const familyUuid = await resolveFamilyUuid();
-
+export async function createInvitationLink(
+  familyUuid: string
+): Promise<InvitationInfo> {
   const requestBody: CreateInvitationRequest = { expiresInHours: 24 };
   const invitationResponse = await serverApiClient<{
     data: InvitationResponse;
@@ -72,9 +50,9 @@ export async function createInvitationLink(): Promise<InvitationInfo> {
   };
 }
 
-export async function getActiveInvitations(): Promise<InvitationInfo[]> {
-  const familyUuid = await resolveFamilyUuid();
-
+export async function getActiveInvitations(
+  familyUuid: string
+): Promise<InvitationInfo[]> {
   const invitationsResponse = await serverApiClient<{
     data: InvitationResponse[];
   }>(`/invitations/families/${familyUuid}`, { method: "GET" });

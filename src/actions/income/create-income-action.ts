@@ -10,19 +10,9 @@ import {
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
 import { createIncome } from "@/services/income/income-service";
+import type { CreateIncomeFormState } from "@/types/income";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-
-export interface CreateIncomeFormState {
-  message?: string;
-  errors?: {
-    amount?: string[];
-    description?: string[];
-    categoryId?: string[];
-    date?: string[];
-  };
-  success: boolean;
-}
 
 const createIncomeSchema = z.object({
   amount: z.number().positive("금액은 0보다 커야 합니다"),
@@ -72,15 +62,10 @@ export async function createIncomeAction(
 
     return { message: "수입이 성공적으로 추가되었습니다.", success: true };
   } catch (error) {
-    if (error instanceof ActionError) {
-      return { message: error.message, success: false };
-    }
-    return {
-      message:
-        error instanceof Error
-          ? error.message
-          : "수입 추가에 실패했습니다. 다시 시도해주세요.",
-      success: false,
-    };
+    const message =
+      error instanceof Error
+        ? error.message
+        : "수입 추가에 실패했습니다. 다시 시도해주세요.";
+    return { message, success: false };
   }
 }

@@ -33,9 +33,8 @@ export async function signOutAction(): Promise<void> {
   nextAuthCookies.forEach((cookieName) => {
     try {
       cookieStore.delete(cookieName);
-    } catch (error) {
+    } catch {
       // 쿠키가 없을 수 있으므로 에러는 무시
-      console.debug(`Failed to delete cookie: ${cookieName}`, error);
     }
   });
 

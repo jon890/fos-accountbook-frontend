@@ -16,6 +16,7 @@ import {
 import { requireAuth } from "@/lib/server/auth/auth-helpers";
 import { createFamily } from "@/services/family/family-service";
 import type { CreateFamilyData, CreateFamilyResult } from "@/types/family";
+import { revalidatePath } from "next/cache";
 
 export async function createFamilyAction(
   data: CreateFamilyData
@@ -32,6 +33,8 @@ export async function createFamilyAction(
     }
 
     const result = await createFamily(data);
+    revalidatePath("/families");
+    revalidatePath("/");
     return successResult(result);
   } catch (error) {
     return handleActionError(error, "가족 생성에 실패했습니다");

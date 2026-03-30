@@ -9,7 +9,10 @@ import {
   successResult,
   type ActionResult,
 } from "@/lib/errors";
-import { requireAuth } from "@/lib/server/auth/auth-helpers";
+import {
+  requireAuth,
+  getSelectedFamilyUuid,
+} from "@/lib/server/auth/auth-helpers";
 import { getActiveInvitations } from "@/services/invitation/invitation-service";
 import type { InvitationInfo } from "@/types/invitation";
 
@@ -18,7 +21,14 @@ export async function getActiveInvitationsAction(): Promise<
 > {
   try {
     await requireAuth();
-    const invitations = await getActiveInvitations();
+    const familyUuid = await getSelectedFamilyUuid();
+    if (!familyUuid) {
+      return handleActionError(
+        new Error("가족이 선택되지 않았습니다"),
+        "초대 목록을 불러오는데 실패했습니다"
+      );
+    }
+    const invitations = await getActiveInvitations(familyUuid);
     return successResult(invitations);
   } catch (error) {
     return handleActionError(error, "초대 목록을 불러오는데 실패했습니다");

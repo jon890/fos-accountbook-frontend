@@ -1,13 +1,17 @@
 "use server";
 
 import {
+  ActionError,
+  handleActionError,
+  successResult,
+  type ActionResult,
+} from "@/lib/errors";
+import {
   requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
 import { markAllNotificationsRead } from "@/services/notification/notification-service";
 import { revalidatePath } from "next/cache";
-import type { ActionResult } from "@/lib/errors";
-import { ErrorCode } from "@/lib/errors/error-code";
 
 /**
  * 가족의 모든 알림을 읽음 처리합니다.
@@ -19,26 +23,17 @@ export async function markAllNotificationsReadAction(
     await requireAuth();
 
     const sessionFamilyUuid = await getSelectedFamilyUuid();
-    if (!sessionFamilyUuid || familyUuid !== sessionFamilyUuid) {
-      return {
-        success: false,
-        error: {
-          code: ErrorCode.NOTIFICATION_MARK_ALL_READ_FAILED,
-          message: "권한이 없습니다.",
-        },
-      };
+    if (!sessionFamilyUuid) {
+      throw ActionError.familyNotSelected();
+    }
+    if (familyUuid !== sessionFamilyUuid) {
+      throw new ActionError("F003", "해당 가족의 구성원이 아닙니다");
     }
 
     await markAllNotificationsRead(familyUuid);
     revalidatePath("/");
-    return { success: true, data: undefined };
-  } catch {
-    return {
-      success: false,
-      error: {
-        code: ErrorCode.NOTIFICATION_MARK_ALL_READ_FAILED,
-        message: "모든 알림 읽음 처리에 실패했습니다",
-      },
-    };
+    return successResult(undefined);
+  } catch (error) {
+    return handleActionError(error, "모든 알림 읽음 처리에 실패했습니다");
   }
 }

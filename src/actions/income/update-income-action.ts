@@ -1,6 +1,5 @@
 "use server";
 
-import { ActionError } from "@/lib/errors";
 import {
   requireAuth,
   getSelectedFamilyUuid,
@@ -73,13 +72,10 @@ export async function updateIncomeAction(
 
     return { success: true, message: "수입이 수정되었습니다" };
   } catch (error) {
-    if (error instanceof ActionError) {
-      return { success: false, message: error.message, errors: {} };
-    }
-    return {
-      success: false,
-      message: "수입 수정 중 오류가 발생했습니다. 다시 시도해주세요.",
-      errors: {},
-    };
+    const message =
+      error instanceof Error
+        ? error.message
+        : "수입 수정에 실패했습니다. 다시 시도해주세요.";
+    return { success: false, message, errors: {} };
   }
 }

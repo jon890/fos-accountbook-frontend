@@ -16,6 +16,7 @@ import {
 } from "@/lib/errors";
 import { requireAuth } from "@/lib/server/auth/auth-helpers";
 import { selectFamily } from "@/services/family/family-service";
+import { revalidatePath } from "next/cache";
 
 export async function selectFamilyAction(
   familyUuid: string
@@ -32,6 +33,7 @@ export async function selectFamilyAction(
     }
 
     await selectFamily(familyUuid);
+    revalidatePath("/");
     return successResult(undefined);
   } catch (error) {
     return handleActionError(error, "가족 선택에 실패했습니다");

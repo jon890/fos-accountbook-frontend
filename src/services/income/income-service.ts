@@ -31,7 +31,8 @@ export async function createIncome(
 }
 
 export async function getIncomes(
-  params: GetIncomesParams
+  familyId: string,
+  params: Omit<GetIncomesParams, "familyId">
 ): Promise<GetIncomesResponse> {
   const queryParams = new URLSearchParams();
   if (params.categoryId) queryParams.set("categoryUuid", params.categoryId);
@@ -41,7 +42,7 @@ export async function getIncomes(
   queryParams.set("size", String(params.limit || 25));
 
   const queryString = queryParams.toString();
-  const endpoint = `/families/${params.familyId}/incomes${
+  const endpoint = `/families/${familyId}/incomes${
     queryString ? `?${queryString}` : ""
   }`;
 

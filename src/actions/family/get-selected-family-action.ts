@@ -10,12 +10,16 @@ import {
   successResult,
   type ActionResult,
 } from "@/lib/errors";
-import { getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
+import {
+  requireAuth,
+  getSelectedFamilyUuid,
+} from "@/lib/server/auth/auth-helpers";
 
 export async function getSelectedFamilyAction(): Promise<
   ActionResult<string | null>
 > {
   try {
+    await requireAuth();
     const selectedFamilyUuid = await getSelectedFamilyUuid();
     return successResult(selectedFamilyUuid);
   } catch (error) {

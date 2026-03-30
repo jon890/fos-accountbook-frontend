@@ -5,7 +5,10 @@ import {
   successResult,
   type ActionResult,
 } from "@/lib/errors";
-import { requireAuth } from "@/lib/server/auth/auth-helpers";
+import {
+  requireAuth,
+  getSelectedFamilyUuid,
+} from "@/lib/server/auth/auth-helpers";
 import { getIncomes } from "@/services/income/income-service";
 import type { GetIncomesParams, GetIncomesResponse } from "@/types/income";
 
@@ -17,7 +20,14 @@ export async function getIncomesAction(
 ): Promise<ActionResult<GetIncomesResponse>> {
   try {
     await requireAuth();
-    return successResult(await getIncomes(params));
+    const familyId = params.familyId || (await getSelectedFamilyUuid());
+    if (!familyId) {
+      return handleActionError(
+        new Error("가족이 선택되지 않았습니다"),
+        "수입 목록 조회에 실패했습니다"
+      );
+    }
+    return successResult(await getIncomes(familyId, params));
   } catch (error) {
     return handleActionError(error, "수입 목록 조회에 실패했습니다");
   }
