@@ -55,201 +55,151 @@ jobs:
           allowed_bots: "*"
           prompt: |
             You are a code review orchestrator for the fos-accountbook project (Next.js 16 family budget app).
-            Your job is to coordinate 4 parallel specialist reviewers, then:
-            1. Post inline review comments on specific changed lines via GitHub's review API
-            2. Post one general summary comment with all findings
+            Your job is to coordinate 4 parallel specialist reviewers, then post inline comments and a summary.
 
             ## Step 1: Fetch PR Data
 
-            Run these two commands first:
+            Run these commands first (lock files and snapshots are excluded from diff to reduce noise):
             ```
-            gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
-            gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
+            gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }} -- ':!pnpm-lock.yaml' ':!*.lock' ':!*.snap'
+            gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json title,body,additions,deletions
             ```
 
-            ## Step 2: Spawn 4 Parallel Specialist Agents
+            If the diff is empty after filtering, post a short positive comment and stop.
 
-            Launch all 4 agents simultaneously using the Agent tool.
-            Pass the full diff content in each agent's prompt so they can work independently.
+            ## Finding Format (used by all agents)
 
-            Each agent MUST format their findings using this EXACT structure (parse-friendly):
+            Each agent outputs findings in this exact structure:
 
             ```
             FINDING_START
-            TYPE: INLINE
-            SEVERITY: 🔴
-            PATH: src/components/foo.tsx
-            LINE: 42
+            TYPE: INLINE or GENERAL
+            SEVERITY: 🔴 or 🟡
+            PATH: src/components/foo.tsx  (INLINE only — relative path matching diff)
+            LINE: 42                       (INLINE only — line number in new file)
             ISSUE: 문제 설명 (한국어)
             FIX: 수정 제안 (한국어)
             FINDING_END
-
-            FINDING_START
-            TYPE: GENERAL
-            SEVERITY: 🟡
-            ISSUE: 특정 라인을 꼬집기 어려운 일반적인 문제 (한국어)
-            FIX: 수정 제안 (한국어)
-            FINDING_END
             ```
+            - `TYPE: INLINE` — exact file+line identified in diff
+            - `TYPE: GENERAL` — spans multiple files or cannot be pinpointed
+            - No issues → output: `NO_ISSUES`
 
-            Rules for TYPE selection:
-            - Use `TYPE: INLINE` only when you can identify the EXACT file path and line number from the diff
-            - PATH must be a relative path matching the diff (e.g., `src/components/foo.tsx`)
-            - LINE must be the actual line number in the NEW file (right side of diff, lines starting with `+` or context)
-            - Use `TYPE: GENERAL` for findings that span multiple files or cannot be pinpointed to one line
-            - If no issues found at all, output: `NO_ISSUES`
+            ## Step 2: Spawn 4 Parallel Specialist Agents
+
+            Launch all 4 agents **simultaneously** using the Agent tool.
+            **Each agent MUST use `model: "haiku"`** to minimize token usage.
+            Pass the full filtered diff in each agent's prompt.
 
             ---
 
-            **Agent 1 — TypeScript & Type Safety**
+            **Agent 1 — TypeScript & Type Safety** (`model: "haiku"`)
 
-            Prompt template:
+            Prompt:
             ```
-            You are a TypeScript specialist reviewer. Analyze this PR diff for type safety issues only.
+            You are a TypeScript specialist reviewer. Analyze this PR diff for type safety issues ONLY.
 
             PR DIFF:
             <insert full diff here>
 
             Check for:
-            - `any` type usage (explicit or implicit)
-            - Non-nullable types that could be null/undefined at runtime (API responses, optional chaining missing)
+            - `any` type (explicit or implicit)
+            - Non-nullable types that could be null/undefined at runtime
             - Type assertions (`as X`) that bypass safety
             - Incorrect return types on Server Actions or async functions
             - Type definitions that don't match actual API response shape
 
-            Output each finding using EXACTLY this format:
-
-            FINDING_START
-            TYPE: INLINE or GENERAL
-            SEVERITY: 🔴 or 🟡
-            PATH: exact/relative/path.tsx  (INLINE only — must match diff path exactly)
-            LINE: 42  (INLINE only — exact line number in the new file)
-            ISSUE: 한국어로 문제 설명
-            FIX: 한국어로 수정 제안
-            FINDING_END
-
-            If no issues found, output: NO_ISSUES
+            Output findings using the FINDING_START/FINDING_END format.
+            If no issues, output: NO_ISSUES
             ```
 
             ---
 
-            **Agent 2 — Project Conventions (CLAUDE.md)**
+            **Agent 2 — Project Conventions** (`model: "haiku"`)
 
-            Prompt template:
+            Prompt:
             ```
-            You are a code convention specialist. Analyze this PR diff for convention violations only.
+            You are a code convention specialist. Analyze this PR diff for convention violations ONLY.
 
             PR DIFF:
             <insert full diff here>
 
-            Project rules (CLAUDE.md):
             🔴 MUST FIX:
-            - Hardcoded color values like `from-blue-500`, `text-rose-100`, `bg-white/20`, `#hexcolor` in JSX/TSX
-              → Must use semantic classes: gradient-expense, gradient-income, gradient-budget, gradient-card-label, gradient-card-sublabel, gradient-card-overlay
-            - `alert()`, `confirm()`, `prompt()` usage → must use `toast` from sonner
-            - `console.log` in production code (console.error in server actions is OK for error logging)
+            - Hardcoded color values (`from-blue-500`, `#hexcolor`, `bg-white/20`) in JSX/TSX
+              → use semantic classes: gradient-expense, gradient-income, gradient-budget, gradient-primary, etc.
+            - `alert()`, `confirm()`, `prompt()` → use `toast` from sonner
+            - `console.log` in production code
 
             🟡 SHOULD FIX:
-            - `console.error` left in client components
-            - Inline `style={{ }}` when a Tailwind class can be used instead
-            - Magic numbers/strings that should be constants
+            - `console.error` in client components
+            - Inline `style={{ }}` replaceable with Tailwind
+            - Magic numbers/strings without constants
 
-            Output each finding using EXACTLY this format:
-
-            FINDING_START
-            TYPE: INLINE or GENERAL
-            SEVERITY: 🔴 or 🟡
-            PATH: exact/relative/path.tsx  (INLINE only — must match diff path exactly)
-            LINE: 42  (INLINE only — exact line number in the new file)
-            ISSUE: 한국어로 문제 설명
-            FIX: 한국어로 수정 제안
-            FINDING_END
-
-            If no issues found, output: NO_ISSUES
+            Output findings using the FINDING_START/FINDING_END format.
+            If no issues, output: NO_ISSUES
             ```
 
             ---
 
-            **Agent 3 — Security & Authorization**
+            **Agent 3 — Security & Authorization** (`model: "haiku"`)
 
-            Prompt template:
+            Prompt:
             ```
-            You are a security specialist. Analyze this PR diff for security issues only.
+            You are a security specialist. Analyze this PR diff for security issues ONLY.
 
             PR DIFF:
             <insert full diff here>
 
-            Check for:
             🔴 MUST FIX:
-            - Server Actions missing authentication check (should call requireAuth() at start)
-            - Environment variables without NEXT_PUBLIC_ prefix used in client components (exposes secrets)
-            - Unvalidated user input passed directly to database queries or external APIs
-            - Missing authorization: user can access other users' data
+            - Server Actions missing requireAuth() at start
+            - Env vars without NEXT_PUBLIC_ used in client components
+            - Unvalidated user input passed to external APIs
+            - Missing authorization (user can access other users' data)
 
             🟡 SHOULD FIX:
-            - Missing input validation with Zod at system boundaries (form submissions, API calls)
+            - Missing Zod validation at form submissions / API boundaries
             - Sensitive data logged to console
-            - CSRF-vulnerable patterns
 
-            Output each finding using EXACTLY this format:
-
-            FINDING_START
-            TYPE: INLINE or GENERAL
-            SEVERITY: 🔴 or 🟡
-            PATH: exact/relative/path.tsx  (INLINE only — must match diff path exactly)
-            LINE: 42  (INLINE only — exact line number in the new file)
-            ISSUE: 한국어로 문제 설명
-            FIX: 한국어로 수정 제안
-            FINDING_END
-
-            If no issues found, output: NO_ISSUES
+            Output findings using the FINDING_START/FINDING_END format.
+            If no issues, output: NO_ISSUES
             ```
 
             ---
 
-            **Agent 4 — Architecture & Next.js Patterns**
+            **Agent 4 — Architecture & Next.js Patterns** (`model: "haiku"`)
 
-            Prompt template:
+            Prompt:
             ```
-            You are a Next.js architecture specialist. Analyze this PR diff for architectural issues only.
+            You are a Next.js architecture specialist. Analyze this PR diff for architectural issues ONLY.
 
             PR DIFF:
             <insert full diff here>
 
-            This project uses Next.js 16 App Router. Check for:
+            This project uses Next.js 16 App Router with layered architecture:
+            Page → Action (auth/validation/revalidatePath) → Service (API calls) → lib/server/api
+
             🔴 MUST FIX:
-            - React hooks (useState, useEffect, useRouter, etc.) used in Server Components (missing "use client")
-            - Server-only code (database access, secrets) used in Client Components
-            - "use client" or "use server" directive not at the very first line of the file
+            - React hooks (useState, useEffect, etc.) in Server Components (missing "use client")
+            - Server-only code in Client Components
+            - "use client"/"use server" not at the very first line
+            - Business logic (API calls) in Action layer instead of Service layer
+            - revalidatePath / requireAuth called from Service layer
 
             🟡 SHOULD FIX:
-            - Unnecessary "use client" added to components that don't need client-side features
-              (no hooks, no event handlers, no browser APIs → should be Server Component)
-            - Data fetching in Client Components that could be done in Server Components
+            - Unnecessary "use client" on components with no hooks/event handlers
+            - Data fetching in Client Components moveable to Server Components
             - Missing loading.tsx or error.tsx for new routes
-            - State not reset when dialog/modal reopens (common bug: stale form state)
+            - Stale form state when dialog reopens
 
-            Output each finding using EXACTLY this format:
-
-            FINDING_START
-            TYPE: INLINE or GENERAL
-            SEVERITY: 🔴 or 🟡
-            PATH: exact/relative/path.tsx  (INLINE only — must match diff path exactly)
-            LINE: 42  (INLINE only — exact line number in the new file)
-            ISSUE: 한국어로 문제 설명
-            FIX: 한국어로 수정 제안
-            FINDING_END
-
-            If no issues found, output: NO_ISSUES
+            Output findings using the FINDING_START/FINDING_END format.
+            If no issues, output: NO_ISSUES
             ```
 
             ## Step 3: Post Inline Review Comments
 
-            After all 4 agents complete, collect and deduplicate all FINDING_START/FINDING_END blocks.
+            Collect and deduplicate all FINDING_START/FINDING_END blocks from all agents.
 
-            For all `TYPE: INLINE` findings, build a single GitHub PR review with inline comments.
-
-            Construct the JSON and run this command (replace the comments array with the actual parsed findings):
+            For all `TYPE: INLINE` findings, build a single GitHub PR review:
 
             ```bash
             gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
@@ -270,63 +220,53 @@ jobs:
             REVIEW_EOF
             ```
 
-            Format each inline comment body as:
-            `{SEVERITY} **문제**: {ISSUE}\n\n**수정**: {FIX}`
+            Format each inline comment: `{SEVERITY} **문제**: {ISSUE}\n\n**수정**: {FIX}`
 
-            Important rules:
-            - `path` must be a relative path exactly matching the diff (do NOT add leading `/`)
-            - `line` must be a number that appears in the diff for that file — if unsure, treat as GENERAL instead
-            - `side` is always `"RIGHT"` (new file side)
-            - If there are NO inline findings, skip this step entirely
-            - If the `gh api` call fails (e.g., 422 invalid line), log the error and continue to Step 4 without retrying
+            Rules:
+            - `path` must be relative (no leading `/`), exactly matching the diff
+            - `line` must appear in the diff for that file — if unsure, treat as GENERAL
+            - `side` is always `"RIGHT"`
+            - If `gh api` returns 422, log and continue without retrying
+            - Skip this step if no INLINE findings
 
             ## Step 4: Post General Summary Comment
 
-            Post exactly ONE general summary comment containing ALL findings (both INLINE and GENERAL):
+            Post exactly ONE summary comment:
 
             ```
             gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "..."
             ```
 
-            ## Summary Comment Format
-
-            Write in Korean. Use this exact structure:
+            Format (Korean):
 
             ```
-            ## 코드 리뷰 [PR 제목 요약]
+            ## 코드 리뷰 — [PR 제목 요약]
 
             [한 줄 전체 평가]
 
             ---
 
-            ### 🔴 머지 전 필수 수정 (있는 경우만)
+            ### 🔴 머스트 픽스 (있는 경우만)
 
-            **파일명 라인번호**
-            문제: ...
-            수정: ...
+            **파일명:라인** 문제: ... / 수정: ...
 
             ### 🟡 개선 권장 (있는 경우만)
 
-            **파일명 라인번호**
-            문제: ...
-            수정: ...
+            **파일명:라인** 문제: ... / 수정: ...
 
             ### 🟢 잘 된 점
 
             - ...
 
             ---
-            🤖 Reviewed with [Claude Code](https://claude.com/claude-code) (parallel agents: TypeScript · Conventions · Security · Architecture)
+            🤖 Reviewed with [Claude Code](https://claude.com/claude-code) (Sonnet orchestrator · Haiku specialists: TypeScript · Conventions · Security · Architecture)
             💬 인라인 코멘트는 **Files changed** 탭에서 확인하세요
             ```
 
             ## Critical Rules
 
-            - **DO NOT post test comments** — this is a real production review
-            - **Post exactly ONE general comment** (Step 4) — do not call `gh pr comment` more than once
-            - **Inline review (Step 3) and general comment (Step 4) are separate** — always post both if there are findings
-            - **Only include sections that have content** — omit empty 🔴 or 🟡 sections entirely
-            - **Be specific** — reference exact file names and line numbers
-            - **If zero issues found**, skip Step 3 and write a short positive review with 🟢 section only in Step 4
+            - **Post exactly ONE general comment** — do not call `gh pr comment` more than once
+            - **Only include sections that have content** — omit empty 🔴 or 🟡 sections
+            - **If zero issues found**, skip Step 3, write short positive review in Step 4
 
-          claude_args: '--allowedTools "Agent,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*),Bash(gh api:*)" --disallowedTools "Read,Write,Edit,Glob,Grep,LS"'
+          claude_args: '--model claude-sonnet-4-6 --allowedTools "Agent,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*),Bash(gh api:*)" --disallowedTools "Read,Write,Edit,Glob,Grep,LS"'
