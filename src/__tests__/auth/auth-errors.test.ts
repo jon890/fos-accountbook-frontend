@@ -68,7 +68,7 @@ describe("Authentication Error Handling", () => {
 
       testUrls.forEach(({ url, shouldBeValid }) => {
         try {
-          const _urlObj = new URL(url);
+          new URL(url);
           expect(shouldBeValid).toBe(true);
           // HTTP/HTTPS 프로토콜인지 확인하는 별도 로직
           const isHttpProtocol = /^https?:\/\//.test(url);

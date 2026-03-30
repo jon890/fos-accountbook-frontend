@@ -72,7 +72,7 @@ export function AddExpenseDialog({
       setCategories([]);
       setFamilyUuid("");
     }
-  }, [open]);
+  }, [open, defaultType]);
 
   const loadData = async () => {
     setIsLoadingCategories(true);

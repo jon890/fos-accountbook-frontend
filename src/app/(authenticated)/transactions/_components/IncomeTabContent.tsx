@@ -13,7 +13,7 @@ interface IncomeTabContentProps {
  * Income Tab Content Component
  * Transactions 페이지의 수입 탭 전용 컴포넌트
  */
-export function IncomeTabContent({ familyUuid: _familyUuid }: IncomeTabContentProps) {
+export function IncomeTabContent({}: IncomeTabContentProps) {
   const [addIncomeDialogOpen, setAddIncomeDialogOpen] = useState(false);
 
   return (

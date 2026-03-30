@@ -11,7 +11,7 @@ import { useSessionRefresh } from "@/lib/client/use-session-refresh";
 import type { Family } from "@/types/family";
 import { ChevronRight, Plus, User, Users } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface FamilySelectorProps {
   onFamilySelect: (family: Family) => void;
@@ -27,6 +27,16 @@ export function FamilySelector({
   const [error, setError] = useState<string | null>(null);
   const autoSelectedRef = useRef(false);
   const { refreshSession } = useSessionRefresh();
+
+  const handleFamilySelect = useCallback(async (family: Family) => {
+    // 선택한 가족을 기본 가족으로 저장
+    const result = await setDefaultFamilyAction(family.uuid);
+    if (result.success) {
+      // 세션 갱신 (프로필의 defaultFamilyUuid가 변경됨)
+      await refreshSession();
+    }
+    onFamilySelect(family);
+  }, [refreshSession, onFamilySelect]);
 
   useEffect(() => {
     initializeSelector();
@@ -61,7 +71,7 @@ export function FamilySelector({
     };
 
     selectFamily();
-  }, [families, loading, onFamilySelect]);
+  }, [families, loading, onFamilySelect, handleFamilySelect]);
 
   const initializeSelector = async () => {
     try {
@@ -84,16 +94,6 @@ export function FamilySelector({
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleFamilySelect = async (family: Family) => {
-    // 선택한 가족을 기본 가족으로 저장
-    const result = await setDefaultFamilyAction(family.uuid);
-    if (result.success) {
-      // 세션 갱신 (프로필의 defaultFamilyUuid가 변경됨)
-      await refreshSession();
-    }
-    onFamilySelect(family);
   };
 
   if (loading) {

@@ -14,7 +14,7 @@ interface FamilySelectorPageProps {
  * 가족 선택 페이지 (Client Component)
  * Server Component에서 families를 받아서 FamilySelector를 렌더링
  */
-export function FamilySelectorPage({ families }: FamilySelectorPageProps) {
+export function FamilySelectorPage({}: FamilySelectorPageProps) {
   const router = useRouter();
   const { refreshSession } = useSessionRefresh();
 
