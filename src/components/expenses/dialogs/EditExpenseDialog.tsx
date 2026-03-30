@@ -4,7 +4,7 @@
 
 "use client";
 
-import { updateExpenseAction } from "@/app/actions/expense/update-expense-action";
+import { updateExpenseAction } from "@/actions/expense/update-expense-action";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

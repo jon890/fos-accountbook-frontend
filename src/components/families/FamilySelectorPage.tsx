@@ -1,6 +1,6 @@
 "use client";
 
-import { setDefaultFamilyAction } from "@/app/actions/user/set-default-family-action";
+import { setDefaultFamilyAction } from "@/actions/user/set-default-family-action";
 import { useSessionRefresh } from "@/lib/client/use-session-refresh";
 import type { Family } from "@/types/family";
 import { useRouter } from "next/navigation";

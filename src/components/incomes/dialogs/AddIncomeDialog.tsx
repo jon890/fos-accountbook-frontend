@@ -4,9 +4,9 @@
 
 "use client";
 
-import { getFamilyCategoriesAction } from "@/app/actions/category/get-categories-action";
-import type { CreateIncomeFormState } from "@/app/actions/income/create-income-action";
-import { createIncomeAction } from "@/app/actions/income/create-income-action";
+import { getFamilyCategoriesAction } from "@/actions/category/get-categories-action";
+import type { CreateIncomeFormState } from "@/actions/income/create-income-action";
+import { createIncomeAction } from "@/actions/income/create-income-action";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

@@ -14,7 +14,7 @@ import type { CategoryResponse } from "@/types/category";
 import type { FamilyResponse } from "@/types/family";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { getUserProfileAction } from "@/app/actions/user/get-user-profile-action";
+import { getUserProfileAction } from "@/actions/user/get-user-profile-action";
 import { getMonthRange } from "@/lib/utils/date-timezone";
 
 // 쿠키를 사용하므로 동적 렌더링 필요

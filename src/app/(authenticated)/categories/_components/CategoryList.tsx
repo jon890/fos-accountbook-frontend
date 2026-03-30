@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteCategoryAction } from "@/app/actions/category/delete-category-action";
+import { deleteCategoryAction } from "@/actions/category/delete-category-action";
 import { Card, CardContent } from "@/components/ui/card";
 import type { CategoryResponse } from "@/types/category";
 import { useState } from "react";

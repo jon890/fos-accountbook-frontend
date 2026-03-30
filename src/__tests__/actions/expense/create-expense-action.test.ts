@@ -18,7 +18,7 @@ jest.mock("@/lib/server/auth/auth-helpers");
 jest.mock("@/lib/server/api/client");
 jest.mock("next/cache");
 
-import { createExpenseAction } from "@/app/actions/expense/create-expense-action";
+import { createExpenseAction } from "@/actions/expense/create-expense-action";
 import { serverApiClient } from "@/lib/server/api/client";
 import {
   requireAuthOrRedirect,

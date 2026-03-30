@@ -1,10 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EditCategoryDialog } from "@/app/(authenticated)/categories/_components/EditCategoryDialog";
-import { updateCategoryAction } from "@/app/actions/category/update-category-action";
+import { updateCategoryAction } from "@/actions/category/update-category-action";
 
 // Mock server action
-jest.mock("@/app/actions/category/update-category-action", () => ({
+jest.mock("@/actions/category/update-category-action", () => ({
   updateCategoryAction: jest.fn(),
 }));
 

@@ -7,7 +7,7 @@ import { Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { EditIncomeDialog } from "../dialogs/EditIncomeDialog";
 import type { CategoryResponse } from "@/types/category";
-import { deleteIncomeAction } from "@/app/actions/income/delete-income-action";
+import { deleteIncomeAction } from "@/actions/income/delete-income-action";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {

@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CheckCheck, Bell } from "lucide-react";
 import { NotificationItem } from "./NotificationItem";
-import { getNotificationsAction } from "@/app/actions/notification/get-notifications-action";
-import { markAllNotificationsReadAction } from "@/app/actions/notification/mark-all-notifications-read-action";
+import { getNotificationsAction } from "@/actions/notification/get-notifications-action";
+import { markAllNotificationsReadAction } from "@/actions/notification/mark-all-notifications-read-action";
 import type { Notification } from "@/types/actions/notification";
 
 interface NotificationListProps {

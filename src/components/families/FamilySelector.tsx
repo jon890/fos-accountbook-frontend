@@ -1,8 +1,8 @@
 "use client";
 
-import { getFamiliesAction } from "@/app/actions/family/get-families-action";
-import { getUserProfileAction } from "@/app/actions/user/get-user-profile-action";
-import { setDefaultFamilyAction } from "@/app/actions/user/set-default-family-action";
+import { getFamiliesAction } from "@/actions/family/get-families-action";
+import { getUserProfileAction } from "@/actions/user/get-user-profile-action";
+import { setDefaultFamilyAction } from "@/actions/user/set-default-family-action";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

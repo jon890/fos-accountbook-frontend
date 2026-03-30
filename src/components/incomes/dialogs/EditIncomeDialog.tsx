@@ -4,7 +4,7 @@
 
 "use client";
 
-import { updateIncomeAction } from "@/app/actions/income/update-income-action";
+import { updateIncomeAction } from "@/actions/income/update-income-action";
 import type { UpdateIncomeFormState, Income } from "@/types/income";
 import { Button } from "@/components/ui/button";
 import {

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { AlertTriangle, AlertCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/client/utils";
 import { useTimeZone } from "@/lib/client/timezone-context";
-import { markNotificationReadAction } from "@/app/actions/notification/mark-notification-read-action";
+import { markNotificationReadAction } from "@/actions/notification/mark-notification-read-action";
 import type {
   Notification,
   NotificationType,

@@ -19,7 +19,7 @@ jest.mock("@/lib/server/auth/auth-helpers");
 jest.mock("@/lib/server/api/client");
 jest.mock("next/cache");
 
-import { deleteExpenseAction } from "@/app/actions/expense/delete-expense-action";
+import { deleteExpenseAction } from "@/actions/expense/delete-expense-action";
 import { ActionError } from "@/lib/errors";
 import { serverApiClient } from "@/lib/server/api/client";
 import {

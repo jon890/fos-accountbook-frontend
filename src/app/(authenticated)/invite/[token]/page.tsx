@@ -3,7 +3,7 @@
  * /invite/[token] 경로로 접속
  */
 
-import { getInvitationInfoAction } from "@/app/actions/invitation/get-invitation-info-action";
+import { getInvitationInfoAction } from "@/actions/invitation/get-invitation-info-action";
 import { InvitePageClient } from "./_components/InvitePageClient";
 import { auth } from "@/lib/server/auth";
 import { redirect } from "next/navigation";

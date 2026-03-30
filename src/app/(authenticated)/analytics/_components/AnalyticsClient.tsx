@@ -1,9 +1,9 @@
 "use client";
 
-import { getDashboardStatsAction } from "@/app/actions/dashboard/get-dashboard-stats-action";
-import { getMonthlyDailyStatsAction } from "@/app/actions/dashboard/get-monthly-daily-stats-action";
-import { getExpensesAction } from "@/app/actions/expense/get-expenses-action";
-import type { DailyTransactionSummary } from "@/app/actions/dashboard/get-monthly-daily-stats-action";
+import { getDashboardStatsAction } from "@/actions/dashboard/get-dashboard-stats-action";
+import { getMonthlyDailyStatsAction } from "@/actions/dashboard/get-monthly-daily-stats-action";
+import { getExpensesAction } from "@/actions/expense/get-expenses-action";
+import type { DailyTransactionSummary } from "@/actions/dashboard/get-monthly-daily-stats-action";
 import type { DashboardStats } from "@/types/dashboard";
 import type { Expense } from "@/types/expense";
 import { ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Wallet, BarChart2, PieChart as PieIcon } from "lucide-react";

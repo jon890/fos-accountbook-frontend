@@ -4,7 +4,7 @@
 
 "use client";
 
-import { deleteExpenseAction } from "@/app/actions/expense/delete-expense-action";
+import { deleteExpenseAction } from "@/actions/expense/delete-expense-action";
 import {
   AlertDialog,
   AlertDialogAction,

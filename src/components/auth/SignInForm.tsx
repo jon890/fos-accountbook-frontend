@@ -5,7 +5,7 @@
 
 "use client";
 
-import { signInAction } from "@/app/actions/auth/signin/signin-action";
+import { signInAction } from "@/actions/auth/signin/signin-action";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { GoogleIcon } from "./GoogleIcon";
 import { NaverIcon } from "./NaverIcon";

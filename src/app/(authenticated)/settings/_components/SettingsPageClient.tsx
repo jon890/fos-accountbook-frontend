@@ -1,7 +1,7 @@
 "use client";
 
-import { updateFamilyAction } from "@/app/actions/family/update-family-action";
-import { setDefaultFamilyAction } from "@/app/actions/user/set-default-family-action";
+import { updateFamilyAction } from "@/actions/family/update-family-action";
+import { setDefaultFamilyAction } from "@/actions/user/set-default-family-action";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

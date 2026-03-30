@@ -8,7 +8,7 @@
  * - 가족이 없으면 생성 페이지로 리다이렉트
  */
 
-import { getFamiliesAction } from "@/app/actions/family/get-families-action";
+import { getFamiliesAction } from "@/actions/family/get-families-action";
 import { FamilySelectorPage } from "@/components/families/FamilySelectorPage";
 import { redirect } from "next/navigation";
 

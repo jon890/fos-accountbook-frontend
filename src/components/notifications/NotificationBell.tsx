@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { NotificationList } from "./NotificationList";
-import { getUnreadCountAction } from "@/app/actions/notification/get-unread-count-action";
+import { getUnreadCountAction } from "@/actions/notification/get-unread-count-action";
 
 interface NotificationBellProps {
   familyUuid: string;

@@ -4,9 +4,9 @@
 
 "use client";
 
-import { createInvitationLinkAction } from "@/app/actions/invitation/create-invitation-link-action";
-import { deleteInvitationAction } from "@/app/actions/invitation/delete-invitation-action";
-import { getActiveInvitationsAction } from "@/app/actions/invitation/get-active-invitations-action";
+import { createInvitationLinkAction } from "@/actions/invitation/create-invitation-link-action";
+import { deleteInvitationAction } from "@/actions/invitation/delete-invitation-action";
+import { getActiveInvitationsAction } from "@/actions/invitation/get-active-invitations-action";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

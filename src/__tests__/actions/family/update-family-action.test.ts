@@ -15,7 +15,7 @@ jest.mock("next/cache", () => ({
   revalidatePath: jest.fn(),
 }));
 
-import { updateFamilyAction } from "@/app/actions/family/update-family-action";
+import { updateFamilyAction } from "@/actions/family/update-family-action";
 import { serverApiClient } from "@/lib/server/api/client";
 import { requireAuth } from "@/lib/server/auth/auth-helpers";
 import { revalidatePath } from "next/cache";

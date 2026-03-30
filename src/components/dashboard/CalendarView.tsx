@@ -3,7 +3,7 @@
 import {
   getMonthlyDailyStatsAction,
   type DailyTransactionSummary,
-} from "@/app/actions/dashboard/get-monthly-daily-stats-action";
+} from "@/actions/dashboard/get-monthly-daily-stats-action";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
