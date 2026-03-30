@@ -11,7 +11,10 @@ import {
   type ActionResult,
 } from "@/lib/errors";
 import { serverApiPut } from "@/lib/server/api";
-import { requireAuth } from "@/lib/server/auth/auth-helpers";
+import {
+  requireAuth,
+  getSelectedFamilyUuid,
+} from "@/lib/server/auth/auth-helpers";
 import { updateCategorySchema } from "@/lib/schemas/category";
 import type { CategoryResponse, UpdateCategoryInput } from "@/types/category";
 import { revalidatePath } from "next/cache";
@@ -69,8 +72,13 @@ export async function updateCategoryAction(
       );
     }
 
+    const familyUuid = await getSelectedFamilyUuid();
+    if (!familyUuid) {
+      throw ActionError.familyNotSelected();
+    }
+
     const category = await serverApiPut<CategoryResponse>(
-      `/categories/${categoryUuid}`,
+      `/families/${familyUuid}/categories/${categoryUuid}`,
       validData
     );
 

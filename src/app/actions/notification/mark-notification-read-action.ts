@@ -7,8 +7,11 @@ import {
 } from "@/lib/server/auth/auth-helpers";
 import { revalidatePath } from "next/cache";
 import type { Notification } from "@/types/actions/notification";
-import type { ActionResult } from "@/lib/errors";
+import { ActionError, type ActionResult } from "@/lib/errors";
 import { ErrorCode } from "@/lib/errors/error-code";
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
  * 알림을 읽음 처리합니다.
@@ -21,22 +24,30 @@ export async function markNotificationReadAction(
     // 인증 확인
     await requireAuth();
 
+    // notificationUuid 형식 검증
+    if (!UUID_REGEX.test(notificationUuid)) {
+      return ActionError.invalidInput(
+        "notificationUuid",
+        notificationUuid,
+        "올바른 UUID 형식이 아닙니다"
+      ).toFailureResult();
+    }
+
     // familyUuid 소유권 검증
     const sessionFamilyUuid = await getSelectedFamilyUuid();
-    if (!sessionFamilyUuid || familyUuid !== sessionFamilyUuid) {
-      return {
-        success: false,
-        error: {
-          code: ErrorCode.NOTIFICATION_READ_FAILED,
-          message: "권한이 없습니다.",
-        },
-      };
+    if (!sessionFamilyUuid) {
+      return ActionError.familyNotSelected().toFailureResult();
+    }
+    if (familyUuid !== sessionFamilyUuid) {
+      return new ActionError(
+        ErrorCode.NOT_FAMILY_MEMBER,
+        "해당 가족의 구성원이 아닙니다"
+      ).toFailureResult();
     }
 
     // 백엔드 API 호출
-    // TODO: 백엔드 이슈 #74 반영 후 /families/${familyUuid}/notifications/${notificationUuid}/read 로 변경
     const data = await serverApiPatch<Notification>(
-      `/notifications/${notificationUuid}/read`
+      `/families/${familyUuid}/notifications/${notificationUuid}/read`
     );
 
     // 알림 목록 재검증
