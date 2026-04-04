@@ -37,7 +37,7 @@ const mockGetRecurringExpensesMonthlyTotal =
 describe("getRecurringExpensesTotalAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRequireAuth.mockResolvedValue(undefined as never);
+    mockRequireAuth.mockResolvedValue(undefined as unknown as Awaited<ReturnType<typeof requireAuth>>);
     mockGetSelectedFamilyUuid.mockResolvedValue("family-1");
   });
 

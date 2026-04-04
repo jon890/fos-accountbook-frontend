@@ -60,7 +60,7 @@ export function RecurringExpenseItem({
         {/* 메인 행 */}
         <div
           className={`flex items-center justify-between p-3 md:p-4 rounded-xl transition-colors duration-150 cursor-pointer ${
-            isExpanded ? "bg-expense/5" : "bg-white hover:bg-gray-50/80"
+            isExpanded ? "bg-expense/5" : "bg-card hover:bg-accent"
           }`}
           onClick={() => setIsExpanded(!isExpanded)}
         >
@@ -179,7 +179,7 @@ export function RecurringExpenseItem({
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-destructive hover:bg-destructive/90"
             >
               {isDeleting ? "종료 중..." : "종료"}
             </AlertDialogAction>

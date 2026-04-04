@@ -20,7 +20,7 @@ export function RecurringExpenseCard({ total }: RecurringExpenseCardProps) {
         <CardContent className="relative p-3 md:p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 md:gap-4">
-              <div className="p-1.5 md:p-3 bg-white/20 rounded-lg md:rounded-2xl backdrop-blur-sm">
+              <div className="p-1.5 md:p-3 gradient-card-overlay rounded-lg md:rounded-2xl backdrop-blur-sm">
                 <RefreshCw className="w-3.5 h-3.5 md:w-6 md:h-6" />
               </div>
               <div>

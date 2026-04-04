@@ -33,7 +33,7 @@ export function RecurringExpenseList({
       </Card>
 
       {/* 목록 */}
-      <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-xl">
+      <Card className="border-0 glass shadow-xl">
         <CardContent className="p-3 md:p-6">
           {data.items.length === 0 ? (
             <div className="py-10 md:py-16">

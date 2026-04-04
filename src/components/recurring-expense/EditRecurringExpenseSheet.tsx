@@ -10,6 +10,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { updateRecurringExpenseAction } from "@/actions/recurring-expense";
 import type { RecurringExpense } from "@/types/recurring-expense";
 import type { CategoryResponse } from "@/types/category";
@@ -31,6 +38,9 @@ export function EditRecurringExpenseSheet({
   categories,
 }: EditRecurringExpenseSheetProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(
+    recurringExpense.categoryUuid
+  );
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,7 +49,7 @@ export function EditRecurringExpenseSheet({
     const formData = new FormData(e.currentTarget);
     const data = {
       name: String(formData.get("name")).trim(),
-      categoryUuid: String(formData.get("categoryUuid")),
+      categoryUuid: selectedCategory,
       amount: Number(formData.get("amount")),
       dayOfMonth: Number(formData.get("dayOfMonth")),
     };
@@ -85,21 +95,23 @@ export function EditRecurringExpenseSheet({
 
           {/* 카테고리 */}
           <div className="space-y-2">
-            <Label htmlFor="edit-categoryUuid">카테고리 *</Label>
-            <select
-              id="edit-categoryUuid"
-              name="categoryUuid"
-              defaultValue={recurringExpense.categoryUuid}
-              className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            <Label>카테고리 *</Label>
+            <Select
+              value={selectedCategory}
+              onValueChange={setSelectedCategory}
               required
             >
-              <option value="">카테고리를 선택하세요</option>
-              {categories.map((cat) => (
-                <option key={cat.uuid} value={cat.uuid}>
-                  {cat.icon} {cat.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="카테고리를 선택하세요" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.uuid} value={cat.uuid}>
+                    {cat.icon} {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* 금액 */}
