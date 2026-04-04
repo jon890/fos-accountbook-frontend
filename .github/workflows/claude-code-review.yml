@@ -2,15 +2,26 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened]
+  issue_comment:
+    types: [created]
 
 jobs:
   claude-review:
-    if: github.actor != 'dependabot[bot]'
+    if: |
+      github.actor != 'dependabot[bot]' &&
+      github.actor != 'claude[bot]' && (
+        github.event_name == 'pull_request' ||
+        (github.event_name == 'issue_comment' &&
+         github.event.issue.pull_request != null &&
+         contains(github.event.comment.body, '/review'))
+      )
     runs-on: ubuntu-latest
-    # 같은 PR에 대해 동시에 실행 중인 이전 리뷰 run을 취소하여 중복 코멘트 방지
+    timeout-minutes: 15
+    env:
+      PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
     concurrency:
-      group: claude-review-${{ github.event.pull_request.number }}
+      group: claude-review-${{ github.event.pull_request.number || github.event.issue.number }}
       cancel-in-progress: true
     permissions:
       contents: read
@@ -24,48 +35,60 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Dismiss old Claude bot comments
+      - name: Minimize old Claude bot comments
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           REPO="${{ github.repository }}"
-          PR_NUMBER="${{ github.event.pull_request.number }}"
+          PR_NUMBER="${{ env.PR_NUMBER }}"
 
-          # 이전 일반 코멘트 숨기기
+          # 이전 일반 PR 코멘트 숨기기
           gh api "repos/$REPO/issues/$PR_NUMBER/comments" \
             --jq '.[] | select(.user.login == "claude[bot]") | .node_id' \
-            | while read -r comment_node_id; do
-              if [ -n "$comment_node_id" ]; then
-                echo "Hiding outdated Claude comment: $comment_node_id"
+            | while read -r node_id; do
+              if [ -n "$node_id" ]; then
+                echo "Minimizing outdated Claude comment: $node_id"
                 gh api graphql -f query='
                   mutation($id: ID!) {
                     minimizeComment(input: {subjectId: $id, classifier: OUTDATED}) {
-                      minimizedComment {
-                        isMinimized
-                      }
+                      minimizedComment { isMinimized }
                     }
-                  }' -f id="$comment_node_id"
+                  }' -f id="$node_id" || true
               fi
             done
 
-      - name: Run Claude Code Review (Parallel Agents + Inline Review)
+          # 이전 인라인 리뷰 코멘트 숨기기
+          gh api "repos/$REPO/pulls/$PR_NUMBER/comments" \
+            --jq '.[] | select(.user.login == "claude[bot]") | .node_id' \
+            | while read -r node_id; do
+              if [ -n "$node_id" ]; then
+                echo "Minimizing outdated Claude inline comment: $node_id"
+                gh api graphql -f query='
+                  mutation($id: ID!) {
+                    minimizeComment(input: {subjectId: $id, classifier: OUTDATED}) {
+                      minimizedComment { isMinimized }
+                    }
+                  }' -f id="$node_id" || true
+              fi
+            done
+
+      - name: Run Claude Code Review
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          allowed_bots: "*"
           prompt: |
             You are a code review orchestrator for the fos-accountbook project (Next.js 16 family budget app).
-            Your job is to coordinate 4 parallel specialist reviewers, then post inline comments and a summary.
+            Your job is to coordinate 4 parallel specialist reviewers, then post a single GitHub review.
 
             ## Step 1: Fetch PR Data
 
             Run these commands first (lock files and snapshots are excluded from diff to reduce noise):
             ```
-            gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }} -- ':!pnpm-lock.yaml' ':!*.lock' ':!*.snap'
-            gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json title,body,additions,deletions
+            gh pr diff ${{ env.PR_NUMBER }} --repo ${{ github.repository }} -- ':!pnpm-lock.yaml' ':!*.lock' ':!*.snap'
+            gh pr view ${{ env.PR_NUMBER }} --repo ${{ github.repository }} --json title,body,additions,deletions
             ```
 
-            If the diff is empty after filtering, post a short positive comment and stop.
+            If the diff is empty after filtering, post a short approving review and stop.
 
             ## Finding Format (used by all agents)
 
@@ -195,19 +218,27 @@ jobs:
             If no issues, output: NO_ISSUES
             ```
 
-            ## Step 3: Post Inline Review Comments
+            ## Step 3: Post Single GitHub Review
 
-            Collect and deduplicate all FINDING_START/FINDING_END blocks from all agents.
+            After all 4 agents complete, collect and deduplicate all FINDING_START/FINDING_END blocks.
 
-            For all `TYPE: INLINE` findings, build a single GitHub PR review:
+            Determine the review event:
+            - If ANY 🔴 finding exists → `"REQUEST_CHANGES"`
+            - Otherwise → `"APPROVE"`
+
+            Build a single GitHub review containing:
+            - `body`: summary of all findings (both INLINE and GENERAL)
+            - `comments`: array of inline comments for TYPE: INLINE findings
+            - `event`: APPROVE or REQUEST_CHANGES
 
             ```bash
-            gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+            gh api repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}/reviews \
               --method POST \
               --header "Content-Type: application/json" \
               --input - <<'REVIEW_EOF'
             {
-              "event": "COMMENT",
+              "event": "APPROVE or REQUEST_CHANGES",
+              "body": "## 코드 리뷰 — [PR 제목 요약]\n\n[한 줄 전체 평가]\n\n---\n\n### 🔴 머스트 픽스\n\n...\n\n### 🟡 개선 권장\n\n...\n\n### 🟢 잘 된 점\n\n- ...\n\n---\n🤖 Reviewed with [Claude Code](https://claude.com/claude-code) (Sonnet orchestrator · Haiku specialists: TypeScript · Conventions · Security · Architecture)",
               "comments": [
                 {
                   "path": "src/example.tsx",
@@ -220,24 +251,7 @@ jobs:
             REVIEW_EOF
             ```
 
-            Format each inline comment: `{SEVERITY} **문제**: {ISSUE}\n\n**수정**: {FIX}`
-
-            Rules:
-            - `path` must be relative (no leading `/`), exactly matching the diff
-            - `line` must appear in the diff for that file — if unsure, treat as GENERAL
-            - `side` is always `"RIGHT"`
-            - If `gh api` returns 422, log and continue without retrying
-            - Skip this step if no INLINE findings
-
-            ## Step 4: Post General Summary Comment
-
-            Post exactly ONE summary comment:
-
-            ```
-            gh pr comment ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --body "..."
-            ```
-
-            Format (Korean):
+            ## Review Body Format (Korean)
 
             ```
             ## 코드 리뷰 — [PR 제목 요약]
@@ -260,13 +274,19 @@ jobs:
 
             ---
             🤖 Reviewed with [Claude Code](https://claude.com/claude-code) (Sonnet orchestrator · Haiku specialists: TypeScript · Conventions · Security · Architecture)
-            💬 인라인 코멘트는 **Files changed** 탭에서 확인하세요
             ```
 
             ## Critical Rules
 
-            - **Post exactly ONE general comment** — do not call `gh pr comment` more than once
+            - **Post exactly ONE review** — do not call the reviews API more than once
+            - **Do NOT post a separate general comment** — the review body IS the summary
             - **Only include sections that have content** — omit empty 🔴 or 🟡 sections
-            - **If zero issues found**, skip Step 3, write short positive review in Step 4
+            - **If zero issues found**, post APPROVE review with 🟢 section only, no comments array
+            - **Be specific** — reference exact file names and line numbers
+            - Format inline comment body as: `{SEVERITY} **문제**: {ISSUE}\n\n**수정**: {FIX}`
+            - `path` must be relative (no leading `/`), exactly matching the diff
+            - `line` must appear in the diff — if unsure, treat as GENERAL in the body
+            - `side` is always `"RIGHT"`
+            - If `gh api` returns 422, log the error and do NOT retry
 
-          claude_args: '--model claude-sonnet-4-6 --allowedTools "Agent,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*),Bash(gh api:*)" --disallowedTools "Read,Write,Edit,Glob,Grep,LS"'
+          claude_args: '--model claude-sonnet-4-6 --allowedTools "Agent,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*)" --disallowedTools "Read,Write,Edit,Glob,Grep,LS"'
