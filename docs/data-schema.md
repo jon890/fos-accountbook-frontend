@@ -229,7 +229,7 @@ interface NotificationResponse {
   notificationUuid: string;
   familyUuid: string;
   userUuid: string | null;
-  type: "BUDGET_WARNING" | "BUDGET_EXCEEDED";
+  type: "BUDGET_WARNING" | "BUDGET_EXCEEDED" | "RECURRING_EXPENSE_CREATED";
   title: string;
   message: string;
   referenceUuid?: string;

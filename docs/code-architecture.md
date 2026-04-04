@@ -71,11 +71,19 @@ page.tsx          (Server) — 데이터 fetch, SEO
 
 ### 인증 흐름
 
+두 가지 패턴이 존재:
+
 ```
-모든 Server Action
+페이지 진입 시 호출되는 Action (지출 등록 등)
   └─ requireAuthOrRedirect()          세션 없으면 /auth/signin 리다이렉트
        └─ getSelectedFamilyUuid()     JWT에 캐싱된 defaultFamilyUuid 반환
+
+이미 페이지 안에서 호출되는 Action (반복 지출 CRUD 등 Sheet/모달 내)
+  └─ requireAuth()                    세션 없으면 에러 반환 (리다이렉트 안 함)
+       └─ getSelectedFamilyUuid()
 ```
+
+**규칙**: 페이지 최초 로드 시 호출 → `requireAuthOrRedirect`, Sheet/모달 내부 → `requireAuth`
 
 ---
 

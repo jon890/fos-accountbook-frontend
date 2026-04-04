@@ -7,7 +7,6 @@ import {
   type ActionResult,
 } from "@/lib/errors";
 import {
-  requireAuthOrRedirect,
   requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
@@ -38,7 +37,7 @@ export async function createRecurringExpenseAction(
   data: unknown
 ): Promise<ActionResult<RecurringExpense>> {
   try {
-    await requireAuthOrRedirect();
+    await requireAuth();
 
     const familyUuid = await getSelectedFamilyUuid();
     if (!familyUuid) {

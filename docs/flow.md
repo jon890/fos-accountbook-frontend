@@ -206,7 +206,7 @@
                     └─ 매월 N일 (1~28, 숫자 입력 또는 선택)
                             │
                             └─ 저장 → createRecurringExpenseAction()
-                                    ├─ requireAuthOrRedirect()
+                                    ├─ requireAuth()
                                     ├─ Zod 검증 (dayOfMonth 1~28 range check)
                                     └─ POST /families/{uuid}/recurring-expenses
                                             └─ "내일부터 매월 N일에 자동 등록됩니다" toast

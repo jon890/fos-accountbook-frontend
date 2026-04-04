@@ -20,16 +20,14 @@ jest.mock("next/cache");
 
 import { createRecurringExpenseAction } from "@/actions/recurring-expense";
 import {
-  requireAuthOrRedirect,
+  requireAuth,
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
 import { createRecurringExpense } from "@/services/recurring-expense/recurring-expense-service";
 import { revalidatePath } from "next/cache";
 import type { RecurringExpense } from "@/types/recurring-expense";
 
-const mockRequireAuthOrRedirect = requireAuthOrRedirect as jest.MockedFunction<
-  typeof requireAuthOrRedirect
->;
+const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;
 const mockGetSelectedFamilyUuid = getSelectedFamilyUuid as jest.MockedFunction<
   typeof getSelectedFamilyUuid
 >;
@@ -63,7 +61,7 @@ const mockRecurringExpense: RecurringExpense = {
 describe("createRecurringExpenseAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRequireAuthOrRedirect.mockResolvedValue(undefined as never);
+    mockRequireAuth.mockResolvedValue(undefined as never);
     mockGetSelectedFamilyUuid.mockResolvedValue("family-1");
   });
 
@@ -112,20 +110,46 @@ describe("createRecurringExpenseAction", () => {
     expect(mockCreateRecurringExpense).not.toHaveBeenCalled();
   });
 
-  it("미인증 시 requireAuthOrRedirect 호출", async () => {
-    mockRequireAuthOrRedirect.mockRejectedValue(new Error("NEXT_REDIRECT"));
+  it("미인증 시 requireAuth 에러", async () => {
+    mockRequireAuth.mockRejectedValue(new Error("Unauthorized"));
 
-    const result = createRecurringExpenseAction({
+    const result = await createRecurringExpenseAction({
       name: "넷플릭스",
       categoryUuid: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
       amount: 17000,
       dayOfMonth: 15,
     });
 
-    await expect(result).resolves.toEqual(
-      expect.objectContaining({ success: false })
-    );
-    expect(mockRequireAuthOrRedirect).toHaveBeenCalled();
+    expect(result.success).toBe(false);
+    expect(mockRequireAuth).toHaveBeenCalled();
     expect(mockCreateRecurringExpense).not.toHaveBeenCalled();
+  });
+
+  it("familyUuid 미선택 시 실패", async () => {
+    mockGetSelectedFamilyUuid.mockResolvedValue(null);
+
+    const result = await createRecurringExpenseAction({
+      name: "넷플릭스",
+      categoryUuid: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      amount: 17000,
+      dayOfMonth: 15,
+    });
+
+    expect(result.success).toBe(false);
+    expect(mockCreateRecurringExpense).not.toHaveBeenCalled();
+  });
+
+  it("서비스 호출 실패 시 에러 반환", async () => {
+    mockCreateRecurringExpense.mockRejectedValue(new Error("Service Error"));
+
+    const result = await createRecurringExpenseAction({
+      name: "넷플릭스",
+      categoryUuid: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      amount: 17000,
+      dayOfMonth: 15,
+    });
+
+    expect(result.success).toBe(false);
+    expect(mockCreateRecurringExpense).toHaveBeenCalled();
   });
 });
