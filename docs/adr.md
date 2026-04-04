@@ -1,0 +1,148 @@
+# ADR — fos-accountbook (프론트엔드)
+
+> 프론트엔드(Next.js) 전용 기술 결정 기록.
+> 백엔드 결정은 `fos-accountbook-backend/docs/adr.md` 참고.
+
+---
+
+## ADR-F01: Next.js App Router 선택
+
+**결정**: Pages Router 대신 App Router 사용 (Next.js 16)
+
+**이유**:
+
+- Server Components 기본 지원 → 데이터 페칭 단순화, 번들 크기 감소
+- Route Groups(`(authenticated)`)로 인증 레이아웃 분리 가능
+- Server Actions로 API Route 없이 폼 처리 가능
+
+**트레이드오프**: Next.js 16 일부 API가 beta 상태 → 문서 변경 빈도 높음
+
+---
+
+## ADR-F02: Server Components 우선 전략
+
+**결정**: 클라이언트 상태가 필요한 경우에만 `"use client"` 추가
+
+**이유**:
+
+- 데이터 페칭을 서버에서 처리 → 백엔드 토큰을 클라이언트에 노출하지 않음
+- 초기 HTML에 데이터 포함 → 로딩 플리커 없음
+- `"use client"` 경계를 말단 컴포넌트로 밀어내 번들 최소화
+
+**결과**: 모든 `page.tsx`는 Server Component. 인터랙션이 필요한 부분만 `*Client.tsx`로 분리
+
+---
+
+## ADR-F03: NextAuth v5 JWT 전략
+
+**결정**: JWT 세션 방식, 프로필 정보를 JWT에 캐싱
+
+**이유**:
+
+- 서버 세션(DB) 없이 stateless 인증 가능
+- `profile` 정보를 JWT에 캐싱 → 매 요청마다 `/users/me/profile` API 호출 불필요
+- 만료 5분 전 자동 갱신으로 UX 중단 없음
+
+**구현 세부사항**:
+
+- JWT에 `backendAccessToken`, `backendRefreshToken`, `profile` 저장
+- Access Token: 백엔드 기준 15분 만료
+- 갱신 트리거: `token.backendTokenExpiredAt` 기준 5분 전
+- Session TTL: 30일, updateAge: 1일
+
+---
+
+## ADR-F04: Actions/Services 계층 분리
+
+**결정**: `actions/`(인증·검증)와 `services/`(API 호출·로직) 엄격 분리
+
+**이유**:
+
+- `"use server"` 코드와 비즈니스 로직이 섞이면 테스트가 어려움
+- Services는 순수 함수에 가까워 단위 테스트 용이
+- revalidatePath, requireAuth 같은 Next.js 전용 코드를 Actions에만 격리
+
+**규칙**:
+
+- `actions/`: `"use server"`, 인증, Zod 검증, revalidatePath만 담당
+- `services/`: API 호출, 데이터 변환, 쿼리 빌딩만 담당. `"use server"` 사용 금지
+
+---
+
+## ADR-F05: ky HTTP 클라이언트
+
+**결정**: axios 대신 ky 사용
+
+**이유**:
+
+- Node 18+ native fetch 기반 → 추가 polyfill 없음
+- 번들 크기: ky ~4KB vs axios ~13KB
+- TypeScript 타입 기본 제공
+- 자동 재시도 설정이 간결 (`retry` 옵션)
+
+**재시도 설정**: 408, 429, 5xx → 최대 2회 재시도
+
+---
+
+## ADR-F06: Zod 런타임 검증
+
+**결정**: 모든 Server Action 입력값을 Zod로 검증
+
+**이유**:
+
+- TypeScript 타입은 컴파일 타임만 보장 → 런타임 서버 액션에서 악의적 입력 가능
+- Zod 스키마에서 TypeScript 타입을 derive → 타입 정의 중복 없음
+- 에러 메시지가 필드 단위로 구조화 → UI 폼 에러 표시 직결
+
+---
+
+## ADR-F07: Shadcn + Tailwind CSS v4
+
+**결정**: UI 컴포넌트는 Shadcn 패턴, 스타일링은 Tailwind CSS v4
+
+**이유**:
+
+- Shadcn: 소유권이 있는 UI (복사 방식) → 커스터마이징 자유도 높음
+- Tailwind v4: `tailwind.config.js` 불필요, `@theme` 블록으로 CSS 변수 관리
+- Radix UI 기반 → 접근성(ARIA) 자동 처리
+
+**색상 규칙**: 시맨틱 클래스(`gradient-expense`, `gradient-income` 등) 사용, 하드코딩 금지
+
+---
+
+## ADR-F08: alert() 대신 sonner 토스트
+
+**결정**: `alert()`, `confirm()`, `prompt()` 전면 금지, sonner 사용
+
+**이유**:
+
+- `alert()`은 모달 차단으로 UX 저하, 스타일 제어 불가
+- sonner는 스택형 토스트, 자동 dismiss, 커스텀 스타일 지원
+
+---
+
+## ADR-F09: MSW vs jest.mock — 테스트 방식
+
+**결정**: Server Action 테스트에서 MSW 대신 jest.mock 사용
+
+**이유**:
+
+- Server Actions는 HTTP 레이어 없이 직접 함수 호출
+- MSW는 fetch interceptor 기반 → Server Component 환경에서 설정 복잡
+- jest.mock으로 `api/client`, `auth-helpers` 모킹 → 단순하고 빠름
+
+**트레이드오프**: 실제 HTTP 요청 경로는 검증 안 됨 → 통합 테스트는 별도 필요
+
+---
+
+## ADR-F10: 반복 지출 상태 관리 — Server Action 방식 유지
+
+**결정**: 폴링·WebSocket 도입 없이 기존 Server Action + revalidatePath 방식 유지
+
+**이유**:
+
+- 스케줄러 실행이 새벽 1시 → 사용자가 앱 사용 중 실시간 업데이트 필요 없음
+- 페이지 재방문 시 Server Component가 최신 데이터를 fetch → 충분한 일관성
+- 폴링 추가 시 복잡도 증가 대비 사용자 경험 개선 미미
+
+**결과**: 자동 생성된 지출은 다음 날 대시보드 방문 시 반영됨. 실시간 알림은 기존 NotificationBell로 대체

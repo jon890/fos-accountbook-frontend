@@ -10,8 +10,10 @@
 import { getDashboardStatsAction } from "@/actions/dashboard/get-dashboard-stats-action";
 import { getRecentExpensesAction } from "@/actions/dashboard/get-recent-expenses-action";
 import { getFamiliesAction } from "@/actions/family/get-families-action";
+import { getRecurringExpensesTotalAction } from "@/actions/recurring-expense";
 import { CalendarView } from "@/components/dashboard/CalendarView";
 import { DashboardClient } from "@/components/dashboard/DashboardClient";
+import { RecurringExpenseCard } from "@/components/dashboard/RecurringExpenseCard";
 import { StatsCards } from "@/components/dashboard/StatsCards";
 import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
 import { getActionDataOrDefault } from "@/lib/server/action-result-handler";
@@ -30,11 +32,12 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
-  const [statsResult, recentExpensesResult, familiesResult] = await Promise.all(
+  const [statsResult, recentExpensesResult, familiesResult, recurringTotalResult] = await Promise.all(
     [
       getDashboardStatsAction(),
       getRecentExpensesAction(10),
       getFamiliesAction(),
+      getRecurringExpensesTotalAction(),
     ],
   );
 
@@ -52,6 +55,8 @@ export default async function DashboardPage() {
 
   const families = getActionDataOrDefault(familiesResult, []);
 
+  const recurringTotal = getActionDataOrDefault(recurringTotalResult, null);
+
   const selectedFamily =
     families.find((f) => f.uuid === selectedFamilyUuid) || null;
 
@@ -62,6 +67,9 @@ export default async function DashboardPage() {
         familyName={selectedFamily?.name}
       />
       <StatsCards data={statsData} />
+      {recurringTotal !== null && (
+        <RecurringExpenseCard total={recurringTotal} />
+      )}
       <div className="my-6">
         <CalendarView />
       </div>

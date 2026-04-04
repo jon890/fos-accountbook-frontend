@@ -3,16 +3,19 @@
 import { ExpenseFilters } from "@/components/expenses/forms/ExpenseFilters";
 import { ExpenseTabContent } from "@/app/(authenticated)/transactions/_components/ExpenseTabContent";
 import { IncomeTabContent } from "@/app/(authenticated)/transactions/_components/IncomeTabContent";
+import { RecurringTabContent } from "@/app/(authenticated)/transactions/_components/RecurringTabContent";
 import { cn } from "@/lib/client/utils";
 import type { CategoryResponse } from "@/types/category";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { TrendingDown, TrendingUp, Repeat } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ReactNode } from "react";
+
+type TabType = "expenses" | "incomes" | "recurring";
 
 interface TransactionsPageClientProps {
   familyUuid: string;
   categories: CategoryResponse[];
-  activeTab: "expenses" | "incomes";
+  activeTab: TabType;
   searchParams: {
     categoryId?: string;
     startDate?: string;
@@ -22,6 +25,7 @@ interface TransactionsPageClientProps {
   };
   expenseListContent: ReactNode;
   incomeListContent: ReactNode;
+  recurringListContent: ReactNode;
 }
 
 export function TransactionsPageClient({
@@ -31,11 +35,12 @@ export function TransactionsPageClient({
   searchParams,
   expenseListContent,
   incomeListContent,
+  recurringListContent,
 }: TransactionsPageClientProps) {
   const router = useRouter();
   const currentSearchParams = useSearchParams();
 
-  const handleTabChange = (tab: "expenses" | "incomes") => {
+  const handleTabChange = (tab: TabType) => {
     const params = new URLSearchParams(currentSearchParams.toString());
     params.set("tab", tab);
     params.set("page", "1");
@@ -71,27 +76,47 @@ export function TransactionsPageClient({
             <TrendingUp className="w-4 h-4" />
             <span>수입</span>
           </button>
+          <button
+            onClick={() => handleTabChange("recurring")}
+            className={cn(
+              "flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200",
+              activeTab === "recurring"
+                ? "gradient-expense text-white shadow-sm"
+                : "text-gray-500 hover:text-gray-700 hover:bg-white/60"
+            )}
+          >
+            <Repeat className="w-4 h-4" />
+            <span>고정지출</span>
+          </button>
         </div>
 
         <div className="shrink-0">
           {activeTab === "expenses" ? (
             <ExpenseTabContent categories={categories} familyUuid={familyUuid} />
-          ) : (
+          ) : activeTab === "incomes" ? (
             <IncomeTabContent />
+          ) : (
+            <RecurringTabContent categories={categories} />
           )}
         </div>
       </div>
 
-      {/* 필터 바 */}
-      <ExpenseFilters
-        categories={categories}
-        defaultStartDate={searchParams.startDate}
-        defaultEndDate={searchParams.endDate}
-      />
+      {/* 필터 바 (고정지출 탭에서는 숨김) */}
+      {activeTab !== "recurring" && (
+        <ExpenseFilters
+          categories={categories}
+          defaultStartDate={searchParams.startDate}
+          defaultEndDate={searchParams.endDate}
+        />
+      )}
 
       {/* 내역 목록 */}
       <div>
-        {activeTab === "expenses" ? expenseListContent : incomeListContent}
+        {activeTab === "expenses"
+          ? expenseListContent
+          : activeTab === "incomes"
+            ? incomeListContent
+            : recurringListContent}
       </div>
     </div>
   );

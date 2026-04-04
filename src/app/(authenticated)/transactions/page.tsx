@@ -7,6 +7,7 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ExpenseList } from "@/components/expenses/list/ExpenseList";
 import { ExpenseSummaryWrapper } from "@/components/expenses/summary/ExpenseSummaryWrapper";
 import { IncomeList } from "@/components/incomes/list/IncomeList";
+import { RecurringExpenseList } from "@/components/recurring-expense/RecurringExpenseList";
 import { TransactionsPageClient } from "./_components/TransactionsPageClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { serverApiGet } from "@/lib/server/api";
@@ -15,13 +16,14 @@ import type { FamilyResponse } from "@/types/family";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { getUserProfileAction } from "@/actions/user/get-user-profile-action";
+import { getRecurringExpensesAction } from "@/actions/recurring-expense";
 import { getMonthRange } from "@/lib/utils/date-timezone";
 
 // 쿠키를 사용하므로 동적 렌더링 필요
 export const dynamic = "force-dynamic";
 
 interface SearchParams {
-  tab?: "expenses" | "incomes";
+  tab?: "expenses" | "incomes" | "recurring";
   categoryId?: string;
   startDate?: string;
   endDate?: string;
@@ -89,6 +91,9 @@ export default async function TransactionsPage({
 
   const page = parseInt(resolvedSearchParams.page || "1", 10);
   const limit = parseInt(resolvedSearchParams.limit || "25", 10);
+
+  // 현재 월 (YYYY-MM 형식)
+  const currentMonth = startDate.slice(0, 7);
 
   return (
     <TransactionsPageClient
@@ -163,6 +168,44 @@ export default async function TransactionsPage({
           />
         </Suspense>
       }
+      recurringListContent={
+        <Suspense
+          fallback={
+            <Card className="w-full">
+              <CardContent className="flex justify-center items-center min-h-[400px] py-12">
+                <LoadingSpinner />
+              </CardContent>
+            </Card>
+          }
+        >
+          <RecurringExpenseListWrapper
+            month={currentMonth}
+            categories={categories}
+          />
+        </Suspense>
+      }
     />
   );
+}
+
+async function RecurringExpenseListWrapper({
+  month,
+  categories,
+}: {
+  month: string;
+  categories: CategoryResponse[];
+}) {
+  const result = await getRecurringExpensesAction(month);
+
+  if (!result.success) {
+    return (
+      <Card className="w-full">
+        <CardContent className="flex justify-center items-center min-h-[200px] py-8">
+          <p className="text-gray-500 text-sm">고정지출을 불러올 수 없습니다</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return <RecurringExpenseList data={result.data} categories={categories} />;
 }
