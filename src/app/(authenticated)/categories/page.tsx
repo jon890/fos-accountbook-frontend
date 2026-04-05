@@ -3,34 +3,25 @@
  */
 
 import { CategoryPageClient } from "./_components/CategoryPageClient";
-import { getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
-import { serverApiGet } from "@/lib/server/api";
+import { getSelectedFamilyAction } from "@/actions/family/get-selected-family-action";
+import { getFamilyCategoriesAction } from "@/actions/category/get-categories-action";
 import type { CategoryResponse } from "@/types/category";
 import { redirect } from "next/navigation";
 
 export default async function CategoriesPage() {
   // 선택된 가족 UUID 가져오기
-  const familyUuid = await getSelectedFamilyUuid();
-
-  // 선택된 가족이 없으면 가족 생성 페이지로 리다이렉트
-  // (선택된 가족이 없는 경우는 첫 회원가입 유저만 해당)
-  if (!familyUuid) {
+  const familyResult = await getSelectedFamilyAction();
+  if (!familyResult.success || !familyResult.data) {
     redirect("/families/create");
   }
+  const familyUuid = familyResult.data;
 
   // 선택된 가족의 카테고리 목록 조회
-  let categories: CategoryResponse[] = [];
-  let hasError = false;
-  try {
-    categories = await serverApiGet<CategoryResponse[]>(
-      `/families/${familyUuid}/categories`
-    );
-  } catch (error) {
-    console.error("Failed to fetch categories:", error);
-    // API 호출 실패 시 에러 상태 전달
-    hasError = true;
-    categories = [];
-  }
+  const categoriesResult = await getFamilyCategoriesAction(familyUuid);
+  const categories: CategoryResponse[] = categoriesResult.success
+    ? categoriesResult.data
+    : [];
+  const hasError = !categoriesResult.success;
 
   return (
     <div className="container mx-auto py-6 px-4 max-w-4xl">
