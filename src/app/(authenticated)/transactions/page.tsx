@@ -10,13 +10,13 @@ import { IncomeList } from "@/components/incomes/list/IncomeList";
 import { RecurringExpenseList } from "@/components/recurring-expense/RecurringExpenseList";
 import { TransactionsPageClient } from "./_components/TransactionsPageClient";
 import { Card, CardContent } from "@/components/ui/card";
-import { serverApiGet } from "@/lib/server/api";
 import type { CategoryResponse } from "@/types/category";
-import type { FamilyResponse } from "@/types/family";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { getUserProfileAction } from "@/actions/user/get-user-profile-action";
 import { getRecurringExpensesAction } from "@/actions/recurring-expense";
+import { getSelectedFamilyAction } from "@/actions/family/get-selected-family-action";
+import { getFamilyCategoriesAction } from "@/actions/category/get-categories-action";
 import { getMonthRange } from "@/lib/utils/date-timezone";
 
 // 쿠키를 사용하므로 동적 렌더링 필요
@@ -62,32 +62,18 @@ export default async function TransactionsPage({
   const startDate = resolvedSearchParams.startDate || defaultStartDate;
   const endDate = resolvedSearchParams.endDate || defaultEndDate;
 
-  // 백엔드 API에서 가족 정보 조회 (Server-side API 호출)
-  let families: FamilyResponse[];
-  try {
-    families = await serverApiGet<FamilyResponse[]>("/families");
-  } catch (error) {
-    console.error("Failed to fetch families:", error);
+  // 선택된 가족 UUID 조회
+  const familyResult = await getSelectedFamilyAction();
+  if (!familyResult.success || !familyResult.data) {
     redirect("/families/create");
   }
-
-  if (!families || families.length === 0) {
-    redirect("/families/create");
-  }
-
-  const family = families[0]; // 첫 번째 가족 사용
+  const familyUuid = familyResult.data;
 
   // 카테고리 목록 조회
-  let categories: CategoryResponse[] = [];
-  try {
-    categories = await serverApiGet<CategoryResponse[]>(
-      `/families/${family.uuid}/categories`
-    );
-  } catch (error) {
-    console.error("Failed to fetch categories:", error);
-    // 카테고리가 없어도 페이지는 표시
-    categories = [];
-  }
+  const categoriesResult = await getFamilyCategoriesAction(familyUuid);
+  const categories: CategoryResponse[] = categoriesResult.success
+    ? categoriesResult.data
+    : [];
 
   const page = parseInt(resolvedSearchParams.page || "1", 10);
   const limit = parseInt(resolvedSearchParams.limit || "25", 10);
@@ -97,7 +83,7 @@ export default async function TransactionsPage({
 
   return (
     <TransactionsPageClient
-      familyUuid={family.uuid}
+      familyUuid={familyUuid}
       categories={categories}
       activeTab={activeTab}
       searchParams={{
@@ -118,7 +104,7 @@ export default async function TransactionsPage({
             }
           >
             <ExpenseSummaryWrapper
-              familyId={family.uuid}
+              familyId={familyUuid}
               categoryId={resolvedSearchParams.categoryId}
               startDate={startDate}
               endDate={endDate}
@@ -136,7 +122,7 @@ export default async function TransactionsPage({
             }
           >
             <ExpenseList
-              familyId={family.uuid}
+              familyId={familyUuid}
               categories={categories}
               categoryId={resolvedSearchParams.categoryId}
               startDate={startDate}
@@ -158,7 +144,7 @@ export default async function TransactionsPage({
           }
         >
           <IncomeList
-            familyId={family.uuid}
+            familyId={familyUuid}
             categories={categories}
             categoryId={resolvedSearchParams.categoryId}
             startDate={startDate}
