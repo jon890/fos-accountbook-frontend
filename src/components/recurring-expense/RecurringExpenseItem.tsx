@@ -33,8 +33,15 @@ export function RecurringExpenseItem({
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { name, amount, dayOfMonth, generatedThisMonth, category } =
-    recurringExpense;
+  const { name, amount, dayOfMonth, generatedThisMonth } = recurringExpense;
+  const category = recurringExpense.category ?? {
+    uuid: "",
+    familyUuid: "",
+    name: "미분류",
+    icon: "📁",
+    createdAt: "",
+    updatedAt: "",
+  };
 
   const handleDelete = async () => {
     setIsDeleting(true);

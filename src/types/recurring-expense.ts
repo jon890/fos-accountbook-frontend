@@ -4,7 +4,7 @@ export interface RecurringExpense {
   uuid: string;
   familyUuid: string;
   categoryUuid: string;
-  category: CategoryResponse;
+  category: CategoryResponse | null;
   name: string;
   amount: number;
   dayOfMonth: number;
