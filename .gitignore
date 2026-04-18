@@ -47,3 +47,5 @@ next-env.d.ts
 # claude, oh-my-claudecode
 .claude/settings.local.json
 .omc
+
+.claude/worktrees/
