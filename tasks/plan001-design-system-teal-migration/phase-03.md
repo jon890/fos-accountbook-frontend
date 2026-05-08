@@ -1,4 +1,4 @@
-# Phase 03 — shadcn ui/ 23개 OKLCH 토큰 직접 사용 재작성
+# Phase 03 — Pretendard + Inter 폰트 도입 (npm 패키지 + next/font/local)
 
 **Model**: sonnet
 **Status**: pending
@@ -7,79 +7,84 @@
 
 ## 목표
 
-`src/components/ui/` 의 23개 컴포넌트가 `hsl(var(--primary))` 같은 HSL 채널 패턴을 통해 색을 참조하는 구조를 제거. Tailwind v4 클래스 (`bg-primary` / `text-foreground` / `border-input` 등) 직접 사용으로 일원화하고, 필요한 곳은 `var(--background)` / `var(--primary)` 같은 OKLCH 토큰 직접 참조로 교체.
+`src/app/layout.tsx` 의 Geist + Geist_Mono 폰트 로더를 `next/font/local` 의 Pretendard Variable + Inter Variable 로 교체. woff2 자산은 `pretendard` / `inter-ui` npm 패키지에서 직접 참조 (브랜치 HEAD `curl` 사용 금지 — 빌드 결정성 확보). `--font-sans` / `--font-num` CSS 변수가 실제 로드된 폰트를 가리키도록 연결.
 
-phase 01 에서 `--background` / `--foreground` / `--primary` 등 shadcn 변수가 OKLCH 평면 값으로 재정의됐으므로 (HSL 채널 표기 폐기), 컴포넌트 안의 `hsl(var(--x))` 표기는 **잘못된 CSS** 가 됨 → grep 으로 0건 만드는 것이 본 phase 의 명확한 성공 기준.
+phase 01 에서 globals.css 의 `--font-sans` / `--font-num` 정의는 의도적으로 생략됨 — `next/font/local` 의 `variable` 옵션이 단일 소스 (자동 stack 생성 포함).
 
-**범위 외**: gradient 클래스 (`gradient-primary` 등) 사용처는 phase 03 에서 건드리지 않음 — phase 01 에서 값이 OKLCH 로 교체됐고 클래스명·시그니처 동일하므로 자동 호환. 폰트 적용은 phase 04.
-
-**선행 의존**: phase 01 (globals.css 의 OKLCH 토큰 + shadcn 변수 OKLCH 재정의)
+**선행 의존**: phase 01 (globals.css `@layer base` 의 `font-family: var(--font-sans)` + `.num` 유틸)
 
 ---
 
-## 작업 항목 (5)
+## 작업 항목 (4)
 
-### 1. `src/components/ui/*.tsx` 23개 — `hsl(var(--x))` 문자열 제거
-
-```bash
-# cwd: /Users/nhn/personal/fos-accountbook
-grep -rnE 'hsl\(var\(--' src/components/ui/ | wc -l   # 작업 시작 시 실측
-```
-
-23개 파일 전수 점검. 패턴별 교체:
-
-| 기존 | 교체 |
-|---|---|
-| `style={{ background: "hsl(var(--primary))" }}` | className 으로 `bg-primary` 이동, 또는 `style={{ background: "var(--primary)" }}` |
-| `bg-[hsl(var(--primary))]` arbitrary | `bg-primary` |
-| `text-[hsl(var(--foreground))]` | `text-foreground` |
-| `border-[hsl(var(--border))]` | `border-border` (Tailwind v4 의 `--color-border` 키) |
-
-phase 01 의 `@theme` 블록에서 `--color-background: var(--background)` 같이 매핑됐으므로 `bg-background` / `text-foreground` 등 Tailwind 유틸리티는 그대로 동작. 즉 대부분은 arbitrary class 를 일반 class 로 단순화하는 작업.
-
-### 2. `src/app/globals.css` 의 `@theme` 블록 단순화
-
-phase 01 에서 호환을 위해 남겨둔 매핑:
-```css
---color-background: var(--background);
---color-foreground: var(--foreground);
-/* ... */
-```
-
-phase 03 에서는 이 매핑을 유지 (Tailwind v4 `bg-background` 유틸리티가 의존). 단 `@theme` 안의 다른 OKLCH 평면 값 (`--color-brand-500`, `--color-income`, `--color-bg-elev` 등) 은 그대로.
-
-대신 `:root` 의 shadcn 변수를 OKLCH **brand 토큰 참조** 로 단순화:
-```css
-:root {
-  --background: var(--color-neutral-50);
-  --foreground: var(--color-neutral-900);
-  --primary: var(--color-brand-500);
-  --primary-foreground: oklch(1 0 0);
-  --muted: var(--color-neutral-100);
-  /* ... 모두 brand/neutral 토큰 참조로 */
-}
-```
-
-phase 01 에서는 직접 `oklch(...)` 값을 적었지만, phase 03 에서 brand/neutral 단일 소스로 통일. `[data-theme="dark"]` 블록도 동일하게 토큰 참조로.
-
-### 3. `--income` / `--expense` 변수 정리
-
-`@theme` 의 `--color-income: hsl(var(--income))` 패턴 제거. 직접 `--color-income: oklch(0.610 0.150 152)` 정의 (phase 01 결과 그대로). `:root` 의 `--income` / `--expense` 변수는 삭제 — Tailwind 유틸리티 (`text-income` / `bg-expense`) 가 `--color-income` 을 직접 보도록.
+### 1. npm 패키지 추가
 
 ```bash
-# 사용처 영향 확인
-grep -rn 'hsl(var(--income))\|hsl(var(--expense))' src/   # exit 1 (0건) 이어야 정리 안전
+# cwd: /Users/nhn/personal/fos-accountbook/.claude/worktrees/plan001
+pnpm add pretendard inter-ui
 ```
 
-만약 사용처가 있으면 `text-income` / `bg-expense` Tailwind 유틸리티로 교체.
+`pretendard@1.3.9` (Variable woff2 포함 — `node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2`).
+`inter-ui@4.1.1` (`node_modules/inter-ui/variable/InterVariable.woff2`).
 
-### 4. Calendar / Form 등 외부 라이브러리 wrapper 점검
+`pnpm-lock.yaml` 갱신 — 결정적 버전 lock 으로 빌드 재현성 확보. 브랜치 HEAD `curl` 다운로드는 사용하지 않음.
 
-`src/components/ui/calendar.tsx` 는 react-day-picker 의 className override 가 hsl(var()) 패턴 가능. `src/components/ui/sonner.tsx` 는 sonner 의 theme prop 만 사용 (CSS 변수 접근 없음). phase 03 grep 결과로 잡히는 곳만 교체.
+### 2. `src/app/layout.tsx` — `next/font/local` 로 교체
 
-### 5. 컴포넌트 재작성 후 검증
+기존:
+```tsx
+import { Geist, Geist_Mono } from "next/font/google";
 
-전 ui/ 파일에서 `hsl(var(...))` 문자열 0건. 각 컴포넌트의 시각 결과는 phase 01 과 동일 (값 동일, 표기만 변경).
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+```
+
+신규:
+```tsx
+import localFont from "next/font/local";
+
+const pretendard = localFont({
+  src: "../../node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2",
+  variable: "--font-sans",
+  weight: "45 920",
+  display: "swap",
+});
+
+const inter = localFont({
+  src: "../../node_modules/inter-ui/variable/InterVariable.woff2",
+  variable: "--font-num",
+  weight: "100 900",
+  display: "swap",
+});
+```
+
+`<body>` 의 `className` 에서 `${geistSans.variable} ${geistMono.variable}` → `${pretendard.variable} ${inter.variable}` 교체. phase 02 에서 추가된 `bg-bg min-h-screen text-fg antialiased` 부분은 유지.
+
+```bash
+# Geist 잔재 0건
+grep -rn "geistSans\|geistMono\|--font-geist\|next/font/google" src/   # exit 1
+```
+
+### 3. 빌드 — woff2 자산 번들 확인
+
+```bash
+# cwd: /Users/nhn/personal/fos-accountbook/.claude/worktrees/plan001
+pnpm build
+```
+
+Next.js 빌드가 `node_modules` 안의 woff2 를 자동으로 `.next/static/media/` 에 복사하여 hash 처리. 빌드 산출물에서 woff2 가 검출되면 OK.
+
+```bash
+find .next/static/media -name '*.woff2' 2>/dev/null | wc -l   # >= 2 (Pretendard + Inter)
+```
+
+### 4. 시각 + 폰트 변수 검증
+
+수동 smoke (`pnpm dev`):
+- 메인 페이지 → 한글 본문이 Pretendard 로 렌더 (DevTools Network → Fonts 탭에서 `PretendardVariable...woff2` 로드 확인)
+- 금액 (`<span className="num">` 또는 `data-num` 속성 요소) → Inter + tabular-nums (숫자 폭 동일)
+- light/dark 모드 토글 → 폰트 변경 없음 (정상)
+- DevTools Computed → `<body>` 의 `--font-sans` 가 Pretendard 자동 stack, `--font-num` 이 Inter 자동 stack
 
 ---
 
@@ -87,39 +92,38 @@ grep -rn 'hsl(var(--income))\|hsl(var(--expense))' src/   # exit 1 (0건) 이어
 
 | 파일 | 변경 |
 |---|---|
-| `src/components/ui/*.tsx` (23개) | `hsl(var(--x))` 패턴 제거. 대부분 className 단순화 |
-| `src/app/globals.css` | `:root` / `[data-theme="dark"]` 의 shadcn 변수를 brand/neutral 토큰 참조로 단순화 |
+| `src/app/layout.tsx` | next/font/google → next/font/local. variable 명 교체 |
+| `package.json` / `pnpm-lock.yaml` | `pretendard` + `inter-ui` 의존 추가 |
 
 ## 검증
 
 ```bash
-# cwd: /Users/nhn/personal/fos-accountbook
-# branch: plan/001-design-system-teal
-
+# cwd: /Users/nhn/personal/fos-accountbook/.claude/worktrees/plan001
 pnpm lint
-pnpm type-check 2>/dev/null || pnpm tsc --noEmit
 pnpm build
 pnpm test --run
 
-# 핵심 검증: hsl(var()) 패턴 전수 제거
-! grep -rnE 'hsl\(var\(--' src/                       # exit 1 (0건)
-! grep -rnE 'hsl\(var\(--' src/components/ui/         # exit 1 (0건)
+# Geist 잔재 0건
+! grep -rnE 'geistSans|geistMono|--font-geist|next/font/google' src/   # exit 1
 
-# brand/neutral 토큰 단일 소스화
-grep -nE '--primary:\s*var\(--color-brand-' src/app/globals.css | wc -l   # >= 1 (light + dark)
-grep -nE '--background:\s*var\(--color-neutral-' src/app/globals.css | wc -l  # >= 1
+# Pretendard / Inter 로딩 확인
+grep -n 'PretendardVariable.woff2' src/app/layout.tsx | wc -l   # = 1
+grep -n 'InterVariable.woff2' src/app/layout.tsx | wc -l        # = 1
+grep -n 'next/font/local' src/app/layout.tsx | wc -l            # = 1
 
-# Tailwind 빌드 성공 (--color-income 등 OKLCH 직접 사용 시 v4 가 정상 처리)
-pnpm build 2>&1 | grep -iE "error|fail"   # 빌드 에러 없음
+# npm 패키지 lock
+grep -E '"pretendard":|"inter-ui":' package.json | wc -l        # = 2
+test -f node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2 && echo "Pretendard OK"
+test -f node_modules/inter-ui/variable/InterVariable.woff2 && echo "Inter OK"
+
+# 빌드 산출물에 woff2 번들
+find .next/static/media -name '*.woff2' 2>/dev/null | wc -l    # >= 2
 ```
-
-수동 smoke (`pnpm dev`):
-- `/expenses` 페이지 → 모든 form 입력, button, badge 가 Teal brand 색으로 정상 렌더
-- light/dark 토글 → 모든 ui/ 컴포넌트가 셀렉터 따라 색 전환
-- sonner toast → light/dark 양쪽에서 색 정상
 
 ## 의도 메모 (왜)
 
-- HSL 채널 패턴은 shadcn 의 historic constraint (Tailwind v3 에서 alpha modifier 지원 위한 공간). Tailwind v4 + OKLCH 에서는 `oklch(L C H / alpha)` 가 alpha 를 직접 지원 → HSL 채널 트릭 무용.
-- `--primary: var(--color-brand-500)` 처럼 단일 소스 (brand 스케일) 로 묶으면 추후 brand hue 변경 시 한 곳만 수정. plan002~005 에서 페이지별 미세 조정이 들어와도 토큰 일관성 유지.
-- `_shared/common-pitfalls.md § 3-13` (npm dep 제거 전 globals.css 의 직접 참조 grep) 패턴 적용: 이 phase 에서는 dep 제거 없음, 단 globals.css 변수 정리 시 사용처 grep 선행.
+- **npm 패키지 사용 (pretendard / inter-ui)** — `pnpm-lock.yaml` 의 integrity hash 가 woff2 hash 까지 lock 하므로 빌드 결정성 확보. `curl ...github.com/.../raw/main/...` 는 브랜치 HEAD 참조라 실행 시점에 따라 woff2 hash 가 달라짐 (재현성 깨짐).
+- **public/fonts/ 복사 안 함** — `next/font/local` 의 `src` 가 `node_modules` 경로를 직접 받음. Next.js 가 빌드 시 hash 처리 + `.next/static/media/` 복사 자동 수행. public/ 복사는 추가 단계 + 동기화 부담.
+- **`--font-sans` 단일 소스** — `next/font/local` 의 `variable: "--font-sans"` 가 폰트명 + 자동 stack 모두 생성. phase 01 에서 globals.css 의 `--font-sans` 정의를 생략했으므로 우선순위 혼동 없음.
+- **`weight: "45 920"`** — Pretendard Variable 의 weight 범위. `100 900` (Inter) 와 마찬가지로 variable axis 전 구간 사용 가능. 페이지별 weight 사용은 plan002~005 에서 결정.
+- **Inter 한글 글리프 부재** — 의도된 latin digit 전용. 한글은 Pretendard stack 으로 떨어지도록 `--font-num` 의 자동 stack 이 처리.
