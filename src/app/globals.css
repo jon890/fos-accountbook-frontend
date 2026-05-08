@@ -41,7 +41,6 @@
   --color-fg:           var(--color-neutral-900);
   --color-fg-muted:     var(--color-neutral-600);
   --color-fg-subtle:    var(--color-neutral-500);
-  --color-border:       var(--color-neutral-200);
   --color-border-strong: var(--color-neutral-300);
 
   /* ── radius ─────────────────────────────────── */
