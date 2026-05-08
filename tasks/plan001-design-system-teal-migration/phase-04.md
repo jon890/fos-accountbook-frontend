@@ -1,7 +1,7 @@
 # Phase 04 — 통합 검증 + legacy 잔재 grep + completed 마킹
 
 **Model**: haiku
-**Status**: pending
+**Status**: completed
 
 ---
 

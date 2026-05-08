@@ -1,7 +1,7 @@
 # Phase 02 — next-themes data-theme 전환 + layout body 하드코딩 정리
 
 **Model**: sonnet
-**Status**: pending
+**Status**: completed
 
 ---
 

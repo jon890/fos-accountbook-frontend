@@ -1,7 +1,7 @@
 # Phase 03 — Pretendard + Inter 폰트 도입 (npm 패키지 + next/font/local)
 
 **Model**: sonnet
-**Status**: pending
+**Status**: completed
 
 ---
 
