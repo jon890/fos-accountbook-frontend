@@ -159,20 +159,28 @@ task 파일을 **사용자에게 제출하기 전**에 반드시 [`common-pitfal
 1. **docs 반영 완료 확인** — `docs/adr.md` / `docs/flow.md` / `docs/data-schema.md` / `docs/code-architecture.md` / `docs/pages/{page}.md` / `CLAUDE.md` 중 해당하는 문서에 이번 결정이 모두 기록됐는지 점검
 2. **task 파일 생성** — `tasks/plan{N}-{kebab-slug}/` 디렉터리 + `index.json` + phase 파일들 작성. 상세 규칙은 [`task-create.md`](./task-create.md) 참조 (index.json 스키마 / model 라우팅 / phase 작성 체크리스트 / 마지막 2 phase 표준). CLAUDE.md "Task 작업 규칙" 도 준수 — 원자적 단일 책임, phase 당 작업 5개 이하, 자기완결 프롬프트, **마지막 phase 에 index.json status="completed" 마킹 명시**
 3. **`common-pitfalls.md` 의 P1~P9 + 패턴 소진 체크리스트 사전 소진** — task 제출 전 self-check
-4. **branch 확인** — `git branch --show-current` 가 `main` 이어야 함. PR 브랜치에서 작업 중이면 stash 후 main 으로 switch
-5. **git commit** — docs 변경 + task 파일을 **한 커밋** 으로 묶어 생성
-6. **git push origin main** — 원격에 즉시 반영 (force push 금지)
-7. 사용자 보고 + 실행 안내:
+4. **plan 브랜치 생성** — `git switch -c plan/{N}-{kebab-slug} origin/main`. 매 plan 마다 origin/main 기준 신규 브랜치 (이전 plan 브랜치 위에 쌓지 않는다)
+5. **git commit** — docs 변경 + task 파일을 **한 커밋** 으로 묶어 생성. commit 메시지: `docs(plan{N}): {plan 한 줄 요약}`
+6. **git push -u origin plan/{N}-{kebab-slug}** — 원격에 push (`-u` 로 upstream 설정). **PR 생성하지 않는다** — task 만으로는 머지할 가치가 없으므로 PR 단독 머지 사고 (status="pending" 인 채 main 진입) 를 처음부터 회피
+7. **main 으로 복귀** — `git switch main`. 이후 사용자가 `/build-with-teams` 호출 시 같은 브랜치에서 작업 이어가도록
+8. 사용자 보고 + 실행 안내:
 
-> plan{N} task 파일 생성 + commit + push 완료. `/build-with-teams plan{N}` 로 구현을 시작하세요.
+> plan{N} task 파일 생성 + push 완료 (브랜치: `plan/{N}-{kebab-slug}`).
+> `/build-with-teams plan{N}` 로 구현을 시작하면 같은 브랜치에서 phase 실행 후 PR 이 생성됩니다.
 
-**실제 구현 (phase 실행) 은 사용자가 명시적으로 `/build-with-teams` 를 호출할 때 시작.** planning 스킬은 task 생성 + push 까지만 책임진다.
+**실제 구현 (phase 실행) + PR 생성은 사용자가 명시적으로 `/build-with-teams` 를 호출할 때 시작.** planning 스킬은 task 생성 + 브랜치 push 까지만 책임진다 (PR 생성 책임 없음).
+
+### 왜 PR 을 생성하지 않는가
+
+- task 파일 단독 PR 은 **결과물 없는 spec 만 main 으로 머지**되는 사고 패턴 — `status="pending"` 인 채 main 에 진입하면 다른 세션에서 재실행 시 사전 검증이 통과해 중복 작업 발생 (실사례: fos-blog plan024/025 사후 정리 비용)
+- task 와 결과물을 같은 PR 에 묶으면 spec ↔ 코드 정합성을 reviewer 가 한 번에 검증 가능 — 분리된 두 PR 보다 정합 보장에 유리
+- 사용자가 며칠 후 `/build-with-teams` 로 재개해도 PR 미생성 → 머지 위험 0. 브랜치만 보존되므로 안전
 
 ### 예외
 
-- **docs 변경 없음 + task 없음** (논의만 한 케이스): commit / push 생략, "task 생성할 규모 아니므로 기록 없이 종료" 고지
-- **force push 필요**: 금지 — 기존 커밋 수정 대신 새 커밋 생성
-- **원격 branch protection 으로 main 직접 push 차단**: PR 경로로 우회 (브랜치 만들고 PR 생성)
+- **docs 변경 없음 + task 없음** (논의만 한 케이스): branch 생성 / commit / push 생략, "task 생성할 규모 아니므로 기록 없이 종료" 고지
+- **force push 필요**: 금지 — 기존 커밋 수정 대신 새 커밋 생성. 단 사용자가 명시적으로 `/planning` 재호출로 task 수정을 요청한 경우에 한해 같은 브랜치에 추가 commit + push (force 아님)
+- **plan 브랜치가 이미 원격에 존재**: 다른 세션에서 만든 동일 plan. 사용자에게 알리고 (a) 그 브랜치 fetch 후 추가 commit (b) 새 plan 번호로 신규 결정 의뢰 (`AskUserQuestion`)
 
 ---
 

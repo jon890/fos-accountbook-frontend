@@ -53,7 +53,86 @@ gh pr view <N> --comments
 
 ---
 
-## 2단계: 리뷰 분류 및 우선순위 결정
+## 2단계: PR Conflict 사전 점검 및 해결
+
+리뷰 fix 를 push 하기 전에 PR 이 main 과 conflict 상태인지 확인. CONFLICTING 인 채로 fix commit 을 push 하면 PR 이 여전히 머지 불가 → fix 효과가 무력화.
+
+### 2-1. mergeable 상태 확인
+
+```bash
+gh pr view <N> --json mergeable,mergeStateStatus
+```
+
+판정:
+- `mergeable: MERGEABLE` + `mergeStateStatus: CLEAN/UNSTABLE/HAS_HOOKS/BLOCKED` → conflict 없음. 3단계로
+- `mergeable: CONFLICTING` 또는 `mergeStateStatus: DIRTY` → conflict 해결 필요. 2-2 로
+- `mergeable: UNKNOWN` → 잠시 대기 후 재확인 (GitHub 가 머지 분석 중)
+
+> `BLOCKED` 는 보호 규칙 (리뷰 필수 등) 의미 — conflict 와 별개로 fix 진행 가능.
+
+### 2-2. worktree 만들어 rebase 시도
+
+```bash
+# cwd: <repo root>
+git fetch origin
+mkdir -p .claude/worktrees
+git worktree add .claude/worktrees/{branch}-rebase {pr-head-branch}
+cd .claude/worktrees/{branch}-rebase
+git rebase origin/main 2>&1 | tail -10
+```
+
+conflict 가 발생한 파일을 `git status` 로 식별.
+
+### 2-3. Conflict 분류 + 자동/수동 처리
+
+| Conflict 유형 | 처리 방식 |
+|---|---|
+| `pnpm-lock.yaml` / `package-lock.json` / `yarn.lock` | 항상 main 채택 (`git checkout --ours <file>`) + 패키지 매니저 install 로 재생성 (`pnpm install`). lockfile 수동 머지 금지 — 무결성 깨짐 |
+| `package.json` | 수동 머지: 신규 의존성은 보존, 버전은 main 우선. conflict marker 직접 편집 |
+| 코드 파일 (.ts/.tsx/.js/.css 등) | **사용자 결정 분기** (`AskUserQuestion`) — 의미적 충돌이라 자동 처리 금지 |
+| docs (.md) | 양쪽 보존 권장 — 두 변경이 의도된 다른 정보일 가능성 높음. 사용자 confirm 후 머지 |
+
+**lockfile 처리 표준 절차**:
+
+```bash
+# rebase 중에는 --ours = upstream(main), --theirs = our commit. main 채택은 --ours.
+git checkout --ours pnpm-lock.yaml
+# package.json 수동 fix 후
+pnpm install  # lock 재생성
+git add package.json pnpm-lock.yaml
+```
+
+**코드 파일 conflict 결정 의뢰 (필수)**:
+
+`AskUserQuestion` 으로 옵션 제시:
+- (a) main 채택 (`--ours`)
+- (b) PR 채택 (`--theirs`)
+- (c) 양쪽 변경 병합 (수동 — 어떻게 병합할지 추가 질문)
+- (d) 사용자가 직접 해결할 테니 worktree 만 남겨둠 (skill 종료, 사용자가 수동 처리 후 force-push)
+
+### 2-4. 검증 + force-with-lease push
+
+conflict 해결 후 빌드/테스트 검증 → 통과 시 force-with-lease push (rebase 한 commit hash 가 변경되므로 force 필요. `--force-with-lease` 는 원격이 예상한 상태일 때만 push — 다른 사람의 push 덮어씌움 방지):
+
+```bash
+pnpm lint && pnpm build && pnpm test:ci
+git rebase --continue   # 모든 conflict 해결 시
+git push --force-with-lease
+```
+
+### 2-5. 정리 + 재확인
+
+```bash
+cd <repo root>
+git worktree remove .claude/worktrees/{branch}-rebase
+gh pr view <N> --json mergeable,mergeStateStatus   # MERGEABLE 재확인
+```
+
+이 단계가 끝나면 3단계로. 단 사용자가 (d) 옵션 선택 시 fix 진행 차단 + 사용자가 수동 처리 후 재호출하도록 안내.
+
+---
+
+## 3단계: 리뷰 분류 및 우선순위 결정
 
 리뷰 댓글에서 항목을 파싱한다. 이 프로젝트에서는 claude bot이 아래 형식으로 댓글을 남긴다:
 
@@ -102,7 +181,7 @@ claude bot 외에도 GitHub formal review, 인라인 코드 댓글(`gh api .../p
 
 ---
 
-## 3단계: 코드 수정
+## 4단계: 코드 수정
 
 🔴 항목부터 처리하고, 완료 후 🟡 항목을 처리한다.
 
@@ -121,7 +200,7 @@ claude bot 외에도 GitHub formal review, 인라인 코드 댓글(`gh api .../p
 
 ---
 
-## 4단계: 검증
+## 5단계: 검증
 
 코드 수정 전에 테스트 파일 목록을 미리 저장해 둔다:
 
@@ -150,7 +229,7 @@ pnpm lint && pnpm tsc --noEmit && pnpm test --passWithNoTests
 
 ---
 
-## 5단계: Commit & Push
+## 6단계: Commit & Push
 
 commit 메시지는 이 프로젝트의 컨벤션을 따른다 (commit-convention 스킬 참조):
 
@@ -193,7 +272,7 @@ COMMIT_HASH=$(git rev-parse --short HEAD)
 
 ---
 
-## 6단계: 인라인 코멘트에 해결 내용 reply
+## 7단계: 인라인 코멘트에 해결 내용 reply
 
 코드 수정이 완료되고 push된 후, 처리한 인라인 리뷰 댓글 각각에 reply를 달아 해결됐음을 알린다.
 
@@ -245,7 +324,7 @@ ${ISSUE_URL}"
 
 ---
 
-## 7단계: 결과 보고
+## 8단계: 결과 보고
 
 완료 후 요약:
 
