@@ -8,13 +8,18 @@ on:
 
 jobs:
   claude-review:
+    # /review 트리거는 댓글 첫 줄이 정확히 '/review' 로 시작할 때만 발동.
+    # contains() substring 매칭은 reply 본문 ("## /review 반영 완료...") 까지
+    # 매치해 workflow 재호출 사고 발생 (PR #202 관측, 2026-05-08).
+    # startsWith() 로 첫 줄 prefix 매치만 허용 — '/reviewed' 같은 false positive 는
+    # 실용적으로 거의 발생 안 하므로 절충 수용.
     if: |
       github.actor != 'dependabot[bot]' &&
       github.actor != 'claude[bot]' && (
         github.event_name == 'pull_request' ||
         (github.event_name == 'issue_comment' &&
          github.event.issue.pull_request != null &&
-         contains(github.event.comment.body, '/review'))
+         startsWith(github.event.comment.body, '/review'))
       )
     runs-on: ubuntu-latest
     timeout-minutes: 15
