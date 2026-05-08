@@ -1,195 +1,228 @@
 @import "tailwindcss";
 
-/**
- * Tailwind v4 Theme 정의
- *
- * 색상 팔레트: "Seoul Finance"
- * - 신뢰감 있는 블루 계열 Primary
- * - 의미 기반 시맨틱 색상 (지출/수입/예산/가족)
- * - 따뜻한 슬레이트 배경
- */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
+  /* ── brand teal (h=188) ─────────────────────── */
+  --color-brand-50:  oklch(0.975 0.018 188);
+  --color-brand-100: oklch(0.945 0.040 188);
+  --color-brand-200: oklch(0.890 0.075 188);
+  --color-brand-300: oklch(0.810 0.105 188);
+  --color-brand-400: oklch(0.720 0.130 188);
+  --color-brand-500: oklch(0.640 0.140 188);
+  --color-brand-600: oklch(0.555 0.130 188);
+  --color-brand-700: oklch(0.470 0.110 188);
+  --color-brand-800: oklch(0.385 0.090 188);
+  --color-brand-900: oklch(0.300 0.070 188);
 
-  /* 시맨틱 거래 색상 */
-  --color-income: hsl(var(--income));
-  --color-expense: hsl(var(--expense));
+  /* ── semantic ───────────────────────────────── */
+  --color-income:  oklch(0.610 0.150 152);
+  --color-expense: oklch(0.620 0.180 25);
+  --color-warning: oklch(0.760 0.150 78);
 
-  --radius: 0.5rem;
+  /* ── neutral (cool gray, h=230) ─────────────── */
+  --color-neutral-0:   oklch(1 0 0);
+  --color-neutral-50:  oklch(0.985 0.003 230);
+  --color-neutral-100: oklch(0.965 0.005 230);
+  --color-neutral-200: oklch(0.925 0.008 230);
+  --color-neutral-300: oklch(0.875 0.012 230);
+  --color-neutral-400: oklch(0.760 0.015 230);
+  --color-neutral-500: oklch(0.625 0.018 230);
+  --color-neutral-600: oklch(0.510 0.018 230);
+  --color-neutral-700: oklch(0.395 0.015 230);
+  --color-neutral-800: oklch(0.275 0.012 230);
+  --color-neutral-900: oklch(0.190 0.010 230);
+  --color-neutral-950: oklch(0.135 0.008 230);
+
+  /* ── semantic surface tokens (light defaults) ── */
+  --color-bg:           var(--color-neutral-50);
+  --color-bg-elev:      var(--color-neutral-0);
+  --color-bg-muted:     var(--color-neutral-100);
+  --color-fg:           var(--color-neutral-900);
+  --color-fg-muted:     var(--color-neutral-600);
+  --color-fg-subtle:    var(--color-neutral-500);
+  --color-border-strong: var(--color-neutral-300);
+
+  /* ── radius ─────────────────────────────────── */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+
+  /* ── shadow ─────────────────────────────────── */
+  --shadow-subtle:  0 1px 2px 0 rgb(15 23 42 / 0.04);
+  --shadow-default: 0 2px 8px -2px rgb(15 23 42 / 0.06), 0 1px 3px -1px rgb(15 23 42 / 0.04);
+  --shadow-popover: 0 8px 24px -8px rgb(15 23 42 / 0.12), 0 2px 6px -2px rgb(15 23 42 / 0.06);
+  --shadow-modal:   0 24px 48px -16px rgb(15 23 42 / 0.18), 0 8px 16px -8px rgb(15 23 42 / 0.10);
+
+  /* ── font (mono only — sans/num from next/font) ─ */
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* ── shadcn → token mapping (Tailwind utility 호환) ─ */
+  --color-background:         var(--background);
+  --color-foreground:         var(--foreground);
+  --color-primary:            var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary:          var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:              var(--muted);
+  --color-muted-foreground:   var(--muted-foreground);
+  --color-accent:             var(--accent);
+  --color-accent-foreground:  var(--accent-foreground);
+  --color-destructive:        var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-card:               var(--card);
+  --color-card-foreground:    var(--card-foreground);
+  --color-popover:            var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-border:             var(--border);
+  --color-input:              var(--input);
+  --color-ring:               var(--ring);
 }
 
-@layer base {
-  :root {
-    /* === Seoul Finance 라이트 팔레트 === */
+:root {
+  --background:            var(--color-neutral-50);
+  --foreground:            var(--color-neutral-900);
+  --primary:               var(--color-brand-500);
+  --primary-foreground:    oklch(1 0 0);
+  --secondary:             var(--color-neutral-100);
+  --secondary-foreground:  var(--color-neutral-900);
+  --muted:                 var(--color-neutral-100);
+  --muted-foreground:      var(--color-neutral-600);
+  --accent:                var(--color-neutral-100);
+  --accent-foreground:     var(--color-neutral-900);
+  --destructive:           var(--color-expense);
+  --destructive-foreground: oklch(1 0 0);
+  --card:                  var(--color-neutral-0);
+  --card-foreground:       var(--color-neutral-900);
+  --popover:               var(--color-neutral-0);
+  --popover-foreground:    var(--color-neutral-900);
+  --border:                var(--color-neutral-200);
+  --input:                 var(--color-neutral-200);
+  --ring:                  var(--color-brand-500);
 
-    /* 표면 */
-    --background: 210 20% 98%;       /* #f8fafc — 따뜻한 슬레이트 화이트 */
-    --foreground: 222 47% 11%;       /* #0f172a — 슬레이트-900 */
-    --card: 0 0% 100%;               /* 순수 화이트 */
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+  --chart-expense:               var(--color-expense);
+  --chart-income:                var(--color-income);
+  --color-category-fallback-bg:  oklch(0.540 0.130 250 / 0.12);
+}
 
-    /* 브랜드: 신뢰감 있는 블루 (blue-600) */
-    --primary: 220 90% 56%;          /* #2563eb */
-    --primary-foreground: 0 0% 100%;
+[data-theme="dark"] {
+  --color-bg:           oklch(0.155 0.010 230);
+  --color-bg-elev:      oklch(0.205 0.012 230);
+  --color-bg-muted:     oklch(0.235 0.012 230);
+  --color-fg:           oklch(0.965 0.005 230);
+  --color-fg-muted:     oklch(0.760 0.015 230);
+  --color-fg-subtle:    oklch(0.625 0.018 230);
+  --color-border:       oklch(0.275 0.012 230);
+  --color-border-strong: oklch(0.395 0.015 230);
 
-    /* 세컨더리 & 뮤트: 쿨 슬레이트 */
-    --secondary: 210 40% 96%;        /* slate-100 */
-    --secondary-foreground: 215 25% 27%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%; /* slate-500 */
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 11%;
-
-    /* 차트 */
-    --chart-expense: #fb7185; /* rose-400 */
-    --chart-income: #34d399;  /* emerald-400 */
-    --color-category-fallback-bg: rgb(99 102 241 / 0.12); /* indigo-500 at 12% — 삭제된 카테고리 fallback */
-
-  /* 위험/삭제 */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
-
-    /* 구조 */
-    --border: 214 32% 91%;           /* slate-200 */
-    --input: 214 32% 91%;
-    --ring: 220 90% 56%;             /* primary와 동일 */
-    --radius: 0.5rem;
-
-    /* 시맨틱 거래 색상 */
-    --income: 160 84% 39%;           /* emerald-600 — 수입 */
-    --expense: 347 77% 50%;          /* rose-600 — 지출 */
-  }
-
-  .dark {
-    --background: 222 47% 6%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 213 100% 68%;
-    --primary-foreground: 222 47% 11%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 213 100% 68%;
-  }
+  --background:            oklch(0.155 0.010 230);
+  --foreground:            oklch(0.965 0.005 230);
+  --primary:               oklch(0.720 0.130 188);
+  --primary-foreground:    oklch(0.190 0.010 230);
+  --secondary:             oklch(0.275 0.012 230);
+  --secondary-foreground:  oklch(0.965 0.005 230);
+  --muted:                 oklch(0.275 0.012 230);
+  --muted-foreground:      oklch(0.760 0.015 230);
+  --accent:                oklch(0.275 0.012 230);
+  --accent-foreground:     oklch(0.965 0.005 230);
+  --destructive:           oklch(0.620 0.180 25);
+  --destructive-foreground: oklch(0.965 0.005 230);
+  --card:                  oklch(0.205 0.012 230);
+  --card-foreground:       oklch(0.965 0.005 230);
+  --popover:               oklch(0.205 0.012 230);
+  --popover-foreground:    oklch(0.965 0.005 230);
+  --border:                oklch(0.275 0.012 230);
+  --input:                 oklch(0.275 0.012 230);
+  --ring:                  oklch(0.720 0.130 188);
 }
 
 @layer base {
   * {
-    border-color: hsl(var(--border));
+    border-color: var(--color-border);
   }
-  body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+
+  html, body {
+    font-family: var(--font-sans);
+    color: var(--color-fg);
+    background: var(--color-bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .num,
+  [data-num] {
+    font-family: var(--font-num);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    letter-spacing: -0.01em;
   }
 }
 
 @layer components {
-  /* === 앱 배경 === */
   .app-background {
     background: linear-gradient(
       160deg,
-      #f8fafc 0%,
-      #eff6ff 55%,
-      #f5f3ff 100%
+      oklch(0.985 0.003 230) 0%,
+      oklch(0.945 0.040 188 / 0.4) 55%,
+      oklch(0.945 0.040 188 / 0.2) 100%
     );
   }
 
-  /* === 시맨틱 그라디언트 — 통일된 135deg === */
-
-  /* 브랜드 / 기본 액션 */
   .gradient-primary {
-    background-image: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    background-image: linear-gradient(135deg, oklch(0.720 0.130 188) 0%, oklch(0.555 0.130 188) 100%);
   }
 
-  /* 지출 — 로즈-레드 */
   .gradient-expense {
-    background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+    background: linear-gradient(135deg, oklch(0.700 0.180 25) 0%, oklch(0.580 0.180 25) 100%);
   }
 
-  /* 수입 — 에메랄드 */
   .gradient-income {
-    background: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    background: linear-gradient(135deg, oklch(0.700 0.150 152) 0%, oklch(0.560 0.150 152) 100%);
   }
 
-  /* 예산 — 앰버 */
   .gradient-budget {
-    background-image: linear-gradient(135deg, #fbbf24 0%, #d97706 100%);
+    background-image: linear-gradient(135deg, oklch(0.820 0.150 78) 0%, oklch(0.680 0.150 78) 100%);
   }
 
-  /* 가족 — 바이올렛 */
   .gradient-family {
-    background-image: linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%);
+    background-image: linear-gradient(135deg, oklch(0.810 0.105 188) 0%, oklch(0.640 0.140 188) 100%);
   }
 
-  /* 카테고리 — 인디고 */
   .gradient-category {
-    background-image: linear-gradient(135deg, #818cf8 0%, #4f46e5 100%);
+    background-image: linear-gradient(135deg, oklch(0.890 0.075 188) 0%, oklch(0.720 0.130 188) 100%);
   }
 
-  /* 레거시 호환 */
-  /* === 그라디언트 카드 위 텍스트/오버레이 공통 유틸 === */
-  /* 그라디언트 배경 위에서 색상에 무관하게 일관된 가독성 제공 */
   .gradient-card-label {
     color: rgba(255, 255, 255, 0.85);
   }
+
   .gradient-card-sublabel {
     color: rgba(255, 255, 255, 0.70);
   }
+
   .gradient-card-overlay {
     background-color: rgba(255, 255, 255, 0.20);
   }
 
-  /* 레거시 호환 */
   .gradient-blue-purple {
-    background-image: linear-gradient(135deg, #3b82f6 0%, #6366f1 100%);
+    background-image: linear-gradient(135deg, oklch(0.620 0.190 256) 0%, oklch(0.585 0.205 277) 100%);
   }
 
   .gradient-emerald-green {
-    background-image: linear-gradient(135deg, #34d399 0%, #059669 100%);
+    background-image: linear-gradient(135deg, oklch(0.770 0.145 165) 0%, oklch(0.560 0.135 162) 100%);
   }
 
   .gradient-purple-indigo {
-    background-image: linear-gradient(135deg, #a78bfa 0%, #6366f1 100%);
+    background-image: linear-gradient(135deg, oklch(0.700 0.165 290) 0%, oklch(0.585 0.205 277) 100%);
   }
 
-  /* === 글래스모피즘 === */
   .glass {
     backdrop-filter: blur(12px);
     background-color: rgba(255, 255, 255, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.5);
   }
 
-  /* === 호버 리프트 — 절제된 4px === */
   .hover-lift {
     transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -205,13 +238,16 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
 
-  /* 필터 칩 활성 상태 */
   .chip-active {
-    @apply bg-gray-800 text-white border-transparent shadow-sm;
+    background-color: var(--color-neutral-800);
+    color: oklch(1 0 0);
+    border-color: transparent;
+    box-shadow: var(--shadow-subtle);
   }
 
   .animate-float {

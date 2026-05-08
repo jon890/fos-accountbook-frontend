@@ -42,6 +42,9 @@ Claude Code가 항상 따라야 할 규칙과 참조 문서 포인터.
 | NextAuth 세션/토큰 수정 | ADR-F03 — JWT 전략, profile 캐싱, 만료 5분 전 갱신 |
 | Server Action 입력 검증 | ADR-F06 — Zod 런타임 검증 필수 |
 | Shadcn / Tailwind v4 스타일 | ADR-F07 — 시맨틱 그라디언트 클래스, 하드코딩 금지 |
+| 색 토큰 작성 (brand/semantic/surface) | ADR-F13 — OKLCH 평면 값. hex/rgb/hsl 금지 |
+| 폰트 추가 / 수치 표기 | ADR-F14 — Pretendard Variable + Inter (`.num` / tabular-nums) |
+| dark mode 셀렉터 | ADR-F15 — `[data-theme="dark"]` 만. `.dark` 신규 사용 금지 |
 | `alert/confirm/prompt` 대체 | ADR-F08 — sonner 토스트 사용 |
 | Jest 테스트 추가 | ADR-F09 — MSW 아닌 jest.mock 방식 |
 | 실시간 업데이트 vs revalidate | ADR-F10 — Server Action + `revalidatePath` 유지 |
@@ -85,10 +88,16 @@ Page (app/) → Action (actions/) → Service (services/) → lib/server/api
 
 ### 스타일링
 
-- **시맨틱 클래스 필수** — 하드코딩 색상 금지
+- **OKLCH 토큰 강제** (ADR-F13) — `globals.css` 의 `@theme` 블록 외부에서 hex/rgb/hsl 직접 작성 금지
+  - brand: `--color-brand-{50..900}` (Teal h=188)
+  - semantic: `--color-{income|expense|warning}`
+  - surface: `--color-{bg|bg-elev|bg-muted|fg|fg-muted|fg-subtle|border|border-strong}` (light/dark 분리)
+- **시맨틱 그라디언트 클래스 필수** — 하드코딩 색상 금지
   - `gradient-expense` · `gradient-income` · `gradient-budget`
   - `gradient-family` · `gradient-category` · `gradient-primary`
-- 인라인 `style={{ }}` 최소화
+- **Dark mode**: `[data-theme="dark"]` 셀렉터만 사용 (ADR-F15). `.dark` 클래스 신규 추가 금지
+- **폰트**: `--font-sans` (Pretendard Variable, ADR-F14) + `--font-num` (Inter, 수치 전용 + tabular-nums)
+- 인라인 `style={{ }}` 최소화 — 단일 토큰은 `text-[var(--token)]` arbitrary class
 - `cn()` 유틸리티로 클래스 병합
 
 ### 컴포넌트
