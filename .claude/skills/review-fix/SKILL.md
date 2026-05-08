@@ -303,6 +303,36 @@ reply 본문 작성 원칙:
 - 리뷰가 지적한 문제와 적용한 해결책을 간결하게 기술한다
 - 건너뛴 항목(이미 반영됐거나 해당 없음)은 reply하지 않는다
 
+### ⚠️ 트리거 키워드 회피 (필수 — 사고 방지)
+
+PR/이슈 댓글 게시 시 본문에 **claude-code-review workflow 의 트리거 키워드를 절대 포함 금지**. workflow 의 if 조건이 `contains(comment.body, '/review')` 같은 substring 매칭이라 reply 본문에 그 단어가 자연스럽게 들어가도 **워크플로 재호출 사고** 발생 (사용자 토큰 낭비 + 무한 루프 위험).
+
+**금지 패턴** (claude bot trigger 키워드):
+- `/review` (정확히 이 문자열 포함 시 발동)
+- 그 외 워크플로 if 조건에서 사용하는 모든 키워드 (워크플로별로 점검)
+
+**대체 표현**:
+| 금지 | 대체 |
+|---|---|
+| `## /review 반영 완료` | `## 코드 리뷰 반영 완료` 또는 `## ✅ 반영 완료` |
+| `/review 의 머스트 픽스 처리` | `리뷰 의 머스트 픽스 처리` 또는 `머스트 픽스 처리` |
+| `/review-fix 결과` | `review-fix 결과` 또는 `리뷰 처리 결과` |
+
+**사전 검증 (게시 직전)**:
+
+```bash
+# 게시 직전 body 에서 트리거 키워드 grep
+BODY="<게시할 본문>"
+if printf '%s' "$BODY" | grep -qE '/review\b'; then
+  echo "🚫 차단: body 에 /review 트리거 키워드 포함 — 대체 표현으로 수정 후 재게시"
+  exit 1
+fi
+```
+
+이 검증을 모든 `gh pr comment` / `gh api .../comments/*/replies` 호출 직전에 수행. 사고 발생 시 사용자에게 즉시 보고하고 댓글 삭제 (`gh api repos/{repo}/issues/comments/{id} -X DELETE`) 후 재게시.
+
+**실사례**: PR #202 에 `/review-fix` 결과 reply 게시 시 body 가 "## /review 반영 완료\n\n..." 로 시작 → workflow `issue_comment` 트리거 발동 (2026-05-08T07:14:27Z). 사용자가 발견.
+
 ### 대범위 항목 — 이슈 등록 후 reply
 
 대범위로 판단한 항목은 코드 수정 대신 이슈를 등록하고 해당 댓글에 reply한다:
