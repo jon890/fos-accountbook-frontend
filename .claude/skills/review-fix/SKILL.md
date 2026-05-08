@@ -53,7 +53,86 @@ gh pr view <N> --comments
 
 ---
 
-## 2단계: 리뷰 분류 및 우선순위 결정
+## 2단계: PR Conflict 사전 점검 및 해결
+
+리뷰 fix 를 push 하기 전에 PR 이 main 과 conflict 상태인지 확인. CONFLICTING 인 채로 fix commit 을 push 하면 PR 이 여전히 머지 불가 → fix 효과가 무력화.
+
+### 2-1. mergeable 상태 확인
+
+```bash
+gh pr view <N> --json mergeable,mergeStateStatus
+```
+
+판정:
+- `mergeable: MERGEABLE` + `mergeStateStatus: CLEAN/UNSTABLE/HAS_HOOKS/BLOCKED` → conflict 없음. 3단계로
+- `mergeable: CONFLICTING` 또는 `mergeStateStatus: DIRTY` → conflict 해결 필요. 2-2 로
+- `mergeable: UNKNOWN` → 잠시 대기 후 재확인 (GitHub 가 머지 분석 중)
+
+> `BLOCKED` 는 보호 규칙 (리뷰 필수 등) 의미 — conflict 와 별개로 fix 진행 가능.
+
+### 2-2. worktree 만들어 rebase 시도
+
+```bash
+# cwd: <repo root>
+git fetch origin
+mkdir -p .claude/worktrees
+git worktree add .claude/worktrees/{branch}-rebase {pr-head-branch}
+cd .claude/worktrees/{branch}-rebase
+git rebase origin/main 2>&1 | tail -10
+```
+
+conflict 가 발생한 파일을 `git status` 로 식별.
+
+### 2-3. Conflict 분류 + 자동/수동 처리
+
+| Conflict 유형 | 처리 방식 |
+|---|---|
+| `pnpm-lock.yaml` / `package-lock.json` / `yarn.lock` | 항상 main 채택 (`git checkout --ours <file>`) + 패키지 매니저 install 로 재생성 (`pnpm install`). lockfile 수동 머지 금지 — 무결성 깨짐 |
+| `package.json` | 수동 머지: 신규 의존성은 보존, 버전은 main 우선. conflict marker 직접 편집 |
+| 코드 파일 (.ts/.tsx/.js/.css 등) | **사용자 결정 분기** (`AskUserQuestion`) — 의미적 충돌이라 자동 처리 금지 |
+| docs (.md) | 양쪽 보존 권장 — 두 변경이 의도된 다른 정보일 가능성 높음. 사용자 confirm 후 머지 |
+
+**lockfile 처리 표준 절차**:
+
+```bash
+# rebase 중에는 --ours = upstream(main), --theirs = our commit. main 채택은 --ours.
+git checkout --ours pnpm-lock.yaml
+# package.json 수동 fix 후
+pnpm install  # lock 재생성
+git add package.json pnpm-lock.yaml
+```
+
+**코드 파일 conflict 결정 의뢰 (필수)**:
+
+`AskUserQuestion` 으로 옵션 제시:
+- (a) main 채택 (`--ours`)
+- (b) PR 채택 (`--theirs`)
+- (c) 양쪽 변경 병합 (수동 — 어떻게 병합할지 추가 질문)
+- (d) 사용자가 직접 해결할 테니 worktree 만 남겨둠 (skill 종료, 사용자가 수동 처리 후 force-push)
+
+### 2-4. 검증 + force-with-lease push
+
+conflict 해결 후 빌드/테스트 검증 → 통과 시 force-with-lease push (rebase 한 commit hash 가 변경되므로 force 필요. `--force-with-lease` 는 원격이 예상한 상태일 때만 push — 다른 사람의 push 덮어씌움 방지):
+
+```bash
+pnpm lint && pnpm build && pnpm test:ci
+git rebase --continue   # 모든 conflict 해결 시
+git push --force-with-lease
+```
+
+### 2-5. 정리 + 재확인
+
+```bash
+cd <repo root>
+git worktree remove .claude/worktrees/{branch}-rebase
+gh pr view <N> --json mergeable,mergeStateStatus   # MERGEABLE 재확인
+```
+
+이 단계가 끝나면 3단계로. 단 사용자가 (d) 옵션 선택 시 fix 진행 차단 + 사용자가 수동 처리 후 재호출하도록 안내.
+
+---
+
+## 3단계: 리뷰 분류 및 우선순위 결정
 
 리뷰 댓글에서 항목을 파싱한다. 이 프로젝트에서는 claude bot이 아래 형식으로 댓글을 남긴다:
 
@@ -102,7 +181,7 @@ claude bot 외에도 GitHub formal review, 인라인 코드 댓글(`gh api .../p
 
 ---
 
-## 3단계: 코드 수정
+## 4단계: 코드 수정
 
 🔴 항목부터 처리하고, 완료 후 🟡 항목을 처리한다.
 
@@ -121,7 +200,7 @@ claude bot 외에도 GitHub formal review, 인라인 코드 댓글(`gh api .../p
 
 ---
 
-## 4단계: 검증
+## 5단계: 검증
 
 코드 수정 전에 테스트 파일 목록을 미리 저장해 둔다:
 
@@ -150,7 +229,7 @@ pnpm lint && pnpm tsc --noEmit && pnpm test --passWithNoTests
 
 ---
 
-## 5단계: Commit & Push
+## 6단계: Commit & Push
 
 commit 메시지는 이 프로젝트의 컨벤션을 따른다 (commit-convention 스킬 참조):
 
@@ -193,7 +272,7 @@ COMMIT_HASH=$(git rev-parse --short HEAD)
 
 ---
 
-## 6단계: 인라인 코멘트에 해결 내용 reply
+## 7단계: 인라인 코멘트에 해결 내용 reply
 
 코드 수정이 완료되고 push된 후, 처리한 인라인 리뷰 댓글 각각에 reply를 달아 해결됐음을 알린다.
 
@@ -224,6 +303,36 @@ reply 본문 작성 원칙:
 - 리뷰가 지적한 문제와 적용한 해결책을 간결하게 기술한다
 - 건너뛴 항목(이미 반영됐거나 해당 없음)은 reply하지 않는다
 
+### ⚠️ 트리거 키워드 회피 (필수 — 사고 방지)
+
+PR/이슈 댓글 게시 시 본문에 **claude-code-review workflow 의 트리거 키워드를 절대 포함 금지**. workflow 의 if 조건이 `contains(comment.body, '/review')` 같은 substring 매칭이라 reply 본문에 그 단어가 자연스럽게 들어가도 **워크플로 재호출 사고** 발생 (사용자 토큰 낭비 + 무한 루프 위험).
+
+**금지 패턴** (claude bot trigger 키워드):
+- `/review` (정확히 이 문자열 포함 시 발동)
+- 그 외 워크플로 if 조건에서 사용하는 모든 키워드 (워크플로별로 점검)
+
+**대체 표현**:
+| 금지 | 대체 |
+|---|---|
+| `## /review 반영 완료` | `## 코드 리뷰 반영 완료` 또는 `## ✅ 반영 완료` |
+| `/review 의 머스트 픽스 처리` | `리뷰 의 머스트 픽스 처리` 또는 `머스트 픽스 처리` |
+| `/review-fix 결과` | `review-fix 결과` 또는 `리뷰 처리 결과` |
+
+**사전 검증 (게시 직전)**:
+
+```bash
+# 게시 직전 body 에서 트리거 키워드 grep
+BODY="<게시할 본문>"
+if printf '%s' "$BODY" | grep -qE '/review\b'; then
+  echo "🚫 차단: body 에 /review 트리거 키워드 포함 — 대체 표현으로 수정 후 재게시"
+  exit 1
+fi
+```
+
+이 검증을 모든 `gh pr comment` / `gh api .../comments/*/replies` 호출 직전에 수행. 사고 발생 시 사용자에게 즉시 보고하고 댓글 삭제 (`gh api repos/{repo}/issues/comments/{id} -X DELETE`) 후 재게시.
+
+**실사례**: PR #202 에 `/review-fix` 결과 reply 게시 시 body 가 "## /review 반영 완료\n\n..." 로 시작 → workflow `issue_comment` 트리거 발동 (2026-05-08T07:14:27Z). 사용자가 발견.
+
 ### 대범위 항목 — 이슈 등록 후 reply
 
 대범위로 판단한 항목은 코드 수정 대신 이슈를 등록하고 해당 댓글에 reply한다:
@@ -245,7 +354,7 @@ ${ISSUE_URL}"
 
 ---
 
-## 7단계: 결과 보고
+## 8단계: 결과 보고
 
 완료 후 요약:
 

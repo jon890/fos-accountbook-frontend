@@ -7,72 +7,48 @@ description: Claude Agent Teams 기반 구현 자동화. 계획(team-lead) → �
 
 task phase를 Claude Agent Teams 파이프라인으로 실행하는 시스템. 4-5명의 에이전트가 가시적으로 협업.
 
-## 사전 검증 (실행 전 필수 — 3중 체크)
+## 사전 검증 (실행 전 필수)
 
-plan 인자를 받으면 **가장 먼저** 아래 3가지 모두 확인. 하나라도 걸리면 사용자에게 알리고 **실행 차단** (사용자 확인 없이 강행 금지):
+plan 인자를 받으면 **가장 먼저** 아래 단계를 순서대로 수행. 신 워크플로 (`/planning` 이 plan 브랜치 push 만 하고 PR 은 `/build-with-teams` 가 생성) 기반이라 검증 단순화.
 
-### 1. main의 `index.json` status
+### 1. 원격 plan 브랜치 존재 — `/planning` 완료 여부
 
 ```bash
 # cwd: <repo root>
-test -f tasks/{plan}/index.json || echo "TASK_MISSING"
-jq -r .status tasks/{plan}/index.json 2>/dev/null
-```
-
-- `TASK_MISSING` → task 파일 부재. `/planning` 으로 먼저 설계할지 사용자에게 확인 (실사례: plan012 가 phase 메모에만 언급됐을 뿐 task 디렉터리는 없는 상태에서 호출됨)
-- `completed` → 추가 검증 (아래 "completed 마킹 ↔ 머지 커밋 정합" 참조)
-- `pending` / `in_progress` → 다음 검증으로
-
-### 2. 원격 `feat/{plan}` 브랜치 존재
-
-```bash
-git ls-remote --heads origin "feat/{plan}" | grep -q . && echo FOUND || echo NONE
-```
-
-`FOUND` → 차단. 이미 작업 중이거나 PR 미머지 상태일 가능성. 사용자 확인 후 (a) 그 브랜치를 fetch 해서 이어서 작업할지 (b) 새로 시작할지 결정.
-
-### 3. 해당 plan 제목을 포함한 오픈 PR
-
-```bash
-gh pr list --state open --search "{plan}" --json number,title,headRefName
-```
-
-결과 있음 → 차단. 작업 완료 후 머지 대기 중일 가능성.
-
-> 세 검증 모두 통과해야 신규 실행. **PR 머지 전 단계에서 main 의 `index.json` 은 여전히 `pending` 이므로 1번만 보면 재실행 사고를 놓친다. 2·3번이 커버.**
-
-### task 단독 PR 이 이미 열려있는 경우 — 옵션 A (이어서 작업) 권장 흐름 (필수)
-
-위 2번 (FOUND) + 3번 (OPEN PR) 이 동시에 걸리고, 해당 PR 이 task 파일만 (코드 변경 0개) 머지 대기 중이라면 **옵션 A (이어서 작업)** 로 전환한다. 이는 차단이 아니라 **그 PR 을 그대로 결과물 통합 PR 로 사용**하는 흐름이다 (plan024/025 의 사후 정리 사고를 처음부터 회피).
-
-**판정 기준** — `gh pr view <N> --json files,additions,deletions` 결과:
-- `files` 가 `tasks/{plan}/...` 만 포함 + 코드 (`src/...`) 변경 0
-- `state` = OPEN
-→ 옵션 A 자동 권장 (사용자 confirm)
-
-**옵션 A 흐름**:
-1. **새 브랜치 만들지 말 것** — 기존 브랜치 그대로 사용
-2. worktree 체크아웃: `git worktree add .claude/worktrees/{plan} feat/{plan}` (`-b` 없음 → 기존 브랜치 사용)
-3. phase 실행 → 결과물 commit → **같은 브랜치**에 push (PR 에 commits 추가됨)
-4. PR 제목 `chore(task)` → `feat(...)` / `fix(...)` 로 갱신: `gh pr edit <N> --title "..."` + body 도 결과물 반영 후 갱신
-5. 마지막 phase 의 `status="completed"` 마킹은 같은 브랜치 안에서
-
-**옵션 A 회피해야 하는 상황**:
-- task PR 이 이미 코드 변경을 포함 (다른 사람이 부분 구현 push 중) → 사용자 confirm 후 변경 분류
-- task PR 의 base 가 main 이 아닌 경우 (드물게 stacked PR) → 별도 처리
-
-**옵션 B (별도 `-impl` 브랜치)** 는 plan024/025 처럼 task PR 과 결과물 PR 이 분리되어 사후 정리 비용이 발생하므로, task PR 이 이미 머지된 후에만 사용 (즉 옵션 A 가 불가한 상황). 사고 패턴이라 디폴트 금지.
-
-### `completed` 마킹 ↔ 머지 커밋 정합 검증 (역방향)
-
-status 가 `completed` 인데 실제 머지 커밋이 origin/main 에 없으면 마킹 사고. 차단 전 한 번 더 확인:
-
-```bash
 git fetch origin
-git log origin/main --oneline --grep "{plan}" | head -3   # 비어있으면 마킹 사고 의심
+git ls-remote --heads origin "plan/{N}-*" | head -3
 ```
 
-부재면 사용자에게 알리고 status 를 pending 으로 되돌릴지 결정 (실사례: plan006 이 status="completed" 였지만 머지 안 된 상태에서 plan007 진행 시도, 사전 게이트 PHASE_BLOCKED).
+- 결과 없음 → `/planning {N}` 호출 안 했거나 push 누락. 사용자에게 안내:
+  > `plan{N}` 브랜치가 원격에 없습니다. `/planning {N}` 를 먼저 호출해서 task + 브랜치를 만들어 주세요.
+- 결과 있음 → 정확한 브랜치 이름 (`plan/{N}-{slug}`) 확인 후 다음 단계
+
+### 2. plan 브랜치에 task 파일 존재 확인
+
+```bash
+git ls-tree origin/plan/{N}-{slug} -- tasks/plan{N}-{slug}/index.json
+```
+
+부재면 비정상 (planning 이 task 안 만든 상태). 사용자 확인 후 `/planning {N}` 재호출 안내.
+
+### 3. 해당 plan 의 오픈 PR 점검
+
+```bash
+gh pr list --head "plan/{N}-{slug}" --state open --json number,title,headRefName,additions,deletions
+```
+
+- 결과 없음 → 신규 실행 OK (가장 흔한 케이스)
+- 결과 있음 → 이전 build-with-teams 실행이 PR 까지 만든 상태. 사용자 결정 (`AskUserQuestion`):
+  - (a) 같은 브랜치에 추가 phase commit 후 PR 갱신 (이어서 작업)
+  - (b) 별개 plan 으로 결정 (새 plan 번호 부여)
+
+### 4. 이미 머지된 plan 재호출 차단 (역방향)
+
+```bash
+git log origin/main --oneline --grep "plan{N}" | head -3
+```
+
+merge commit 발견 시 이미 완료된 plan. 사용자에게 알리고 (a) 새 plan 번호 부여 또는 (b) 후속 작업 전용 follow-up 브랜치 결정 의뢰. 실사례: fos-blog plan006 이 status="completed" 였지만 머지 안 된 상태에서 plan007 진행 시도 → 신 워크플로에서는 PR 생성 자체가 build-with-teams 책임이라 이런 사고 자체 회피.
 
 ## 핵심 원칙
 
@@ -286,25 +262,31 @@ TeamCreate → team name: plan{N}
 
 critic + docs-verifier 를 `run_in_background: true` 로 스폰. 대기 상태로 준비. (단, fos-blog 에서는 docs-verifier / code-reviewer 가 self-shutdown 패턴이 있으므로 위 "팀원 self-shutdown 패턴 대응" 참조 — 검사 시점에 새로 스폰하는 게 안전)
 
-### 2. 문서 파악 + 논의
+### 2. plan 브랜치 fetch + worktree 체크아웃
 
-team-lead 가 `docs/` 하위 문서 + `CLAUDE.md` 를 읽고 사용자와 논의.
+`/planning` 이 만든 브랜치 (`plan/{N}-{slug}`) 를 fetch + worktree 로 체크아웃. **새 브랜치 만들지 말 것** — 기존 브랜치에 phase commits 를 추가한다.
 
-### 3. docs 최신화 + 커밋
+```bash
+# cwd: <repo root>
+git fetch origin plan/{N}-{slug}
+git worktree add .claude/worktrees/plan{N} plan/{N}-{slug}   # -b 없음 (기존 브랜치 사용)
+cd .claude/worktrees/plan{N}
+pnpm install   # 의존성 설치
+```
 
-논의 결과를 task 생성 전에 docs 에 반영. docs 변경사항 단독 커밋.
+worktree 안에는 task 파일이 이미 있음 (`/planning` 이 commit + push 했으므로). docs 도 갱신된 상태.
 
-### 4. task 파일 생성
+### 3. task 파일 검토 + 필요 시 보강
 
-`tasks/{task-name}/` 디렉터리에 `index.json` + `phase-{N}.md` 생성. phase 프롬프트 규칙:
+`tasks/plan{N}-{slug}/index.json` + `phase-*.md` 를 읽고 critic 평가 전에 빠진 부분이 없는지 점검. `/planning` 단계에서 누락된 사항이 발견되면 **같은 브랜치에 보강 commit 추가** (별도 PR 만들지 않음).
+
+phase 프롬프트 규칙 (planning 에서 이미 적용됐어야 하는 사항 — 검증):
 
 - 원자적 단일 책임, 작업 항목 5개 이하
 - 자기완결적 (이전 대화 없이 독립 실행 가능)
 - 성공 기준에 모든 작업 검증 포함 (grep/test/diff/build — "눈으로 확인" 금지)
 - 모든 Bash 블록 앞에 `# cwd: ...` 주석
-- **마지막 phase 작업 목록에 `index.json` 의 `status="completed"` + 모든 phase `status="completed"` 업데이트를 포함** (task 파일 설계 단계에서 명시) — main 별도 커밋 회피
-
-task 파일 생성 후 커밋. **단 이 commit 을 별도 PR 로 push/머지 금지** — task 파일과 phase 결과물은 **반드시 같은 PR 에 묶는다**. 별도 PR 로 task 만 머지하면 (a) status="pending" 인 채로 main 에 task 가 들어가 추후 재실행 사고 + (b) 실제 결과물이 다른 PR 에서 머지되는 경우 task spec 과 코드 간 정합 검증이 누락된다 (실사례: fos-blog plan024 — task 가 PR #110 단독 머지, 결과물은 PR #81 에서 이미 머지된 상태로 사후 정리 필요). worktree 안에서 task 파일 commit → phase 실행/검증 → 같은 브랜치 push → 한 번에 PR 생성.
+- **마지막 phase 작업 목록에 `index.json` 의 `status="completed"` + 모든 phase `status="completed"` 업데이트 포함** — 별도 commit 회피
 
 **task 재분할 시 index.json 동시 갱신 강제 (필수 — webtoon-maker-v1 plan250 관측)**: critic REVISE 후 phase 파일을 재작성/추가/제거할 때 `index.json` 의 `total_phases` + `phases` 배열 + description 본문을 **반드시 같은 commit 으로 갱신**한다. phase 파일만 추가하고 index.json 미수정한 채 commit 하면 파이프라인이 신 phase 를 인식 못해 executor 가 구 phase 만 실행 → plan 핵심 누락 사고. team-lead 는 commit 직전 sanity check:
 
@@ -411,11 +393,15 @@ executor 완료 후 team-lead → docs-verifier 에게 검증 요청. self-shutd
      - **B**: 별도 hotfix PR 분리 → 머지 후 plan PR rebase (책임 분리, 시간 소요)
      - **C**: 그대로 PR 생성 + description 에 의존 명시 (사용자가 hotfix PR 머지 후 rebase)
    - 결정 후 진행. 결정 이력은 PR description 의 "Build" 섹션에 명시
-4. **`tasks/{task-name}/index.json` status="completed" 마킹은 PR 브랜치 안에서**:
-   - 이상적: 마지막 phase 작업 항목에 포함 (단계 4 의 phase 설계 단계에서 명시) → 별도 commit 불필요
-   - 차선: PR 브랜치 안에서 별도 `chore(tasks): mark {plan} completed` commit
-   - **main 직접 커밋/푸시 금지** — 이중 진실원 + push 충돌 위험. 재실행 사고 방지는 위 "사전 검증 3중 체크" 가 담당
-5. push + `gh pr create` (main 대상). CI 실패가 plan 외부에 있으면 description 에 의존 PR 번호 + 머지 순서 명시
+4. **`tasks/{task-name}/index.json` status="completed" 마킹은 plan 브랜치 안에서**:
+   - 이상적: 마지막 phase 작업 항목에 포함 (단계 3 의 phase 설계 단계에서 명시) → 별도 commit 불필요
+   - 차선: plan 브랜치 안에서 별도 `chore(tasks): mark {plan} completed` commit
+   - **main 직접 커밋/푸시 금지** — 이중 진실원 + push 충돌 위험
+5. **push + PR 생성/갱신**:
+   - 사전 검증 3 (오픈 PR 점검) 결과에 따라 분기:
+     - **신규 실행 (오픈 PR 없음)** → `git push` 후 `gh pr create --base main --head plan/{N}-{slug}` 신규 생성. 제목 형식: `feat(scope): {plan 핵심}` 또는 `fix(scope): ...`. body 에 task spec 요약 + 결과물 commits + Test plan 포함
+     - **이어서 실행 (오픈 PR 있음, 사용자 옵션 (a) 선택)** → 같은 브랜치 push (commits 추가됨) + `gh pr edit <N> --title "..." --body "..."` 로 제목/body 갱신. PR 번호는 사전 검증 3 에서 확인한 값
+   - CI 실패가 plan 외부에 있으면 description 에 의존 PR 번호 + 머지 순서 명시
 6. **즉시 팀 shutdown** (SendMessage `shutdown_request`) + worktree 정리 + team-lead 누적 노하우 보고
 7. 사용자가 GitHub 에서 PR 머지 → completed 상태 자동 main 반영. main 후속 작업 0개
 
@@ -482,18 +468,19 @@ fi
 
 실사례: `.claire-worktrees/plan011-...` 가 ESLint 에러 유발 — 다음 plan 시작 시점에 자동 정리되도록 게이트화.
 
-### worktree 생성
+### worktree 생성 (plan 브랜치 기반)
 
 ```bash
 # cwd: <repo root>
 mkdir -p .claude/worktrees
-git worktree add .claude/worktrees/{plan이름} -b feat/{plan이름} origin/main
-cd .claude/worktrees/{plan이름}
+git fetch origin plan/{N}-{slug}
+git worktree add .claude/worktrees/plan{N} plan/{N}-{slug}   # -b 없음 — /planning 이 만든 기존 브랜치 사용
+cd .claude/worktrees/plan{N}
 pnpm install                # 의존성 설치
 pnpm db:generate            # Drizzle schema 변경이 있으면 타입 재생성 (선택)
 ```
 
-**worktree 정리**: 메인 워킹 디렉토리로 돌아가서 `git worktree remove .claude/worktrees/{plan이름}` + 로컬 브랜치 정리 `git branch -D feat/{plan이름}` (PR 머지 후엔 안전).
+**worktree 정리**: 메인 워킹 디렉토리로 돌아가서 `git worktree remove .claude/worktrees/plan{N}`. 로컬 브랜치 (`plan/{N}-{slug}`) 는 PR 머지 후 cleanup 시 삭제 (즉시 삭제 금지 — 사용자가 follow-up commit 추가할 수 있음).
 
 이렇게 하면 여러 plan 을 **동시 병렬 실행**해도 서로 간섭하지 않는다.
 
@@ -516,21 +503,22 @@ executor 가 phase 실패 보고 시:
 
 ## 실행 흐름 요약
 
+전제: `/planning {N}` 이 task 파일 생성 + `plan/{N}-{slug}` 브랜치 push 완료 (PR 미생성 상태). build-with-teams 가 같은 브랜치에서 phase 실행 + PR 생성.
+
 ```
-[사전 검증 3중 체크 — main index.json status + 원격 feat 브랜치 + 오픈 PR]
+[사전 검증 — plan 브랜치 존재 + task 파일 존재 + 오픈 PR 점검 + 머지 이력]
     → [실행 모드 선택 게이트 — AskUserQuestion: A 정식 / B 사후검수 / C 직접]
     → [메인 워킹 트리 사전 점검 (앞섬/뒤짐/dirty 안내)]
     → [오타 worktree pre-flight 정리]
-    → [worktree 생성 (origin/main 기반)]
-    → [docs 최신화 + 커밋]
-    → [task 파일 생성 + 커밋]  ← 마지막 phase 에 index.json completed 업데이트 포함
+    → [worktree 생성 — plan/{N}-{slug} 기반 (기존 브랜치 사용)]
+    → [task 파일 검토 + 보강 commit 필요 시 추가]
     → [critic 평가] ←─ REVISE 면 계획 수정 후 재평가 (한도 3회)
     → [executor 실행 — cwd 격리 + scope 확장 보고 가드] ←─ 실패 시 원인 분석 후 재실행
     → [code-reviewer 검사] ←─ FIX_NEEDED 면 executor 재투입 (한도 2회)
     → [docs-verifier 검증 (문서 부패 포함)] ←─ VIOLATION/UPDATE_NEEDED 면 재투입 (한도 2회)
     → [통합 검증 (CI) — 실패 시 plan 범위 내/외 분기 절차]
-    → [team-lead 최종 push (PR 브랜치 안에서 index.json completed 마킹 포함)]
-    → [PR 생성 (main 대상)]
+    → [team-lead 최종 push (plan 브랜치 안에서 index.json completed 마킹 포함)]
+    → [PR 생성 또는 갱신 (오픈 PR 없으면 신규, 있으면 gh pr edit 으로 갱신)]
     → [팀 즉시 shutdown + worktree 정리 (post-flight 오타 정리 1회 더) + 누적 노하우 보고]
     → (사용자 PR 머지 → completed 자동 main 반영, 후속 작업 0개)
 ```
