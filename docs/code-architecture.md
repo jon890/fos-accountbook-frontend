@@ -112,3 +112,18 @@ src/
 4. `src/__tests__/` — 서비스 단위 테스트
 5. `src/app/(authenticated)/` — 페이지 라우트 (Server Component)
 6. `docs/data-schema.md` — TypeScript 타입 + API 엔드포인트 업데이트
+
+---
+
+## 디자인 토큰 / 테마
+
+- **단일 소스**: `src/app/globals.css` 의 `@theme` 블록. OKLCH 평면 값 (ADR-F13).
+- **토큰 카테고리**:
+  - `--color-brand-{50..900}` — Teal h=188 스케일 (primary/hover/pressed 파생)
+  - `--color-{income|expense|warning}` — semantic 의미색
+  - `--color-neutral-{0..950}` — cool gray h=230
+  - `--color-{bg|bg-elev|bg-muted|fg|fg-muted|fg-subtle|border|border-strong}` — surface 토큰 (light/dark 분리)
+- **Dark mode**: `[data-theme="dark"]` 셀렉터 (ADR-F15). `next-themes` `attribute="data-theme"`.
+- **시맨틱 그라디언트 클래스**: `gradient-{primary|expense|income|budget|family|category}` 6종 — 클래스명 유지, 값만 OKLCH.
+- **수치 표기**: `.num` 또는 `data-num` — Inter + `tabular-nums` (ADR-F14).
+- **금지**: hex / rgb / hsl 직접 작성 (`oklch()` 또는 토큰 변수만). `style={{ color: ... }}` inline 토큰 직접 표기 — `text-[var(--token)]` arbitrary class 사용.

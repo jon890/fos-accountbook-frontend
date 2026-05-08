@@ -1,0 +1,49 @@
+{
+  "name": "plan001-design-system-teal-migration",
+  "description": "Teal fintech 리디자인 — 디자인 시스템 토큰을 OKLCH/Teal로 전면 마이그레이션. brand=Teal h=188, Pretendard, [data-theme=dark]. Page UI 변경 없음(plan002~005 책임).",
+  "status": "pending",
+  "created_at": "2026-05-08",
+  "total_phases": 5,
+  "related_docs": [
+    "docs/adr.md",
+    "docs/code-architecture.md",
+    "CLAUDE.md"
+  ],
+  "phases": [
+    {
+      "number": 1,
+      "file": "phase-01.md",
+      "title": "globals.css OKLCH 토큰 정의 (brand/semantic/neutral/surface) + gradient 값 교체",
+      "model": "sonnet",
+      "status": "pending"
+    },
+    {
+      "number": 2,
+      "file": "phase-02.md",
+      "title": "next-themes attribute=data-theme 전환 + .dark 사용처 마이그레이션",
+      "model": "sonnet",
+      "status": "pending"
+    },
+    {
+      "number": 3,
+      "file": "phase-03.md",
+      "title": "src/components/ui/ 23개 hsl(var(--x)) → OKLCH 토큰 재작성",
+      "model": "sonnet",
+      "status": "pending"
+    },
+    {
+      "number": 4,
+      "file": "phase-04.md",
+      "title": "Pretendard Variable + Inter 폰트 도입 (next/font localFont) + .num 유틸",
+      "model": "sonnet",
+      "status": "pending"
+    },
+    {
+      "number": 5,
+      "file": "phase-05.md",
+      "title": "통합 검증 + legacy 잔재 grep + index.json completed 마킹",
+      "model": "haiku",
+      "status": "pending"
+    }
+  ]
+}
