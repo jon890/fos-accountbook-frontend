@@ -244,7 +244,10 @@
   }
 
   .chip-active {
-    @apply bg-gray-800 text-white border-transparent shadow-sm;
+    background-color: var(--color-neutral-800);
+    color: oklch(1 0 0);
+    border-color: transparent;
+    box-shadow: var(--shadow-subtle);
   }
 
   .animate-float {
