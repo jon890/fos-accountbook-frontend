@@ -32,7 +32,7 @@ phase 03/04 가 globals.css 를 다시 만지지 않도록 처음부터 단일 �
 | semantic | `--color-income` | `oklch(0.610 0.150 152)` |
 | | `--color-expense` | `oklch(0.620 0.180 25)` |
 | | `--color-warning` | `oklch(0.760 0.150 78)` |
-| neutral | `--color-neutral-0..950` | h=230, L 1→0.135 (12 단계: 0/50/100/150/200/300/400/500/600/700/800/900/950 중 12개) |
+| neutral | `--color-neutral-0..950` | h=230, L 1→0.135 (12 단계: 0/50/100/200/300/400/500/600/700/800/900/950) |
 | surface | `--color-bg` | `var(--color-neutral-50)` |
 | | `--color-bg-elev` | `var(--color-neutral-0)` |
 | | `--color-bg-muted` | `var(--color-neutral-100)` |
