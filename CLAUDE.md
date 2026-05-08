@@ -2,6 +2,23 @@
 
 Claude Code가 항상 따라야 할 규칙과 참조 문서 포인터.
 
+## 핵심 워크플로우 스킬
+
+| 시점 | 스킬 | 트리거 |
+|---|---|---|
+| 새 기능/변경 설계 | `/planning` | "/planning", "계획 세워보자", "설계해보자" |
+| plan 실행 (자동 하네스) | `/plan-and-build` | "plan{N} 실행", "구현해줘" — 코드 구현은 항상 이 스킬 |
+| plan 실행 (Agent Teams) | `/build-with-teams` | 가시적 협업, 4~5명 에이전트 파이프라인 |
+| docs 정리 | `/docs-check` | docs/ 5축 검증, plan 완료 후 주기적 |
+| UI 리뷰 | `/web-design-guidelines` | "review my UI", 접근성/UX 감사 |
+| UX PR 통합 | `/integrate-ux` | 디자이너 PR 리뷰·머지 |
+| PR 리뷰 반영 | `/review-fix` | "리뷰 댓글 반영" |
+| 커밋 | `/commit-convention` | "커밋해줘" |
+
+`/planning` → docs 갱신 → task 생성 → `/plan-and-build` 또는 `/build-with-teams` 실행 흐름이 표준.
+
+---
+
 ## 컨텍스트 문서
 
 | 문서                                         | 내용                                 | 언제 읽을까                    |
@@ -10,6 +27,8 @@ Claude Code가 항상 따라야 할 규칙과 참조 문서 포인터.
 | [`docs/adr.md`](docs/adr.md)                 | 기술 결정 기록 (F=프론트, B=백엔드)  | 기술 결정 시, 아키텍처 질문 시 |
 | [`docs/data-schema.md`](docs/data-schema.md) | DB 스키마, TypeScript 타입, API 구조 | API 연동, 타입 정의 시         |
 | [`docs/flow.md`](docs/flow.md)               | 사용자 플로우, 데이터 흐름           | UI/UX 수정, 플로우 변경 시     |
+| [`docs/code-architecture.md`](docs/code-architecture.md) | 디렉터리 구조, 레이어 분리, API 전략 | 디렉터리 구조 변경, 레이어 경계 검토 |
+| [`docs/testing-strategy.md`](docs/testing-strategy.md) | 테스트 범위·전략·우선순위 | 테스트 추가/삭제 시 |
 
 ### 상황별 ADR 필수 참조
 
