@@ -11,11 +11,12 @@ import { getDashboardStatsAction } from "@/actions/dashboard/get-dashboard-stats
 import { getRecentExpensesAction } from "@/actions/dashboard/get-recent-expenses-action";
 import { getFamiliesAction } from "@/actions/family/get-families-action";
 import { getRecurringExpensesTotalAction } from "@/actions/recurring-expense";
+import { BudgetHeroCard } from "@/components/dashboard/BudgetHeroCard";
 import { CalendarView } from "@/components/dashboard/CalendarView";
 import { DashboardClient } from "@/components/dashboard/DashboardClient";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { IncomeExpenseStats } from "@/components/dashboard/IncomeExpenseStats";
 import { RecurringExpenseCard } from "@/components/dashboard/RecurringExpenseCard";
-import { StatsCards } from "@/components/dashboard/StatsCards";
 import { getActionDataOrDefault } from "@/lib/server/action-result-handler";
 import { auth } from "@/lib/server/auth";
 import { getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
@@ -67,6 +68,14 @@ export default async function DashboardPage() {
       avatarUrl: m.userImage,
     })) ?? [];
 
+  const now = new Date();
+  const lastDayOfMonth = new Date(
+    statsData.year,
+    statsData.month,
+    0
+  ).getDate();
+  const daysRemaining = Math.max(0, lastDayOfMonth - now.getDate());
+
   return (
     <DashboardClient recentExpenses={recentExpenses}>
       <DashboardHeader
@@ -75,7 +84,16 @@ export default async function DashboardPage() {
         year={statsData.year}
         month={statsData.month}
       />
-      <StatsCards data={statsData} />
+      <BudgetHeroCard
+        remainingBudget={statsData.remainingBudget}
+        monthlyExpense={statsData.monthlyExpense}
+        budget={statsData.budget}
+        daysRemaining={daysRemaining}
+      />
+      <IncomeExpenseStats
+        monthlyIncome={statsData.monthlyIncome}
+        monthlyExpense={statsData.monthlyExpense}
+      />
       {recurringTotal !== null && (
         <RecurringExpenseCard total={recurringTotal} />
       )}

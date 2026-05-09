@@ -1,0 +1,57 @@
+interface BudgetHeroCardProps {
+  remainingBudget: number;
+  monthlyExpense: number;
+  budget: number;
+  daysRemaining: number;
+}
+
+function formatWon(amount: number): string {
+  return `₩${Math.abs(amount).toLocaleString("ko-KR")}`;
+}
+
+export function BudgetHeroCard({
+  remainingBudget,
+  monthlyExpense,
+  budget,
+  daysRemaining,
+}: BudgetHeroCardProps) {
+  const hasBudget = budget > 0;
+  const pct = hasBudget
+    ? Math.min(100, Math.round((monthlyExpense / budget) * 100))
+    : 0;
+  const isExceeded = remainingBudget < 0;
+
+  return (
+    <div className="gradient-primary rounded-[var(--radius-xl)] p-5 md:p-6 text-white mb-4 overflow-hidden">
+      <p className="text-xs md:text-sm font-medium opacity-85">
+        이번 달 남은 예산
+      </p>
+
+      <p className="num text-[38px] md:text-[44px] font-bold leading-none mt-1 tracking-tight">
+        {isExceeded ? `-${formatWon(remainingBudget)}` : formatWon(remainingBudget)}
+      </p>
+
+      {hasBudget ? (
+        <>
+          <div className="mt-3 mb-2 h-1.5 rounded-full bg-white/20 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-white/80 transition-all"
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between text-xs opacity-85">
+            <span>
+              <span className="num">{formatWon(monthlyExpense)}</span>
+              <span className="opacity-70"> / {formatWon(budget)} 사용</span>
+            </span>
+            <span className="bg-white/20 rounded-full px-2.5 py-0.5 text-[11px] font-medium">
+              {daysRemaining}일 남음
+            </span>
+          </div>
+        </>
+      ) : (
+        <p className="mt-2 text-xs opacity-75">예산 미설정</p>
+      )}
+    </div>
+  );
+}

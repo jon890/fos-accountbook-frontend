@@ -1,6 +1,6 @@
 import { DashboardContentSkeleton } from "@/components/dashboard/skeleton/DashboardContentSkeleton";
 import { DashboardHeaderSkeleton } from "@/components/dashboard/skeleton/DashboardHeaderSkeleton";
-import { StatsCardsSkeleton } from "@/components/dashboard/skeleton/StatsCardsSkeleton";
+import { StatsHeroSkeleton } from "@/components/dashboard/skeleton/StatsHeroSkeleton";
 
 /**
  * Dashboard 페이지 로딩 UI (스켈레톤)
@@ -13,7 +13,7 @@ export default function DashboardLoading() {
   return (
     <div className="animate-in fade-in duration-300">
       <DashboardHeaderSkeleton />
-      <StatsCardsSkeleton />
+      <StatsHeroSkeleton />
       <DashboardContentSkeleton />
     </div>
   );
