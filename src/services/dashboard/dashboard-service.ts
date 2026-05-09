@@ -5,6 +5,8 @@ import type { DashboardStats, RecentExpense, MonthlyCategoryBreakdown } from "@/
 import type { ExpenseResponse } from "@/types/expense";
 import type { PaginationResponse } from "@/types/common";
 
+const MONTHLY_FETCH_PAGE_SIZE = 1000;
+
 interface RawExpenseResponse {
   uuid: string;
   amount: number;
@@ -46,10 +48,10 @@ export async function getMonthlyDailyStats(
 
   const [expensesResult, incomesResult] = await Promise.all([
     serverApiGet<{ items: RawExpenseResponse[] }>(
-      `/families/${familyUuid}/expenses?size=1000&startDate=${startDate}&endDate=${endDate}`
+      `/families/${familyUuid}/expenses?size=${MONTHLY_FETCH_PAGE_SIZE}&startDate=${startDate}&endDate=${endDate}`
     ).catch(() => ({ items: [] as RawExpenseResponse[] })),
     serverApiGet<{ items: RawIncomeResponse[] }>(
-      `/families/${familyUuid}/incomes?size=1000&startDate=${startDate}&endDate=${endDate}`
+      `/families/${familyUuid}/incomes?size=${MONTHLY_FETCH_PAGE_SIZE}&startDate=${startDate}&endDate=${endDate}`
     ).catch(() => ({ items: [] as RawIncomeResponse[] })),
   ]);
 
@@ -91,7 +93,7 @@ export async function getMonthlyCategoryBreakdown(
 
   const [expensesResult, categories] = await Promise.all([
     serverApiGet<{ items: RawExpenseResponse[] }>(
-      `/families/${familyUuid}/expenses?size=1000&startDate=${startDate}&endDate=${endDate}`
+      `/families/${familyUuid}/expenses?size=${MONTHLY_FETCH_PAGE_SIZE}&startDate=${startDate}&endDate=${endDate}`
     ).catch(() => ({ items: [] as RawExpenseResponse[] })),
     getCachedFamilyCategories(familyUuid),
   ]);

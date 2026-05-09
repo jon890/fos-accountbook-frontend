@@ -1,12 +1,10 @@
+import { formatCurrency } from "@/lib/utils/format";
+
 interface BudgetHeroCardProps {
   remainingBudget: number;
   monthlyExpense: number;
   budget: number;
   daysRemaining: number;
-}
-
-function formatWon(amount: number): string {
-  return `₩${Math.abs(amount).toLocaleString("ko-KR")}`;
 }
 
 export function BudgetHeroCard({
@@ -28,7 +26,7 @@ export function BudgetHeroCard({
       </p>
 
       <p className="num text-[38px] md:text-[44px] font-bold leading-none mt-1 tracking-tight">
-        {isExceeded ? `-${formatWon(remainingBudget)}` : formatWon(remainingBudget)}
+        {isExceeded ? `-${formatCurrency(Math.abs(remainingBudget))}` : formatCurrency(Math.abs(remainingBudget))}
       </p>
 
       {hasBudget ? (
@@ -41,8 +39,8 @@ export function BudgetHeroCard({
           </div>
           <div className="flex items-center justify-between text-xs opacity-85">
             <span>
-              <span className="num">{formatWon(monthlyExpense)}</span>
-              <span className="opacity-70"> / {formatWon(budget)} 사용</span>
+              <span className="num">{formatCurrency(monthlyExpense)}</span>
+              <span className="opacity-70"> / {formatCurrency(budget)} 사용</span>
             </span>
             <span className="bg-white/20 rounded-full px-2.5 py-0.5 text-[11px] font-medium">
               {daysRemaining}일 남음

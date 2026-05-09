@@ -8,17 +8,15 @@ import {
   Tooltip,
 } from "recharts";
 import { getCategoryTone } from "@/lib/utils/category-tone";
+import { formatCurrency } from "@/lib/utils/format";
 import type { MonthlyCategoryBreakdown } from "@/types/dashboard";
 
 interface CategoryDistributionProps {
   breakdown: MonthlyCategoryBreakdown;
 }
 
-function formatWon(amount: number): string {
-  return `₩${amount.toLocaleString("ko-KR")}`;
-}
-
-const EMPTY_DONUT = [{ value: 1, fill: "oklch(0.925 0.008 230)" }];
+const EMPTY_DONUT_FILL = "var(--color-neutral-200)";
+const EMPTY_DONUT = [{ value: 1, fill: EMPTY_DONUT_FILL }];
 
 export function CategoryDistribution({ breakdown }: CategoryDistributionProps) {
   const { totalExpense, items } = breakdown;
@@ -64,7 +62,7 @@ export function CategoryDistribution({ breakdown }: CategoryDistributionProps) {
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
-                      fill={"fill" in entry ? entry.fill : "oklch(0.925 0.008 230)"}
+                      fill={"fill" in entry ? entry.fill : EMPTY_DONUT_FILL}
                     />
                   ))}
                 </Pie>
@@ -72,7 +70,7 @@ export function CategoryDistribution({ breakdown }: CategoryDistributionProps) {
                   <Tooltip
                     formatter={(value) => {
                       const num = typeof value === "number" ? value : Number(value ?? 0);
-                      return [formatWon(num), "지출"];
+                      return [formatCurrency(num), "지출"];
                     }}
                     contentStyle={{
                       fontSize: 12,
@@ -89,7 +87,7 @@ export function CategoryDistribution({ breakdown }: CategoryDistributionProps) {
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
               <span className="text-[9px] md:text-[11px] text-fg-muted">총 지출</span>
               <span className="num text-[11px] md:text-sm font-bold text-fg leading-tight">
-                {formatWon(totalExpense)}
+                {formatCurrency(totalExpense)}
               </span>
             </div>
           </div>
@@ -119,7 +117,7 @@ export function CategoryDistribution({ breakdown }: CategoryDistributionProps) {
                       </span>
                     </div>
                     <span className="num text-[11px] text-fg-muted">
-                      {formatWon(item.totalAmount)}
+                      {formatCurrency(item.totalAmount)}
                     </span>
                   </div>
                 </div>

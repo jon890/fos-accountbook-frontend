@@ -1,12 +1,3 @@
-/**
- * Dashboard Page - Server Component
- * 대시보드 전용 페이지
- *
- * 역할:
- * - 선택된 가족의 대시보드 데이터 표시
- * - 통계, 최근 지출 등 렌더링
- */
-
 import { getDashboardStatsAction } from "@/actions/dashboard/get-dashboard-stats-action";
 import { getMonthlyCategoryBreakdownAction } from "@/actions/dashboard/get-monthly-category-breakdown-action";
 import { getRecentExpensesAction } from "@/actions/dashboard/get-recent-expenses-action";

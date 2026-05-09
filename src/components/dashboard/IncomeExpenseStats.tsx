@@ -1,12 +1,9 @@
 import { TrendingDown, TrendingUp } from "lucide-react";
+import { formatCurrency } from "@/lib/utils/format";
 
 interface IncomeExpenseStatsProps {
   monthlyIncome: number;
   monthlyExpense: number;
-}
-
-function formatWon(amount: number): string {
-  return `₩${amount.toLocaleString("ko-KR")}`;
 }
 
 export function IncomeExpenseStats({
@@ -23,7 +20,7 @@ export function IncomeExpenseStats({
           </p>
         </div>
         <p className="num text-lg md:text-2xl font-bold text-income">
-          {formatWon(monthlyIncome)}
+          {formatCurrency(monthlyIncome)}
         </p>
       </div>
 
@@ -35,7 +32,7 @@ export function IncomeExpenseStats({
           </p>
         </div>
         <p className="num text-lg md:text-2xl font-bold text-expense">
-          {formatWon(monthlyExpense)}
+          {formatCurrency(monthlyExpense)}
         </p>
       </div>
     </div>
