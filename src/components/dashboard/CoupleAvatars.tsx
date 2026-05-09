@@ -20,10 +20,10 @@ export function CoupleAvatars({ members }: CoupleAvatarsProps) {
       {visible.map((member, index) => (
         <Avatar
           key={member.uuid}
-          className={`size-8 ring-2 ring-[var(--color-bg-elev)] ${index > 0 ? "-ml-2" : ""}`}
+          className={`size-8 ring-2 ring-bg-elev ${index > 0 ? "-ml-2" : ""}`}
         >
           <AvatarImage src={member.avatarUrl} alt={member.name} />
-          <AvatarFallback className="text-xs font-medium bg-[var(--color-brand-200)] text-[var(--color-brand-800)]">
+          <AvatarFallback className="text-xs font-medium bg-brand-200 text-brand-800">
             {member.name.charAt(0)}
           </AvatarFallback>
         </Avatar>
