@@ -34,7 +34,7 @@ export function QuickActions() {
     <>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <Card
-          className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white/80 backdrop-blur-sm"
+          className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-bg-elev/80 backdrop-blur-sm"
           onClick={handleAddExpenseClick}
         >
           <CardContent className="p-3 md:p-6">
@@ -43,10 +43,10 @@ export function QuickActions() {
                 <Plus className="w-5 h-5 md:w-7 md:h-7 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-0 md:mb-1 text-sm md:text-base">
+                <h3 className="font-semibold text-fg mb-0 md:mb-1 text-sm md:text-base">
                   지출 추가
                 </h3>
-                <p className="text-gray-600 text-xs md:text-sm">
+                <p className="text-fg-muted text-xs md:text-sm">
                   새로운 지출 기록
                 </p>
               </div>
@@ -55,7 +55,7 @@ export function QuickActions() {
         </Card>
 
         <Card
-          className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white/80 backdrop-blur-sm"
+          className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-bg-elev/80 backdrop-blur-sm"
           onClick={handleAddIncomeClick}
         >
           <CardContent className="p-3 md:p-6">
@@ -64,10 +64,10 @@ export function QuickActions() {
                 <TrendingUp className="w-5 h-5 md:w-7 md:h-7 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-0 md:mb-1 text-sm md:text-base">
+                <h3 className="font-semibold text-fg mb-0 md:mb-1 text-sm md:text-base">
                   수입 추가
                 </h3>
-                <p className="text-gray-600 text-xs md:text-sm">
+                <p className="text-fg-muted text-xs md:text-sm">
                   새로운 수입 기록
                 </p>
               </div>
@@ -76,7 +76,7 @@ export function QuickActions() {
         </Card>
 
         <Card
-          className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white/80 backdrop-blur-sm"
+          className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-bg-elev/80 backdrop-blur-sm"
           onClick={handleInviteClick}
         >
           <CardContent className="p-3 md:p-6">
@@ -85,17 +85,17 @@ export function QuickActions() {
                 <UserPlus className="w-5 h-5 md:w-7 md:h-7 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-0 md:mb-1 text-sm md:text-base">
+                <h3 className="font-semibold text-fg mb-0 md:mb-1 text-sm md:text-base">
                   가족 초대
                 </h3>
-                <p className="text-gray-600 text-xs md:text-sm">구성원 추가</p>
+                <p className="text-fg-muted text-xs md:text-sm">구성원 추가</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card
-          className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-white/80 backdrop-blur-sm"
+          className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-0 bg-bg-elev/80 backdrop-blur-sm"
           onClick={handleCategoryClick}
         >
           <CardContent className="p-3 md:p-6">
@@ -104,10 +104,10 @@ export function QuickActions() {
                 <Settings className="w-5 h-5 md:w-7 md:h-7 text-white" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 mb-0 md:mb-1 text-sm md:text-base">
+                <h3 className="font-semibold text-fg mb-0 md:mb-1 text-sm md:text-base">
                   카테고리
                 </h3>
-                <p className="text-gray-600 text-xs md:text-sm">분류 관리</p>
+                <p className="text-fg-muted text-xs md:text-sm">분류 관리</p>
               </div>
             </div>
           </CardContent>

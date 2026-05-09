@@ -45,6 +45,7 @@ Claude Code가 항상 따라야 할 규칙과 참조 문서 포인터.
 | 색 토큰 작성 (brand/semantic/surface) | ADR-F13 — OKLCH 평면 값. hex/rgb/hsl 금지 |
 | 폰트 추가 / 수치 표기 | ADR-F14 — Pretendard Variable + Inter (`.num` / tabular-nums) |
 | dark mode 셀렉터 | ADR-F15 — `[data-theme="dark"]` 만. `.dark` 신규 사용 금지 |
+| 카테고리 분포·월 집계 stat 추가 | ADR-F16 — Server Action 측 집계. backend endpoint 신설 전 임계 트리거 확인 |
 | `alert/confirm/prompt` 대체 | ADR-F08 — sonner 토스트 사용 |
 | Jest 테스트 추가 | ADR-F09 — MSW 아닌 jest.mock 방식 |
 | 실시간 업데이트 vs revalidate | ADR-F10 — Server Action + `revalidatePath` 유지 |
