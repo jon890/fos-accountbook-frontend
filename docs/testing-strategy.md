@@ -148,7 +148,6 @@ jobs:
 
 - `RecurringExpenseList`: 목록 렌더링 + 빈 상태 처리
 - `AddRecurringExpenseSheet`: 폼 입력 → submit → Action 호출
-- `RecurringExpenseCard`: 대시보드 카드 금액 표시
 
 ### 도구
 

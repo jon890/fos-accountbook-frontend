@@ -100,21 +100,29 @@
 ## 5. 대시보드 데이터 흐름
 
 ```
-[/dashboard 접속] (Server Component)
+[/dashboard 접속] (Server Component, page.tsx 가 모든 섹션 직접 배치)
     │
     ├─ getDashboardStatsAction() → /dashboard/stats/monthly
-    │       └─ { monthlyExpense, monthlyIncome, remainingBudget, budget }
+    │       └─ { monthlyExpense, monthlyIncome, remainingBudget, budget, year, month }
     │
-    ├─ getRecentExpensesAction() → /expenses?limit=10
-    │       └─ [ { amount, description, date, category } × 10 ]
+    ├─ getRecentExpensesAction(10) → /expenses?limit=10
+    │       └─ [ { amount, memo, date, category, createdBy? } × 10 ]
     │
-    └─ getMonthlyDailyStatsAction() → /dashboard/daily-stats
-            └─ [ { date, income, expense } × N일 ]
+    ├─ getFamiliesAction() → /families
+    │       └─ [ { uuid, name, members? } ]
+    │
+    └─ getMonthlyCategoryBreakdownAction() — ADR-F16 server-side 집계
+            └─ /expenses?startDate=...&endDate=... 응답을 service 측에서 카테고리별 합산
+                    └─ { year, month, totalExpense, items: CategoryBreakdownItem[] }
 
-[DashboardClient (Client Component)]
-    ├─ StatsCards: 월지출 / 월수입 / 남은예산
-    ├─ CalendarView: 일별 수입·지출 바 차트
-    └─ RecentExpenseList: 최근 10개 지출
+[page.tsx 7요소 직접 배치 (DashboardClient wrapper 없음)]
+    ├─ DashboardHeader: 가족명 + "{year}년 {month}월" + Bell + CoupleAvatars
+    ├─ BudgetHeroCard: Teal gradient + 잔여 예산 + progress + daysRemaining
+    ├─ IncomeExpenseStats: 월 수입 / 월 지출 (text-income/expense 토큰)
+    ├─ CategoryDistribution ("use client"): recharts Donut + top 5/6 리스트
+    ├─ RecentActivity ("use client"): TxRow (category-tone 36px + memo + .num amount + createdBy 16px)
+    ├─ QuickActions ("use client"): 지출/수입/가족초대/카테고리 4-grid
+    └─ CalendarView: 일별 수입·지출 바 차트
 ```
 
 ---
