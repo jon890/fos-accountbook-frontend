@@ -162,6 +162,7 @@
 | 일반 요약 댓글 | 인라인 리뷰와 분리해 1회 추가 게시 | Conversation 탭 가시성 확보. inline 만 두면 Files changed 탭에 묻힘 |
 | 댓글 정리 | DELETE (REST) | minimize 누적 시 PR 스레드 시각 답답. 이력은 GitHub event log 로 충분 |
 | Dummy 댓글 자동 정리 | post-step bash 로 길이/regex/severity 마커 검사 후 삭제 | Claude action 이 자연어 sanity check 무시하고 placeholder 게시하는 사고 (fos-blog PR #114) 강제 차단 |
+| literal `\n` 자동 보정 | post-step bash 로 검출 후 perl 교체 + PATCH API | Claude action 이 HEREDOC 무시하고 `--body "...\n..."` 호출 시 literal 두 글자 박힘 (PR #208 사고). 보정 후 정상 줄바꿈 |
 | 모델 | orchestrator=sonnet, specialist=haiku | 토큰 비용 최적화. haiku로 충분한 단일 관점 분석 |
 | allowed_bots | `"*"` | 광범위 허용 — Dependabot/Claude 모두 차단되지 않음. 보안 검증은 specialist agent 가 담당 |
 | diff 필터 | `pnpm-lock.yaml`, `*.lock`, `*.snap` 제외 | 노이즈 감소 |
