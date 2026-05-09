@@ -178,20 +178,25 @@ Page (app/) → Action (actions/) → Service (services/) → lib/server/api
 
 ## Git & PR Conventions
 
-**main 직접 push 차단됨** — branch protection 으로 `git push origin main` 이 항상 거부된다 (`Changes must be made through a pull request`). 모든 변경은 작업 브랜치(`plan/NNN-...`, `chore/...`, `feat/...` 등) 에 commit + push 후 `gh pr create` 로 PR 생성. task 파일 + docs 변경도 동일 — 직접 push 시도하지 말고 처음부터 브랜치 + PR 패턴.
+- **main 직접 push 차단** — branch protection 으로 거부됨. 모든 변경은 작업 브랜치 + PR (task 파일/docs 도 동일).
+- **PR 제목**: `type(scope): description` — 절대 벗어나지 않는다.
 
-PR 제목은 반드시 아래 형식을 따른다:
+### 브랜치 명명
 
-```
-type(scope): description
-```
+| 단계 | 브랜치 | 내용 |
+|---|---|---|
+| 계획 | `plan/{N}-{slug}` | `tasks/plan{N}-{slug}/` task 파일 + docs 갱신 (→ main 머지) |
+| 구현 | `feat/plan{N}-{slug}` | task 의 phase 별 코드 commit (→ main 머지) |
+| 기타 | `chore/...` · `fix/...` · `refactor/...` · `docs/...` | 일반 작업 |
 
-예시:
+plan 의 계획/구현 분리는 머지 이력에서 즉시 식별 + 검토 부담 분산이 목적.
+`/build-with-teams` 사전검증 4번이 task-only 머지를 잡아도 정상 — `feat/plan{N}-{slug}` 신 브랜치로 진행.
+
+### 예시
+
 - `feat(backend): add Prometheus config`
 - `fix(database): resolve Redis connection timeout`
 - `docs(task): add NSC slot engine abstraction`
-
-이 형식에서 절대 벗어나지 않는다.
 
 ---
 
