@@ -100,6 +100,10 @@
   --color-border:             var(--border);
   --color-input:              var(--input);
   --color-ring:               var(--ring);
+
+  /* ── hero card overlays (gradient 위 progress/pill 전용) ──── */
+  --color-hero-track: oklch(1 0 0 / 0.2);
+  --color-hero-fill:  oklch(1 0 0 / 0.8);
 }
 
 :root {

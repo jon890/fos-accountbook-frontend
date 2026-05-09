@@ -31,9 +31,9 @@ export function BudgetHeroCard({
 
       {hasBudget ? (
         <>
-          <div className="mt-3 mb-2 h-1.5 rounded-full bg-white/20 overflow-hidden">
+          <div className="mt-3 mb-2 h-1.5 rounded-full bg-[var(--color-hero-track)] overflow-hidden">
             <div
-              className="h-full rounded-full bg-white/80 transition-all"
+              className="h-full rounded-full bg-[var(--color-hero-fill)] transition-all"
               style={{ width: `${pct}%` }}
             />
           </div>
@@ -42,7 +42,7 @@ export function BudgetHeroCard({
               <span className="num">{formatCurrency(monthlyExpense)}</span>
               <span className="opacity-70"> / {formatCurrency(budget)} 사용</span>
             </span>
-            <span className="bg-white/20 rounded-full px-2.5 py-0.5 text-[11px] font-medium">
+            <span className="bg-[var(--color-hero-track)] rounded-full px-2.5 py-0.5 text-[11px] font-medium">
               {daysRemaining}일 남음
             </span>
           </div>

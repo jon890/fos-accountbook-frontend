@@ -62,9 +62,15 @@ export default async function DashboardPage() {
       avatarUrl: m.userImage,
     })) ?? [];
 
-  const now = new Date();
+  // KST 기준 일자 (서버 UTC 와 무관하게 사용자 시간대로 daysRemaining 계산)
+  const todayKstDay = Number(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      day: "2-digit",
+    }).format(new Date())
+  );
   const lastDayOfMonth = new Date(statsData.year, statsData.month, 0).getDate();
-  const daysRemaining = Math.max(0, lastDayOfMonth - now.getDate());
+  const daysRemaining = Math.max(0, lastDayOfMonth - todayKstDay);
 
   return (
     <>

@@ -16,13 +16,29 @@ interface CategoryDistributionProps {
 }
 
 const EMPTY_DONUT_FILL = "var(--color-neutral-200)";
-const EMPTY_DONUT = [{ value: 1, fill: EMPTY_DONUT_FILL }];
+
+interface EmptyEntry {
+  value: number;
+  fill: string;
+}
+
+interface DataEntry {
+  categoryUuid: string;
+  name: string;
+  icon: string;
+  color?: string;
+  totalAmount: number;
+  percentage: number;
+  fill: string;
+}
+
+const EMPTY_DONUT: EmptyEntry[] = [{ value: 1, fill: EMPTY_DONUT_FILL }];
 
 export function CategoryDistribution({ breakdown }: CategoryDistributionProps) {
   const { totalExpense, items } = breakdown;
   const isEmpty = items.length === 0;
 
-  const chartData = isEmpty
+  const chartData: EmptyEntry[] | DataEntry[] = isEmpty
     ? EMPTY_DONUT
     : items.map((item) => ({
         ...item,
