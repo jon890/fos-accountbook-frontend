@@ -177,6 +177,8 @@ Page (app/) → Action (actions/) → Service (services/) → lib/server/api
 
 ## Git & PR Conventions
 
+**main 직접 push 차단됨** — branch protection 으로 `git push origin main` 이 항상 거부된다 (`Changes must be made through a pull request`). 모든 변경은 작업 브랜치(`plan/NNN-...`, `chore/...`, `feat/...` 등) 에 commit + push 후 `gh pr create` 로 PR 생성. task 파일 + docs 변경도 동일 — 직접 push 시도하지 말고 처음부터 브랜치 + PR 패턴.
+
 PR 제목은 반드시 아래 형식을 따른다:
 
 ```
