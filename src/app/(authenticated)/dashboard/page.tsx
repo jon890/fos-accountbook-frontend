@@ -8,10 +8,12 @@
  */
 
 import { getDashboardStatsAction } from "@/actions/dashboard/get-dashboard-stats-action";
+import { getMonthlyCategoryBreakdownAction } from "@/actions/dashboard/get-monthly-category-breakdown-action";
 import { getRecentExpensesAction } from "@/actions/dashboard/get-recent-expenses-action";
 import { getFamiliesAction } from "@/actions/family/get-families-action";
 import { getRecurringExpensesTotalAction } from "@/actions/recurring-expense";
 import { BudgetHeroCard } from "@/components/dashboard/BudgetHeroCard";
+import { CategoryDistribution } from "@/components/dashboard/CategoryDistribution";
 import { CalendarView } from "@/components/dashboard/CalendarView";
 import { DashboardClient } from "@/components/dashboard/DashboardClient";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
@@ -33,12 +35,13 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
-  const [statsResult, recentExpensesResult, familiesResult, recurringTotalResult] = await Promise.all(
+  const [statsResult, recentExpensesResult, familiesResult, recurringTotalResult, categoryBreakdownResult] = await Promise.all(
     [
       getDashboardStatsAction(),
       getRecentExpensesAction(10),
       getFamiliesAction(),
       getRecurringExpensesTotalAction(),
+      getMonthlyCategoryBreakdownAction(),
     ],
   );
 
@@ -57,6 +60,13 @@ export default async function DashboardPage() {
   const families = getActionDataOrDefault(familiesResult, []);
 
   const recurringTotal = getActionDataOrDefault(recurringTotalResult, null);
+
+  const categoryBreakdown = getActionDataOrDefault(categoryBreakdownResult, {
+    year: statsData.year,
+    month: statsData.month,
+    totalExpense: 0,
+    items: [],
+  });
 
   const selectedFamily =
     families.find((f) => f.uuid === selectedFamilyUuid) || null;
@@ -94,6 +104,7 @@ export default async function DashboardPage() {
         monthlyIncome={statsData.monthlyIncome}
         monthlyExpense={statsData.monthlyExpense}
       />
+      <CategoryDistribution breakdown={categoryBreakdown} />
       {recurringTotal !== null && (
         <RecurringExpenseCard total={recurringTotal} />
       )}

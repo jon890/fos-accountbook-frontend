@@ -58,6 +58,28 @@
   /* ── font (mono only — sans/num from next/font) ─ */
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
 
+  /* ── category tone tokens (10 hues + etc, bg+fg = 22 vars) ── */
+  --color-cat-food-bg:      oklch(0.945 0.045  35);
+  --color-cat-food-fg:      oklch(0.560 0.140  35);
+  --color-cat-cafe-bg:      oklch(0.945 0.045  60);
+  --color-cat-cafe-fg:      oklch(0.520 0.110  60);
+  --color-cat-transit-bg:   oklch(0.945 0.045 230);
+  --color-cat-transit-fg:   oklch(0.540 0.130 230);
+  --color-cat-telecom-bg:   oklch(0.945 0.045 280);
+  --color-cat-telecom-fg:   oklch(0.540 0.130 280);
+  --color-cat-home-bg:      oklch(0.945 0.045 188);
+  --color-cat-home-fg:      oklch(0.510 0.110 188);
+  --color-cat-shopping-bg:  oklch(0.945 0.045 330);
+  --color-cat-shopping-fg:  oklch(0.560 0.140 330);
+  --color-cat-health-bg:    oklch(0.945 0.045 152);
+  --color-cat-health-fg:    oklch(0.520 0.120 152);
+  --color-cat-leisure-bg:   oklch(0.945 0.045 105);
+  --color-cat-leisure-fg:   oklch(0.520 0.120 105);
+  --color-cat-education-bg: oklch(0.945 0.045 250);
+  --color-cat-education-fg: oklch(0.540 0.130 250);
+  --color-cat-etc-bg:       oklch(0.945 0.005 230);
+  --color-cat-etc-fg:       oklch(0.510 0.015 230);
+
   /* ── shadcn → token mapping (Tailwind utility 호환) ─ */
   --color-background:         var(--background);
   --color-foreground:         var(--foreground);
