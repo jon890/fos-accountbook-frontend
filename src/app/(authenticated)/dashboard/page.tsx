@@ -46,8 +46,8 @@ export default async function DashboardPage() {
   const recentExpenses = getActionDataOrDefault(recentExpensesResult, []);
   const families = getActionDataOrDefault(familiesResult, []);
   const categoryBreakdown = getActionDataOrDefault(categoryBreakdownResult, {
-    year: statsData.year,
-    month: statsData.month,
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1,
     totalExpense: 0,
     items: [],
   });

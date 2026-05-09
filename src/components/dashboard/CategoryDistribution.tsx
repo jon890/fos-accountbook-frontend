@@ -84,10 +84,10 @@ export function CategoryDistribution({ breakdown }: CategoryDistributionProps) {
                 </Pie>
                 {!isEmpty && (
                   <Tooltip
-                    formatter={(value) => {
-                      const num = typeof value === "number" ? value : Number(value ?? 0);
-                      return [formatCurrency(num), "지출"];
-                    }}
+                    formatter={(value) => [
+                      formatCurrency(typeof value === "number" ? value : 0),
+                      "지출",
+                    ]}
                     contentStyle={{
                       fontSize: 12,
                       borderRadius: 8,
