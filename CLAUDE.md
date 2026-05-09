@@ -192,6 +192,22 @@ type(scope): description
 
 이 형식에서 절대 벗어나지 않는다.
 
+### Plan 브랜치 분리 규칙
+
+plan task 와 실제 구현은 **분리된 브랜치 + 분리된 PR** 로 관리한다.
+
+| 단계 | 브랜치 | 내용 | 머지 후 |
+|---|---|---|---|
+| 계획 | `plan/{N}-{slug}` | `tasks/plan{N}-{slug}/` task 파일 + docs 갱신 | task 가 main 에 반영 |
+| 구현 | `feat/plan{N}-{slug}` | phase 별 코드 commit | 실제 기능이 main 에 반영 |
+
+**왜?** 머지 이력에서 "무엇이 계획이고 무엇이 구현인가" 즉시 식별. 검토 부담도 분산.
+
+**적용**:
+- `/planning N` → `plan/{N}-{slug}` 에 task + docs commit + PR
+- `/build-with-teams N` → main 의 task 를 base 로 **`feat/plan{N}-{slug}` 신규 브랜치** 생성 후 phase 실행
+- build-with-teams 사전 검증 4번이 plan task PR 머지를 잡아도 정상 — task-only 머지이므로 무시하고 신 브랜치로 진행
+
 ---
 
 ## PR 체크리스트
