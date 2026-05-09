@@ -149,29 +149,36 @@
 
 ---
 
-## ADR-F11: CI 코드 리뷰 워크플로 설계 (2026-04-04)
+## ADR-F11: CI 코드 리뷰 워크플로 설계 (2026-04-04, 2026-05-09 개정)
 
-**결정**: Claude Code Action 기반 자동 코드 리뷰 워크플로를 아래 방침으로 운영
+**결정**: Claude Code Action 기반 자동 코드 리뷰 워크플로를 아래 방침으로 운영. fos-blog 정착 패턴과 동일화 (2026-05-09 개정).
 
 **핵심 결정 사항**:
 
 | 항목 | 결정 | 이유 |
 |------|------|------|
 | 트리거 | `opened` + `/review` 수동 | `synchronize` 제거 — 매 push마다 토큰 소비 방지 |
-| Review Event | 🔴 → `REQUEST_CHANGES`, 없으면 `APPROVE` | PR 머지 안전망 역할 |
-| 일반 코멘트 | 제거 — Review body로 통합 | Review API의 body 필드가 요약 역할. 별도 코멘트는 중복 |
-| 코멘트 정리 | minimize (OUTDATED) | delete보다 이력 보존에 유리. 인라인 리뷰 코멘트도 포함 |
+| Review Event | 항상 `COMMENT` (🔴 있어도 차단 안 함) | 리뷰는 권고. 머지 차단은 인간 reviewer 책임. `REQUEST_CHANGES` 사고 회피 |
+| 일반 요약 댓글 | 인라인 리뷰와 분리해 1회 추가 게시 | Conversation 탭 가시성 확보. inline 만 두면 Files changed 탭에 묻힘 |
+| 댓글 정리 | DELETE (REST) | minimize 누적 시 PR 스레드 시각 답답. 이력은 GitHub event log 로 충분 |
+| Dummy 댓글 자동 정리 | post-step bash 로 길이/regex/severity 마커 검사 후 삭제 | Claude action 이 자연어 sanity check 무시하고 placeholder 게시하는 사고 (fos-blog PR #114) 강제 차단 |
 | 모델 | orchestrator=sonnet, specialist=haiku | 토큰 비용 최적화. haiku로 충분한 단일 관점 분석 |
-| allowed_bots | 필요한 봇만 명시 | `"*"` 와일드카드 보안 위험. 봇 추가 시 명시적 업데이트 |
+| allowed_bots | `"*"` | 광범위 허용 — Dependabot/Claude 모두 차단되지 않음. 보안 검증은 specialist agent 가 담당 |
 | diff 필터 | `pnpm-lock.yaml`, `*.lock`, `*.snap` 제외 | 노이즈 감소 |
 | Job timeout | 15분 | agent hang 시 불필요한 비용 방지 |
-| 프롬프트 관리 | yml 인라인 유지 | 4개 agent 규모에서 파일 분리는 오버엔지니어링. 단일 파일에서 전체 흐름 파악 가능 |
-| 소규모 PR 스킵 | 안 함 | 추후 재논의. 현재는 모든 PR 동일 리뷰 |
+| Check Run 수동 등록 | `issue_comment` 트리거 시 수동 생성 | issue_comment workflow run 이 PR Checks 탭에 자동 노출 안 됨 — 수동 Check Run 으로 진행 상태 가시화 |
+| 프롬프트 관리 | yml 인라인 유지 | 4개 agent 규모에서 파일 분리는 오버엔지니어링 |
+| 소규모 PR 스킵 | 안 함 | 모든 PR 동일 리뷰 |
 
-**트레이드오프**:
-- `/review` 수동 트리거는 리뷰를 잊을 수 있음 → `opened` 시 자동 1회 실행으로 보완
-- `REQUEST_CHANGES`는 머지를 차단할 수 있음 → 의도적 안전망으로 수용
-- minimize된 코멘트가 쌓이면 PR 스레드가 길어질 수 있음 → OUTDATED 라벨로 접힌 상태이므로 가독성 영향 최소
+**대안 기각**:
+- `REQUEST_CHANGES` event 유지: PR 머지 버튼 비활성으로 사용자가 매번 dismiss 해야 함 + Reviews 탭 빨간 X 가 시각적으로 부정적. 안전망 가치보다 마찰 비용 큼.
+- minimize 유지: PR 스레드에 minimized 블록 누적 → "Show outdated" 토글이 보이고 답답. 이력은 GitHub Activity 탭에서 보존.
+- 단일 review API 호출 (요약을 review body 안에): Files changed 탭에만 보이고 Conversation 탭에서 요약 가시성 떨어짐.
+
+**HEREDOC 패턴 강제 (실측 사고)**:
+- 일반 요약 댓글은 반드시 `gh pr comment --body-file - <<'COMMENT_EOF' ... COMMENT_EOF` HEREDOC 으로 stdin 전달.
+- `gh pr comment --body "...\n..."` 패턴은 shell 이 `\n` 을 literal 두 글자로 전달해 댓글 줄바꿈 깨짐.
+- review JSON body 안의 `\n` 은 JSON parser 가 해석하므로 정상.
 
 ---
 
