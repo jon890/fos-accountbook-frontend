@@ -1,7 +1,7 @@
 import { endOfMonth, format, parseISO } from "date-fns";
 import { serverApiGet } from "@/lib/server/api/client";
 import { getCachedDashboardStats, getCachedFamilyCategories } from "@/lib/server/cache";
-import type { DashboardStats, RecentExpense } from "@/types/dashboard";
+import type { DashboardStats, RecentExpense, MonthlyCategoryBreakdown } from "@/types/dashboard";
 import type { ExpenseResponse } from "@/types/expense";
 import type { PaginationResponse } from "@/types/common";
 
@@ -10,6 +10,7 @@ interface RawExpenseResponse {
   amount: number;
   date: string;
   categoryName: string;
+  categoryUuid?: string;
 }
 
 interface RawIncomeResponse {
@@ -77,6 +78,59 @@ export async function getMonthlyDailyStats(
     income: stats.income,
     expense: stats.expense,
   }));
+}
+
+export async function getMonthlyCategoryBreakdown(
+  familyUuid: string,
+  year: number,
+  month: number
+): Promise<MonthlyCategoryBreakdown> {
+  const firstOfMonth = new Date(year, month - 1, 1);
+  const startDate = format(firstOfMonth, "yyyy-MM-dd");
+  const endDate = format(endOfMonth(firstOfMonth), "yyyy-MM-dd");
+
+  const [expensesResult, categories] = await Promise.all([
+    serverApiGet<{ items: RawExpenseResponse[] }>(
+      `/families/${familyUuid}/expenses?size=1000&startDate=${startDate}&endDate=${endDate}`
+    ).catch(() => ({ items: [] as RawExpenseResponse[] })),
+    getCachedFamilyCategories(familyUuid),
+  ]);
+
+  const categoryMap = new Map(categories.map((cat) => [cat.uuid, cat]));
+  const amountByCategory = new Map<string, number>();
+
+  for (const expense of expensesResult?.items ?? []) {
+    if (!Number.isFinite(expense.amount) || expense.amount <= 0) continue;
+    if (!expense.categoryUuid) continue;
+    amountByCategory.set(
+      expense.categoryUuid,
+      (amountByCategory.get(expense.categoryUuid) ?? 0) + expense.amount
+    );
+  }
+
+  const totalExpense = Array.from(amountByCategory.values()).reduce(
+    (sum, amt) => sum + amt,
+    0
+  );
+
+  const items = Array.from(amountByCategory.entries())
+    .map(([categoryUuid, totalAmount]) => {
+      const cat = categoryMap.get(categoryUuid);
+      return {
+        categoryUuid,
+        name: cat?.name ?? "Unknown",
+        icon: cat?.icon ?? "💰",
+        color: cat?.color,
+        totalAmount,
+        percentage:
+          totalExpense > 0
+            ? Math.round((totalAmount / totalExpense) * 100)
+            : 0,
+      };
+    })
+    .sort((a, b) => b.totalAmount - a.totalAmount);
+
+  return { year, month, totalExpense, items };
 }
 
 export async function getRecentExpenses(
