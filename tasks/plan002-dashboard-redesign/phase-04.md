@@ -17,13 +17,15 @@
 
 ### 1. 카테고리 톤 토큰화 — globals.css 또는 별도 파일
 
-10개 카테고리 hue 를 토큰화. plan001 의 `@theme` 블록 또는 별도 `--color-cat-{food,cafe,...}` 변수로 globals.css 추가.
+10개 카테고리 hue + `etc` = 11쌍(bg+fg) = 22개 변수를 토큰화. plan001 의 `@theme` 블록 또는 별도 `--color-cat-{food,cafe,...,etc}` 변수로 globals.css 추가.
 
 ```css
 --color-cat-food-bg: oklch(0.945 0.045 35);
 --color-cat-food-fg: oklch(0.560 0.140 35);
-/* 9개 더 + etc */
+/* 10개 더 (cafe, transit, telecom, home, shopping, health, leisure, education, etc) */
 ```
+
+키 셋 cross-check: handoff `tokens.js` 의 `category` 키 셋 = (food, cafe, transit, telecom, home, shopping, health, leisure, education, etc). 시작 시 1회 grep 으로 확인.
 
 카테고리 식별자는 backend `Category.name` 한국어 → 토큰 키 매핑 helper 함수 (`src/lib/utils/category-tone.ts`) 신규. 매칭 실패 시 `etc` 톤.
 
@@ -37,7 +39,7 @@ Layout: Donut 좌측 (mobile 120px / desktop 180px) + top N 리스트 우측. Do
 
 `<PieChart>` + `<Pie data={items} dataKey="totalAmount" innerRadius={...} outerRadius={...} stroke="none" />`. 각 셀의 `fill` 은 카테고리 톤 fg. `<Tooltip />` (recharts 기본) 활성화로 hover 시 amount + %.
 
-`window` 의존 없는 SSR-safe 구현. recharts `ResponsiveContainer` 사용 시 client component 필요 — `"use client"` 지시자 파일 최상단.
+**SSR 처리**: 파일 최상단에 `"use client"` 지시자만 사용. `dynamic(... { ssr: false })` 도입 금지 — 기존 `src/app/(authenticated)/analytics/_components/CategoryPieChart.tsx` 가 `"use client"` + `ResponsiveContainer` 조합으로 정상 동작 중인 동일 패턴이라 검증된 경로.
 
 ### 4. 빈 상태 / 단일 카테고리 처리
 
@@ -88,6 +90,6 @@ grep -n 'innerRadius' src/components/dashboard/CategoryDistribution.tsx | wc -l 
 | 리스크 | 완화 |
 |---|---|
 | 한국어 카테고리명이 매핑 helper 의 키 집합과 다름 (예: "음식" vs "식비") | matching 실패 시 `etc` 톤. helper 의 키 셋은 backend Category 시드 데이터와 phase 시작 시 cross-check |
-| recharts SSR 경고 (window 미정의) | `"use client"` 지시자 + `ResponsiveContainer` 동적 import 또는 `dynamic(... { ssr: false })` 검토 |
+| recharts SSR 경고 (window 미정의) | `"use client"` 지시자만으로 충분 (기존 analytics CategoryPieChart 검증된 패턴) |
 | Donut 작은 사이즈에서 0~3% 슬라이스 가시성 | recharts 의 `minAngle` prop (예: 4도) 로 시각 가독 보장 |
 | 카테고리가 11개 이상이면 "etc" 단일 합산이 거대해짐 | 본 plan 은 "이번 달" 단위. 가구당 월 활성 카테고리 8~10 추정. 11+ 케이스는 `items.slice(0, 5)` + "기타 N건 N원" 행 추가 검토 — phase 본문 자체에는 미반영, plan003+ |
