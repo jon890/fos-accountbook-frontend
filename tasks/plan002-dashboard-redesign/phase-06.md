@@ -1,7 +1,7 @@
 # Phase 06 — 통합 검증 + legacy/신규/하드코딩 grep + completed 마킹
 
 **Model**: haiku
-**Status**: pending
+**Status**: completed
 **Goal**: phase 01~05 산출물 통합 검증, legacy/신규/하드코딩 잔재를 단일 grep step 으로 일괄 점검, `index.json` status `completed` 마킹.
 
 ## Context (자기완결)
