@@ -13,9 +13,9 @@ import { getFamiliesAction } from "@/actions/family/get-families-action";
 import { getRecurringExpensesTotalAction } from "@/actions/recurring-expense";
 import { CalendarView } from "@/components/dashboard/CalendarView";
 import { DashboardClient } from "@/components/dashboard/DashboardClient";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { RecurringExpenseCard } from "@/components/dashboard/RecurringExpenseCard";
 import { StatsCards } from "@/components/dashboard/StatsCards";
-import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
 import { getActionDataOrDefault } from "@/lib/server/action-result-handler";
 import { auth } from "@/lib/server/auth";
 import { getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
@@ -60,11 +60,20 @@ export default async function DashboardPage() {
   const selectedFamily =
     families.find((f) => f.uuid === selectedFamilyUuid) || null;
 
+  const members =
+    selectedFamily?.members?.map((m) => ({
+      uuid: m.uuid,
+      name: m.userName ?? m.userEmail ?? "멤버",
+      avatarUrl: m.userImage,
+    })) ?? [];
+
   return (
     <DashboardClient recentExpenses={recentExpenses}>
-      <WelcomeSection
-        userName={session.user.name}
-        familyName={selectedFamily?.name}
+      <DashboardHeader
+        familyName={selectedFamily?.name ?? null}
+        members={members}
+        year={statsData.year}
+        month={statsData.month}
       />
       <StatsCards data={statsData} />
       {recurringTotal !== null && (
