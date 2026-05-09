@@ -429,6 +429,48 @@ jobs:
 
           claude_args: '--model claude-sonnet-4-6 --allowedTools "Agent,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*),Bash(gh api:*)" --disallowedTools "Read,Write,Edit,Glob,Grep,LS"'
 
+      # 게시된 댓글 본문에 literal `\n` 두 글자가 박힌 경우 자동 보정.
+      # 사고 패턴: Claude action 이 prompt 의 `--body-file - <<'COMMENT_EOF'` HEREDOC
+      # 가이드를 무시하고 `gh pr comment --body "...\n..."` 호출 → shell 이 큰따옴표 안
+      # `\n` 을 literal 두 글자로 GitHub API 에 전달 → 마크다운 렌더 시 줄바꿈 안 됨.
+      # 실측 사고: PR #208 일반 댓글 (id 4412740228). jq contains("\\n") 으로 검출 후
+      # perl 로 실제 newline 으로 교체, PATCH API 로 본문 갱신.
+      - name: 게시된 댓글의 literal \n 두 글자 자동 보정
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          REPO="${{ github.repository }}"
+          PR_NUMBER="${{ env.PR_NUMBER }}"
+
+          fix_one() {
+            local kind="$1"   # issues 또는 pulls
+            local id="$2"
+            local body
+            body=$(gh api "repos/$REPO/$kind/comments/$id" --jq .body)
+            if printf '%s' "$body" | grep -q '\\n'; then
+              echo "[literal \\n 검출] $kind#$id 본문 보정 중..."
+              local fixed
+              fixed=$(printf '%s' "$body" | perl -pe 's/\\n/\n/g')
+              gh api "repos/$REPO/$kind/comments/$id" --method PATCH \
+                --field body="$fixed" >/dev/null || true
+            fi
+          }
+
+          # 일반 PR 댓글 (issue comments)
+          gh api "repos/$REPO/issues/$PR_NUMBER/comments" \
+            --jq '.[] | select(.user.login == "claude[bot]") | select(.body | contains("\\n")) | .id' \
+            | while read -r id; do
+              [ -n "$id" ] && fix_one "issues" "$id"
+            done
+
+          # 인라인 리뷰 댓글 (PR review comments)
+          gh api "repos/$REPO/pulls/$PR_NUMBER/comments" \
+            --jq '.[] | select(.user.login == "claude[bot]") | select(.body | contains("\\n")) | .id' \
+            | while read -r id; do
+              [ -n "$id" ] && fix_one "pulls" "$id"
+            done
+
       # 게시된 인라인 댓글 중 dummy / 길이 미달 / 마커 부재 entry 를 자동 정리
       # — Claude action 이 자연어 sanity check 를 무시하고 "test body" / "test2"
       # 같은 placeholder 를 게시하는 사고 (fos-blog PR #114 관측) 를 강제 차단.
