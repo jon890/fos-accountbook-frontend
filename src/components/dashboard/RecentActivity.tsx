@@ -1,89 +1,123 @@
-import { Badge } from "@/components/ui/badge";
+"use client";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { ExpenseItem } from "@/components/expenses/list/ExpenseItem";
-import type { ExpenseItemData } from "@/types/expense";
+import { getCategoryTone } from "@/lib/utils/category-tone";
+import { formatCurrency } from "@/lib/utils/format";
 import type { RecentExpense } from "@/types/dashboard";
-import { Plus, Wallet } from "lucide-react";
+import { Wallet, Plus } from "lucide-react";
 import Link from "next/link";
 
 interface RecentActivityProps {
   expenses: RecentExpense[];
 }
 
+function formatRelativeDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffDays = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  if (diffDays === 0) return "오늘";
+  if (diffDays === 1) return "어제";
+  return `${diffDays}일 전`;
+}
+
+interface TxRowProps {
+  expense: RecentExpense;
+}
+
+function TxRow({ expense }: TxRowProps) {
+  const tone = getCategoryTone(expense.category.name);
+
+  return (
+    <div className="flex items-center gap-3 py-2.5">
+      {/* Left: category icon */}
+      <div
+        className="size-9 shrink-0 rounded-xl flex items-center justify-center text-base"
+        style={{ background: tone.bg, color: tone.fg }}
+      >
+        {expense.category.icon}
+      </div>
+
+      {/* Middle: memo + category · time */}
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-fg truncate">
+          {expense.description || expense.category.name}
+        </p>
+        <p className="text-[11.5px] text-fg-muted">
+          {expense.category.name} · {formatRelativeDate(expense.date)}
+        </p>
+      </div>
+
+      {/* Right: amount + creator avatar */}
+      <div className="flex flex-col items-end gap-1 shrink-0">
+        <span className="num text-sm font-bold text-fg">
+          {formatCurrency(expense.amount)}
+        </span>
+        {expense.createdBy?.name ? (
+          <Avatar className="size-4">
+            <AvatarFallback className="text-[8px] font-medium bg-brand-200 text-brand-800">
+              {expense.createdBy.name.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+        ) : (
+          <div className="size-4" />
+        )}
+      </div>
+    </div>
+  );
+}
+
 export function RecentActivity({ expenses }: RecentActivityProps) {
   const hasExpenses = expenses.length > 0;
 
   return (
-    <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-xl">
-      <CardHeader className="pb-3 md:pb-4 px-4 md:px-6 pt-4 md:pt-6">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base md:text-xl font-bold text-gray-900">
-            최근 활동
-          </CardTitle>
-          <Badge variant="secondary" className="bg-gray-100 text-xs">
-            {expenses.length}건
-          </Badge>
-        </div>
-        <CardDescription className="text-xs md:text-sm">
-          최근 추가된 지출 내역을 확인하세요
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="px-4 md:px-6">
+    <div className="bg-bg-elev rounded-[var(--radius-xl)] shadow-[var(--shadow-default)] mb-4 md:mb-6">
+      <div className="flex items-center justify-between px-4 md:px-6 pt-4 md:pt-5 pb-3">
+        <h3 className="text-sm md:text-base font-semibold text-fg">최근 활동</h3>
+        <span className="text-xs text-fg-muted">{expenses.length}건</span>
+      </div>
+
+      <div className="px-4 md:px-6 pb-4 md:pb-5">
         {!hasExpenses ? (
-          <div className="text-center py-10 md:py-16">
-            <div className="w-14 h-14 md:w-20 md:h-20 bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl md:rounded-3xl flex items-center justify-center mx-auto mb-4 md:mb-6">
-              <Wallet className="w-7 h-7 md:w-10 md:h-10 text-gray-400" />
+          <div className="text-center py-8">
+            <div className="size-14 bg-bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Wallet className="size-7 text-fg-subtle" />
             </div>
-            <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-1.5 md:mb-2">
+            <p className="text-sm font-semibold text-fg mb-1">
               아직 지출 내역이 없습니다
-            </h3>
-            <p className="text-sm md:text-base text-gray-500 mb-4 md:mb-6">
-              첫 번째 지출을 추가해보세요!
             </p>
+            <p className="text-xs text-fg-muted mb-4">첫 번째 지출을 추가해보세요!</p>
             <Link href="/expenses">
-              <Button className="gradient-primary hover:opacity-90 shadow-lg hover:shadow-xl transition-all duration-200 rounded-xl md:rounded-2xl px-6 md:px-8 text-sm md:text-base text-white">
-                <Plus className="w-4 h-4 md:w-5 md:h-5 mr-2" />첫 지출 추가하기
+              <Button className="gradient-primary text-white rounded-xl text-sm px-6 hover:opacity-90">
+                <Plus className="size-4 mr-1.5" />
+                첫 지출 추가하기
               </Button>
             </Link>
           </div>
         ) : (
-          <div className="space-y-2 md:space-y-3">
-            {expenses.map((expense) => {
-              const expenseData: ExpenseItemData = {
-                uuid: expense.uuid,
-                amount: expense.amount,
-                description: expense.description,
-                date: expense.date,
-                categoryUuid: expense.category.uuid,
-                categoryName: expense.category.name,
-                categoryColor: expense.category.color,
-                categoryIcon: expense.category.icon,
-              };
-              return <ExpenseItem key={expense.uuid} expense={expenseData} />;
-            })}
-
+          <>
+            <div className="divide-y divide-[var(--color-border)]">
+              {expenses.map((expense) => (
+                <TxRow key={expense.uuid} expense={expense} />
+              ))}
+            </div>
             {expenses.length >= 10 && (
-              <div className="pt-3 md:pt-4">
+              <div className="pt-3">
                 <Link href="/expenses">
                   <Button
                     variant="outline"
-                    className="w-full border-2 border-gray-200 hover:bg-gray-50 rounded-xl md:rounded-2xl text-sm md:text-base"
+                    className="w-full rounded-xl text-sm border-[var(--color-border)]"
                   >
                     모든 지출 내역 보기
                   </Button>
                 </Link>
               </div>
             )}
-          </div>
+          </>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
