@@ -6,3 +6,4 @@ export type * from "./expense";
 export type * from "./income";
 export type * from "./invitation";
 export type * from "./dashboard";
+export type * from "./transaction";

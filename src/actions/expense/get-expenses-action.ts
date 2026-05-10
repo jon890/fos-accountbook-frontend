@@ -1,7 +1,3 @@
-/**
- * 지출 목록 조회 Server Action
- */
-
 "use server";
 
 import {
