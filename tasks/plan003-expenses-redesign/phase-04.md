@@ -58,7 +58,7 @@ test -f src/components/transactions/TransactionRow.tsx
 test -f src/components/transactions/DateGroupSection.tsx
 
 # 5-col desktop grid
-grep -nE 'grid-cols\[44px|md:grid-cols' src/components/transactions/TransactionRow.tsx | wc -l   # >= 1
+grep -nE 'md:grid-cols-\[44px_1fr_110px_28px_140px\]' src/components/transactions/TransactionRow.tsx | wc -l   # >= 1 (handoff desktop 5-col grid)
 
 # 카테고리 톤 토큰 사용 (plan002 helper)
 grep -n 'category-tone\|--color-cat-' src/components/transactions/TransactionRow.tsx | wc -l   # >= 1
