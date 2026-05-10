@@ -31,16 +31,18 @@ export class HTTPError extends Error {
   response: Response;
   request: Request;
   options: NormalizedOptions;
-  data: unknown;        // ← ky 2.0 신규: 자동 파싱된 응답 body
+  data: unknown;        // ← ky 2.0 신규: 자동 파싱된 응답 body (always defined)
 
-  constructor(response: Response, request: Request, options: NormalizedOptions, data?: unknown) {
+  constructor(response: Response, request: Request, options: NormalizedOptions, data: unknown = null) {
     super(...);
     // ...
-    this.data = data ?? null;
+    this.data = data;
     this.name = "HTTPError";
   }
 }
 ```
+
+`data` 는 `unknown = null` 기본값으로 항상 정의됨 (ky 2.0 실제 타입과 일치) — 호출자에서 `error.data === undefined` 분기 불필요. body 없이 throw 하는 테스트는 4번째 인자 생략 시 자동으로 `null`.
 
 테스트에서 사용 시:
 ```ts

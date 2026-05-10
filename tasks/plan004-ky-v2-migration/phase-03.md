@@ -23,30 +23,33 @@ const response = await kyInstance[method](normalizedEndpoint, kyOptions);
 return response.json<T>();
 ```
 
-방어 패턴:
+방어 패턴 — `serverApiClient<T>` 의 반환 타입을 `Promise<T | null>` 로 변경하고, 빈 body 응답은 status 코드 기반으로 판정 (Content-Length 헤더는 chunked 응답에서 부재할 수 있어 신뢰성 부족):
 
 ```ts
+// serverApiClient<T>(...): Promise<T | null>
 const response = await kyInstance[method](normalizedEndpoint, kyOptions);
 
-// 204 No Content 또는 빈 body 응답 — DELETE 등에서 발생
-if (response.status === 204 || response.headers.get("content-length") === "0") {
-  return null as T;
+// 204 No Content / 304 Not Modified — body 없음 보장된 status
+if (response.status === 204 || response.status === 304) {
+  return null;
 }
 
 return response.json<T>();
 ```
 
-`null as T` 는 호출자 (`serverApiDelete` 등) 가 `data` 필드를 안 쓰는 케이스에 맞춤. envelope 응답 (`ApiResponse<T>`) 검사 (line 311 `if (!response.success)`) 는 호출자에서 분기 — 빈 body 시 success 검증 자체를 건너뛰는 분기 추가:
+5개 helper (`serverApiGet`/`Post`/`Put`/`Patch`/`Delete`) 모두 반환 타입을 `Promise<T | null>` 로 변경 + null 분기 명시:
 
 ```ts
 // serverApiDelete 등에서:
-const response = await serverApiClient<ApiResponse<T> | null>(endpoint, { method: "DELETE" });
-if (response === null) return null as T;   // 204 No Content
-if (!response.success) throw new ServerApiError(...);
-return response.data;
+export async function serverApiDelete<T>(endpoint: string): Promise<T | null> {
+  const response = await serverApiClient<ApiResponse<T>>(endpoint, { method: "DELETE" });
+  if (response === null) return null;          // 204/304 — body 없음
+  if (!response.success) throw new ServerApiError(response.message || response.error || "API 오류");
+  return response.data;
+}
 ```
 
-5개 helper (`serverApiGet`/`Post`/`Put`/`Patch`/`Delete`) 모두 동일 패턴 가드 추가.
+호출자 (action/service) 도 `null` 가능성을 타입으로 인지 — phase 5 에서 `grep serverApiDelete` 후 호출자 null 분기 점검.
 
 ### 2. `beforeError` 의 `HTTPError.data` 활용
 
@@ -116,8 +119,12 @@ pnpm lint
 pnpm build
 pnpm test --run
 
-# 빈 body 가드 도입
-grep -nE 'response\.status === 204|content-length' src/lib/server/api/client.ts | wc -l   # >= 1
+# 빈 body 가드 도입 (status 코드 기반 — Content-Length 헤더 의존 X)
+grep -nE 'response\.status === 204|response\.status === 304' src/lib/server/api/client.ts | wc -l   # >= 1
+! grep -nE 'content-length|Content-Length' src/lib/server/api/client.ts   # exit 1 — 헤더 체크 잔재 0건
+
+# 5개 helper 가 Promise<T | null> 시그니처
+grep -cE 'Promise<.*\| null>' src/lib/server/api/client.ts   # >= 5
 
 # HTTPError.data 활용 (await error.response.json 패턴 0건)
 ! grep -nE 'await error\.response\.json' src/lib/server/api/client.ts
@@ -139,12 +146,10 @@ grep -nE 'error\.data' src/lib/server/api/client.ts | wc -l   # >= 2
 
 - `__mocks__/ky.ts` 의 `HTTPError.data` 추가 (phase 4)
 - `NetworkError` 분기 처리 (본 plan 범위 외)
-- 호출자측 (action/service) 의 null 응답 처리 정책 — `null as T` 캐스팅 유지, 사용처에서 분기 안 해도 동작 (data 안 쓰는 케이스)
 
 ## Risks
 
 | 리스크 | 완화 |
 |---|---|
 | `error.data` 가 ky 2.0 에서 lazy 파싱이라 첫 접근 시 비동기 가능성 | release note (1341f5c) 가 "automatically consumed and parsed" 로 즉시 사용 명시. `await` 불필요 |
-| 빈 body 가드가 200 + 빈 body (비정상 응답) 도 null 처리해버림 | `content-length === "0"` 가드 — 정상 envelope 응답은 항상 length > 0. 의도적 정책 |
-| 호출자가 `null` 응답을 success 로 가정 안 하면 회귀 | helper 5개 모두 `null` 체크 → success false 분기 X. 변경 후 통합 테스트 (phase 5) |
+| 호출자가 `null` 응답에 분기 안 해서 런타임 에러 | helper 5개 반환 타입을 `Promise<T \| null>` 로 명시 → TypeScript 컴파일 단계에서 호출자 분기 강제. phase 5 의 `grep serverApiDelete` 점검으로 cross-check |
