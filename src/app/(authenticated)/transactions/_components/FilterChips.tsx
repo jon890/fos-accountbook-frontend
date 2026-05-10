@@ -11,6 +11,7 @@ import type { CategoryResponse } from "@/types/category";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { AmountRangeFilter } from "@/app/(authenticated)/transactions/_components/AmountRangeFilter";
 import { ChevronDown, CalendarDays, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -206,25 +207,8 @@ export function FilterChips({
           </Select>
         )}
 
-        {/* Phase 3 placeholder — 검색/금액 chip 자리 */}
-        <button
-          disabled
-          aria-disabled="true"
-          aria-label="검색 (준비 중)"
-          className={cn(chipBase, chipDefault, "opacity-40 cursor-not-allowed")}
-        >
-          검색
-          <ChevronDown size={13} aria-hidden="true" />
-        </button>
-        <button
-          disabled
-          aria-disabled="true"
-          aria-label="금액 범위 (준비 중)"
-          className={cn(chipBase, chipDefault, "opacity-40 cursor-not-allowed")}
-        >
-          금액
-          <ChevronDown size={13} aria-hidden="true" />
-        </button>
+        {/* 금액 범위 필터 */}
+        <AmountRangeFilter />
       </div>
 
       {/* 날짜 직접 입력 패널 */}

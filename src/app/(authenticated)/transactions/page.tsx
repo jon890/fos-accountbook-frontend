@@ -29,6 +29,9 @@ interface SearchParams {
   endDate?: string;
   page?: string;
   limit?: string;
+  q?: string;
+  amountMin?: string;
+  amountMax?: string;
 }
 
 interface TransactionsPageProps {
