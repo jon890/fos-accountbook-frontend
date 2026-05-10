@@ -1,13 +1,11 @@
 "use client";
 
-import { ExpenseFilters } from "@/components/expenses/forms/ExpenseFilters";
+import { TransactionsTabs } from "@/app/(authenticated)/transactions/_components/TransactionsTabs";
+import { FilterChips } from "@/app/(authenticated)/transactions/_components/FilterChips";
 import { ExpenseTabContent } from "@/app/(authenticated)/transactions/_components/ExpenseTabContent";
 import { IncomeTabContent } from "@/app/(authenticated)/transactions/_components/IncomeTabContent";
 import { RecurringTabContent } from "@/app/(authenticated)/transactions/_components/RecurringTabContent";
-import { cn } from "@/lib/client/utils";
 import type { CategoryResponse } from "@/types/category";
-import { TrendingDown, TrendingUp, Repeat } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { ReactNode } from "react";
 
 type TabType = "expenses" | "incomes" | "recurring";
@@ -37,59 +35,13 @@ export function TransactionsPageClient({
   incomeListContent,
   recurringListContent,
 }: TransactionsPageClientProps) {
-  const router = useRouter();
-  const currentSearchParams = useSearchParams();
-
-  const handleTabChange = (tab: TabType) => {
-    const params = new URLSearchParams(currentSearchParams.toString());
-    params.set("tab", tab);
-    params.set("page", "1");
-    router.push(`/transactions?${params.toString()}`);
-  };
-
   return (
     <div className="space-y-4">
-      {/* 탭 + 추가 버튼 */}
+      {/* 세그먼트 탭 + 추가 버튼 */}
       <div className="flex items-center justify-between gap-3">
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-xl shrink-0">
-          <button
-            onClick={() => handleTabChange("expenses")}
-            className={cn(
-              "flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200",
-              activeTab === "expenses"
-                ? "gradient-expense text-white shadow-sm"
-                : "text-gray-500 hover:text-gray-700 hover:bg-white/60"
-            )}
-          >
-            <TrendingDown className="w-4 h-4" />
-            <span>지출</span>
-          </button>
-          <button
-            onClick={() => handleTabChange("incomes")}
-            className={cn(
-              "flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200",
-              activeTab === "incomes"
-                ? "gradient-income text-white shadow-sm"
-                : "text-gray-500 hover:text-gray-700 hover:bg-white/60"
-            )}
-          >
-            <TrendingUp className="w-4 h-4" />
-            <span>수입</span>
-          </button>
-          <button
-            onClick={() => handleTabChange("recurring")}
-            className={cn(
-              "flex items-center gap-1.5 px-3 md:px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200",
-              activeTab === "recurring"
-                ? "gradient-expense text-white shadow-sm"
-                : "text-gray-500 hover:text-gray-700 hover:bg-white/60"
-            )}
-          >
-            <Repeat className="w-4 h-4" />
-            <span>고정지출</span>
-          </button>
+        <div className="flex-1 min-w-0">
+          <TransactionsTabs activeTab={activeTab} />
         </div>
-
         <div className="shrink-0">
           {activeTab === "expenses" ? (
             <ExpenseTabContent categories={categories} familyUuid={familyUuid} />
@@ -101,9 +53,9 @@ export function TransactionsPageClient({
         </div>
       </div>
 
-      {/* 필터 바 (고정지출 탭에서는 숨김) */}
+      {/* 필터 chips (반복지출 탭에서는 숨김) */}
       {activeTab !== "recurring" && (
-        <ExpenseFilters
+        <FilterChips
           categories={categories}
           defaultStartDate={searchParams.startDate}
           defaultEndDate={searchParams.endDate}
