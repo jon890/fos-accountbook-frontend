@@ -1,19 +1,16 @@
-/**
- * 지출 목록 클라이언트 컴포넌트
- * 수정/삭제 다이얼로그 상태 관리 + 날짜별 그룹핑
- */
-
 "use client";
 
 import { getFamilyCategoriesAction } from "@/actions/category/get-categories-action";
+import { DateGroupSection } from "@/components/transactions/DateGroupSection";
+import { groupTransactionsWithTotal } from "@/services/transaction/transaction-service";
 import type { CategoryResponse } from "@/types/category";
-import type { Expense, ExpenseItemData } from "@/types/expense";
-import { groupByDate } from "@/lib/utils/group-by-date";
+import type { Expense } from "@/types/expense";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { DeleteExpenseDialog } from "../dialogs/DeleteExpenseDialog";
 import { EditExpenseDialog } from "../dialogs/EditExpenseDialog";
 import { ExpenseItem } from "./ExpenseItem";
+import type { ExpenseItemData } from "@/types/expense";
 
 interface ExpenseListClientProps {
   expenses: Expense[];
@@ -54,55 +51,38 @@ export function ExpenseListClient({
   };
 
   const categoryMap = new Map(categories.map((cat) => [cat.uuid, cat]));
-
-  // 날짜별 그룹핑
-  const groups = groupByDate(expenses);
+  const groups = groupTransactionsWithTotal(expenses);
 
   return (
     <>
       <div className="space-y-5">
-        {groups.map(({ dateKey, label, items }) => {
-          const groupTotal = items.reduce((sum, e) => sum + Number(e.amount), 0);
-
-          return (
-            <div key={dateKey}>
-              {/* 날짜 헤더 */}
-              <div className="flex items-center justify-between px-1 mb-2">
-                <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-                  {label}
-                </span>
-                <span className="text-xs font-semibold text-expense">
-                  -₩{groupTotal.toLocaleString()}
-                </span>
-              </div>
-
-              {/* 해당 날짜의 지출 목록 */}
-              <div className="bg-white rounded-2xl overflow-hidden divide-y divide-gray-50">
-                {items.map((expense) => {
-                  const category = categoryMap.get(expense.categoryUuid);
-                  const expenseData: ExpenseItemData = {
-                    uuid: expense.uuid,
-                    amount: expense.amount,
-                    description: expense.description,
-                    date: expense.date,
-                    categoryUuid: expense.categoryUuid,
-                    categoryName: category?.name || expense.category?.name || "기타",
-                    categoryColor: category?.color || expense.category?.color,
-                    categoryIcon: category?.icon || expense.category?.icon || "💸",
-                  };
-                  return (
-                    <ExpenseItem
-                      key={expense.uuid}
-                      expense={expenseData}
-                      onEdit={() => setEditingExpense(expense)}
-                      onDelete={() => setDeletingExpense(expense)}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
+        {groups.map((group) => (
+          <DateGroupSection
+            key={group.dateKey}
+            group={group}
+            renderItem={(expense) => {
+              const cat = categoryMap.get(expense.categoryUuid);
+              const expenseData: ExpenseItemData = {
+                uuid: expense.uuid,
+                amount: expense.amount,
+                description: expense.description,
+                date: expense.date,
+                categoryUuid: expense.categoryUuid,
+                categoryName: cat?.name || expense.category?.name || "기타",
+                categoryColor: cat?.color || expense.category?.color,
+                categoryIcon: cat?.icon || expense.category?.icon || "💸",
+              };
+              return (
+                <ExpenseItem
+                  key={expense.uuid}
+                  expense={expenseData}
+                  onEdit={() => setEditingExpense(expense)}
+                  onDelete={() => setDeletingExpense(expense)}
+                />
+              );
+            }}
+          />
+        ))}
       </div>
 
       {editingExpense && (
