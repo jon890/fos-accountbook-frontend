@@ -45,7 +45,7 @@ import { groupByDate } from "@/lib/utils/group-by-date";
 
 export function groupTransactionsWithTotal<T extends { date: string; amount: number }>(
   items: T[]
-): DateGroupWithTotal<T> {
+): DateGroupWithTotal<T>[] {
   const groups = groupByDate(items);
   return groups.map((g) => ({
     ...g,
@@ -70,7 +70,11 @@ export async function getExpensesAction(
 ): Promise<ActionResult<{ items: Expense[]; dateGroups: DateGroupWithTotal<Expense>[]; totalCount: number }>>
 ```
 
-`totalCount` 책임: backend 가 query param 지원 시 backend `totalCount` 그대로, 미지원 시 클라 필터 적용 후 길이. service 가 두 케이스 모두 캡슐화. ADR-F04 — action 은 인증·검증·service 호출만, 그룹화/필터는 service.
+**Client filter 정책**: `applyClientFilters` 는 idempotent — backend 가 일부/전부 query 지원해도 service 가 무조건 client 측 재적용 (안전 + 단순). 따라서 `totalCount` = client 필터 후 items 길이 (backend 원본 totalCount 무시). ADR-F04 — action 은 인증·검증·service 호출만, 그룹화/필터는 service.
+
+**탭별 반환 분기**: `tab` 가
+- `"expenses"` / `"incomes"` → `dateGroups: DateGroupWithTotal<Expense | Income>[]`
+- `"recurring"` → `RecurringExpense` 는 schedule 기반이라 `groupTransactionsWithTotal` 미적용. `dateGroups: null`, items 만 반환. UI (phase 4) 는 별도 행 렌더.
 
 Zod 검증 (ADR-F06): `amountMin/Max` 음수 금지, `q` 길이 ≤ 100자.
 
