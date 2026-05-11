@@ -120,10 +120,27 @@
     ├─ BudgetHeroCard: Teal gradient + 잔여 예산 + progress + daysRemaining
     ├─ IncomeExpenseStats: 월 수입 / 월 지출 (text-income/expense 토큰)
     ├─ CategoryDistribution ("use client"): recharts Donut + top 5/6 리스트
-    ├─ RecentActivity ("use client"): TxRow (category-tone 36px + memo + .num amount + createdBy 16px)
+    ├─ RecentActivity ("use client"): TransactionRow variant=compact (category-tone 36px + memo + .num amount + createdBy 16px)
     ├─ QuickActions ("use client"): 지출/수입/가족초대/카테고리 4-grid
     └─ CalendarView: 일별 수입·지출 바 차트
 ```
+
+---
+
+## 5-2. /transactions 페이지 구조 (plan003)
+
+```
+[page.tsx (server) — searchParams { tab, categoryId, startDate, endDate, page, q, amountMin, amountMax }]
+    ├─ TransactionsTabs (segmented role=tablist, bg-bg-muted / bg-bg-elev)
+    ├─ FilterChips (카테고리 / 기간 / AmountRangeFilter / SearchBar)
+    │     ├─ SearchBar (300ms debounce, ?q= URL 동기화, 모바일 expand)
+    │     └─ AmountRangeFilter (Popover, amountMin/Max URL param)
+    └─ ExpenseListClient / IncomeListClient / RecurringExpenseList (tab 별)
+            └─ DateGroupSection<T> (날짜 헤더 + 합계, formatDateHeader 사용)
+                    └─ TransactionRow variant=compact (모바일) / variant=full (md: 5-col grid 44/1fr/110/28/140)
+```
+
+helper: `services/transaction/transaction-service.ts` 의 `groupTransactionsWithTotal` (groupByDate wrap + 합계). `applyClientFilters` 는 amountMin/Max/q post-filter (현재 미사용 — 후속 plan 에서 wiring).
 
 ---
 

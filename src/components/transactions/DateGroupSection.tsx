@@ -35,7 +35,7 @@ export function DateGroupSection<T extends TxBase>({
             renderItem(item, i)
           ) : (
             <div key={item.uuid} className="px-3 md:px-4">
-              <TransactionRow tx={item as TxBase} variant={variant} />
+              <TransactionRow tx={item} variant={variant} />
             </div>
           )
         )}

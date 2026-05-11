@@ -23,7 +23,6 @@ interface TransactionRowProps {
   tx: TxBase;
   variant: "compact" | "full";
   onEdit?: () => void;
-  onDelete?: () => void;
 }
 
 export function TransactionRow({
