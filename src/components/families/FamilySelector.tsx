@@ -7,6 +7,7 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/client/utils";
 import { useSessionRefresh } from "@/lib/client/use-session-refresh";
 import type { Family } from "@/types/family";
 import { ChevronRight, Plus, User, Users } from "lucide-react";
@@ -29,10 +30,8 @@ export function FamilySelector({
   const { refreshSession } = useSessionRefresh();
 
   const handleFamilySelect = useCallback(async (family: Family) => {
-    // 선택한 가족을 기본 가족으로 저장
     const result = await setDefaultFamilyAction(family.uuid);
     if (result.success) {
-      // 세션 갱신 (프로필의 defaultFamilyUuid가 변경됨)
       await refreshSession();
     }
     onFamilySelect(family);
@@ -42,16 +41,13 @@ export function FamilySelector({
     initializeSelector();
   }, []);
 
-  // 기본 가족이 있으면 자동 선택, 없으면 가족이 1개일 때 자동 선택
   useEffect(() => {
     if (loading || autoSelectedRef.current || families.length === 0) return;
 
     const selectFamily = async () => {
-      // 사용자 프로필에서 기본 가족 조회
       const profileResult = await getUserProfileAction();
 
       if (profileResult.success && profileResult.data.defaultFamilyUuid) {
-        // 기본 가족이 설정되어 있으면 해당 가족 선택
         const defaultFamily = families.find(
           (f) => f.uuid === profileResult.data.defaultFamilyUuid
         );
@@ -63,7 +59,6 @@ export function FamilySelector({
         }
       }
 
-      // 기본 가족이 없고 가족이 1개뿐이면 자동 선택
       if (families.length === 1) {
         autoSelectedRef.current = true;
         await handleFamilySelect(families[0]);
@@ -109,7 +104,7 @@ export function FamilySelector({
       <div className="min-h-screen flex items-center justify-center">
         <Card className="w-full max-w-md">
           <CardContent className="py-8 text-center">
-            <p className="text-red-500 mb-4">{error}</p>
+            <p className="text-expense mb-4">{error}</p>
             <Button onClick={initializeSelector}>다시 시도</Button>
           </CardContent>
         </Card>
@@ -123,7 +118,7 @@ export function FamilySelector({
         <div className="text-center mb-8">
           <div className="flex items-center justify-between mb-4">
             <div className="flex-1" />
-            <h1 className="text-3xl font-bold text-gray-900 flex-1">
+            <h1 className="text-3xl font-bold text-fg flex-1">
               가계부 시작하기
             </h1>
             <div className="flex-1 flex justify-end">
@@ -138,7 +133,7 @@ export function FamilySelector({
               )}
             </div>
           </div>
-          <p className="text-gray-600">
+          <p className="text-fg-muted">
             {families.length > 0
               ? "기존 가족을 선택하거나 새로운 가족을 만드세요"
               : "어떤 방식으로 가계부를 관리하시겠어요?"}
@@ -149,20 +144,20 @@ export function FamilySelector({
           {/* 기존 가족들 */}
           {families.length > 0 && (
             <>
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              <h2 className="text-xl font-semibold text-fg mb-4">
                 기존 가족/그룹
               </h2>
               {families.map((family) => (
                 <Card
                   key={family.uuid}
-                  className="cursor-pointer hover:shadow-lg transition-all duration-200 border-2 hover:border-blue-200"
+                  className="cursor-pointer transition border-border hover:border-brand-300 hover:shadow-default bg-bg-elev"
                   onClick={() => handleFamilySelect(family)}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">
+                          <h3 className="text-lg font-semibold text-fg">
                             {family.name}
                           </h3>
                           <Badge variant="secondary" className="text-xs">
@@ -170,7 +165,7 @@ export function FamilySelector({
                           </Badge>
                         </div>
 
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-4 text-sm text-fg-muted">
                           <span className="flex items-center gap-1">
                             <Users className="w-4 h-4" />
                             구성원 {family.members?.length || 0}명
@@ -181,37 +176,42 @@ export function FamilySelector({
                           </span>
                         </div>
 
-                        {/* 구성원 미리보기 */}
+                        {/* 멤버 avatar 겹침 */}
                         {family.members && family.members.length > 0 && (
-                          <div className="flex items-center gap-2 mt-3">
-                            {family.members.slice(0, 3).map((member) => (
+                          <div className="flex items-center mt-3">
+                            {family.members.slice(0, 3).map((member, i) => (
                               <div
                                 key={member.uuid}
-                                className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-xs font-medium text-gray-700 overflow-hidden"
+                                className={cn(
+                                  "w-8 h-8 rounded-full ring-2 ring-bg-elev overflow-hidden",
+                                  i > 0 && "-ml-2"
+                                )}
                               >
                                 {member.userImage ? (
                                   <Image
                                     src={member.userImage}
-                                    alt={member.userName || ""}
+                                    alt={member.userName ?? ""}
                                     width={32}
                                     height={32}
-                                    className="w-full h-full object-cover"
+                                    className="object-cover w-full h-full"
                                   />
                                 ) : (
-                                  member.userName?.charAt(0) || "U"
+                                  <div className="w-full h-full bg-bg-muted text-fg-muted text-xs font-semibold flex items-center justify-center">
+                                    {member.userName?.charAt(0) ?? "U"}
+                                  </div>
                                 )}
                               </div>
                             ))}
                             {family.members.length > 3 && (
-                              <span className="text-xs text-gray-500">
+                              <div className="-ml-2 w-8 h-8 rounded-full ring-2 ring-bg-elev bg-bg-muted text-fg-muted text-xs font-semibold flex items-center justify-center">
                                 +{family.members.length - 3}
-                              </span>
+                              </div>
                             )}
                           </div>
                         )}
                       </div>
 
-                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                      <ChevronRight className="w-5 h-5 text-fg-subtle" />
                     </div>
                   </CardContent>
                 </Card>
@@ -220,10 +220,10 @@ export function FamilySelector({
               <div className="my-8">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
+                    <div className="w-full border-t border-border" />
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="bg-gray-50 px-3 text-gray-500">또는</span>
+                    <span className="bg-bg px-3 text-fg-muted">또는</span>
                   </div>
                 </div>
               </div>
@@ -233,7 +233,7 @@ export function FamilySelector({
           {/* 새로운 가족/그룹 생성 옵션 */}
           <div className="grid gap-4">
             <Card
-              className="cursor-pointer hover:shadow-lg transition-all duration-200 border-2 hover:border-green-200 group"
+              className="cursor-pointer hover:shadow-default transition-all duration-200 border-border hover:border-brand-300 group"
               onClick={() => onCreateFamily()}
             >
               <CardContent className="p-6">
@@ -242,20 +242,20 @@ export function FamilySelector({
                     <User className="w-7 h-7 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                    <h3 className="text-lg font-semibold text-fg mb-1">
                       혼자 사용하기
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-fg-muted text-sm">
                       개인 가계부로 시작하기
                     </p>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-green-500 transition-colors" />
+                  <ChevronRight className="w-5 h-5 text-fg-subtle group-hover:text-brand-500 transition-colors" />
                 </div>
               </CardContent>
             </Card>
 
             <Card
-              className="cursor-pointer hover:shadow-lg transition-all duration-200 border-2 hover:border-blue-200 group"
+              className="cursor-pointer hover:shadow-default transition-all duration-200 border-border hover:border-brand-300 group"
               onClick={() => onCreateFamily()}
             >
               <CardContent className="p-6">
@@ -264,14 +264,14 @@ export function FamilySelector({
                     <Users className="w-7 h-7 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                    <h3 className="text-lg font-semibold text-fg mb-1">
                       새 가족/그룹 만들기
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-fg-muted text-sm">
                       가족이나 팀과 함께 관리하기
                     </p>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                  <ChevronRight className="w-5 h-5 text-fg-subtle group-hover:text-brand-500 transition-colors" />
                 </div>
               </CardContent>
             </Card>
@@ -279,11 +279,11 @@ export function FamilySelector({
 
           {families.length === 0 && (
             <div className="text-center py-8">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Plus className="w-8 h-8 text-gray-400" />
+              <div className="w-16 h-16 bg-bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                <Plus className="w-8 h-8 text-fg-subtle" />
               </div>
-              <p className="text-gray-500">아직 생성된 가족/그룹이 없습니다.</p>
-              <p className="text-gray-400 text-sm mt-1">
+              <p className="text-fg-muted">아직 생성된 가족/그룹이 없습니다.</p>
+              <p className="text-fg-subtle text-sm mt-1">
                 위의 옵션을 선택해서 시작해보세요!
               </p>
             </div>
