@@ -44,14 +44,15 @@ pnpm add -D typescript@^6 @types/node@^22
 ### 3. 1차 tsc 실측
 
 ```bash
-pnpm tsc --noEmit 2>&1 | tee /tmp/tsc-errors.txt | tail -40
+mkdir -p .scratch   # .gitignore 등록됨, worktree-scoped 산출물 디렉터리
+pnpm tsc --noEmit 2>&1 | tee .scratch/tsc-errors-plan008.txt | tail -40
 ```
 
-에러 line 수 / 파일 수 / 카테고리 식별. `/tmp/tsc-errors.txt` 는 후속 phase 참조용 (PR commit 에는 포함 X).
+에러 line 수 / 파일 수 / 카테고리 식별. `.scratch/tsc-errors-plan008.txt` 는 후속 phase 참조용 (PR commit 에는 포함 X).
 
 ### 4. 에러 카테고리 분류 (phase 2~3 입력)
 
-`/tmp/tsc-errors.txt` 의 에러 메시지를 다음 카테고리로 분류:
+`.scratch/tsc-errors-plan008.txt` 의 에러 메시지를 다음 카테고리로 분류:
 
 - **lib.d.ts 변경**: `Property 'X' does not exist on type 'Array<...>'` 등 표준 라이브러리 type 변화
 - **inference 변경**: `Type 'X' is not assignable to type 'Y'` — 5.9 에서 통과하던 코드가 fail
@@ -72,7 +73,22 @@ pnpm install 2>&1 | grep -iE 'peer|warning' | head -20
 - `msw` 2.14.5 의 d.ts 가 ts6 inference 와 충돌?
 - `jest-environment-jsdom` 30.x 가 ts6 호환?
 
-peer 경고 발견 시 phase-03 (peer 정렬) 의 입력. install 자체 실패면 `PHASE_BLOCKED: peer resolution failed` 출력 후 보고.
+peer 경고 발견 시 phase-03 (peer 정렬) 의 입력.
+
+**peer 매트릭스 사전 채우기 (phase-03 작업 축소용)**:
+
+```bash
+# 각 peer 의 latest peerDependencies 사전 조회 — phase-03 진입 시 "결정 + 적용" 만 남도록
+pnpm view typescript-eslint@latest peerDependencies 2>&1 | head
+pnpm view @typescript-eslint/parser@latest peerDependencies 2>&1 | head
+pnpm view msw@latest peerDependencies 2>&1 | head
+pnpm view jest@latest peerDependencies 2>&1 | head
+pnpm view eslint-config-next@latest peerDependencies 2>&1 | head
+```
+
+결과를 phase-01 commit message 의 **peer 매트릭스 표**로 정리 (현재 버전 / ts6 호환 최소 / 업그레이드 필요 여부 5행). phase-03 은 이 표를 받아 결정 + 적용만 수행.
+
+install 자체 실패면 `PHASE_BLOCKED: peer resolution failed` 출력 후 보고.
 
 ### 6. 자동 verification
 
@@ -81,7 +97,7 @@ peer 경고 발견 시 phase-03 (peer 정렬) 의 입력. install 자체 실패�
 grep '"typescript"' package.json   # = "^6"
 
 # tsc 실측 결과 존재
-test -f /tmp/tsc-errors.txt && wc -l /tmp/tsc-errors.txt
+test -f .scratch/tsc-errors-plan008.txt && wc -l .scratch/tsc-errors-plan008.txt
 
 # phase 1 시점에는 tsc 통과 안 함 — 정상. phase 2~3 에서 해소
 ```
@@ -91,7 +107,7 @@ test -f /tmp/tsc-errors.txt && wc -l /tmp/tsc-errors.txt
 | 파일 | 상태 |
 |---|---|
 | `package.json` / `pnpm-lock.yaml` | dep 교체 |
-| (`/tmp/tsc-errors.txt`) | phase 산출물 — repo 에 commit X |
+| (`.scratch/tsc-errors-plan008.txt`) | phase 산출물 — repo 에 commit X |
 
 ## Out of Scope
 
@@ -104,6 +120,6 @@ test -f /tmp/tsc-errors.txt && wc -l /tmp/tsc-errors.txt
 | 리스크 | 완화 |
 |---|---|
 | WebFetch 가 release blog 차단/형식 변화 | 2차 fallback (GitHub release tag). 모두 실패 시 phase commit message 에 "release note 미수집, ts6 release blog 부재" 명시 + tsc 에러만으로 분류 |
-| tsc 에러 200+ — 단일 phase 처리 부담 | 카테고리별 분할이 phase 2 의 분기 기반. 1000+ 면 plan008 자체 분할 검토 + 보고 |
+| tsc 에러 임계 (phase-02 와 통일) | **50+ 또는 영향 파일 20+ → phase-02 를 02a/02b 분할 (phase-02 risks 참조)**. **1000+ → plan008 자체 분할 + PHASE_BLOCKED 보고**. 50~1000 구간은 단일 phase-02 유지 |
 | peer dep 가 ts6 거부 → install 실패 | install 실패 = PHASE_BLOCKED. msw/jest 업그레이드 의존성 plan 분리 가능성 |
 | @types/node 22.19.18 가 신 type 추가로 별도 에러 | minor patch — 영향 작을 것. tsc 결과에 포함되면 함께 fix |

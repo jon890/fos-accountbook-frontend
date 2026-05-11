@@ -6,7 +6,7 @@
 
 ## Context (자기완결)
 
-- phase-01 commit message 의 카테고리 분류표 + `/tmp/tsc-errors.txt` (생존 시) 참조.
+- phase-01 commit message 의 카테고리 분류표 + `.scratch/tsc-errors-plan008.txt` (생존 시) 참조.
 - 본 phase 대상: **우리 src/ 코드 수정으로 해결되는 에러**. peer dep 측 에러는 phase-03.
 - 일반적 fix 패턴:
   - `Object is possibly 'null'` → optional chaining `?.` 또는 명시 가드
@@ -22,7 +22,7 @@
 # cwd: /Users/nhn/personal/fos-accountbook
 # branch: plan/008-typescript-v6
 
-pnpm tsc --noEmit 2>&1 | tee /tmp/tsc-errors-v2.txt | tail -40
+pnpm tsc --noEmit 2>&1 | tee .scratch/tsc-errors-plan008-v2.txt | tail -40
 ```
 
 phase-01 의 카테고리 분류표를 본 phase 작업 분할 기준으로 사용.
@@ -70,9 +70,9 @@ ts6 의 신 strict 옵션 (있다면) 가 tsconfig 의 `strict: true` 로 자동
 pnpm tsc --noEmit 2>&1 | tail -20
 # 에러 수가 phase-01 시점 대비 감소 — 단 peer dep 측 에러 (phase-03) 는 남을 수 있음
 
-# any 신규 도입 0건
+# any 신규 도입 0건 (\.test\.(ts|tsx): 양쪽 escape — BRE `?` 리터럴 회피)
 ! grep -rnE ': any\b|<any>|as any\b' src/ \
-  | grep -v ".test.tsx?:" | grep -v "// eslint-disable"
+  | grep -vE '\.test\.(ts|tsx):' | grep -v "// eslint-disable"
 ```
 
 수동 smoke: `pnpm build` → 컴파일 통과 (peer dep 측 잔여 에러 1~5 건 정도 허용). 잔여 에러는 phase-03 에서 해소.
@@ -93,6 +93,6 @@ pnpm tsc --noEmit 2>&1 | tail -20
 
 | 리스크 | 완화 |
 |---|---|
-| 에러 수가 100+ 면 phase 작업 양 초과 (CLAUDE.md "5개 이하" 위반) | phase-01 카테고리표를 5 카테고리 이하로 압축. 그래도 초과면 본 phase 를 phase-02a/02b 분할 + index.json 갱신 보고 |
+| 에러 분할 임계 — 통일 기준 | **에러 50+ 또는 영향 파일 20+ → phase-02 를 02a/02b 강제 분할 + index.json `total_phases` 갱신**. **1000+ → plan008 자체 분할 보고 + PHASE_BLOCKED**. 50~1000 구간은 분할 없이 단일 phase 처리 가능 (작업 항목은 5 카테고리로 압축) |
 | inference 변경 fix 시 `any` 도입 유혹 | grep 으로 검출 + lint 통과 강제. 정 안 되면 `// @ts-expect-error` 한 줄 + 이유 주석 (재발 추적용) |
 | 우리 fix 가 의도치 않은 타입 강화로 호출자 깨짐 | tsc + jest --run 으로 회귀 1차 검출. PR 검증 단계에서 추가 점검 |

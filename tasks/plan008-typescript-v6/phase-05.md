@@ -41,7 +41,7 @@ grep -E 'typescript@6\.' pnpm-lock.yaml | head -3   # 6.x 버전 lock 됨
 ! grep -E '"typescript":\s*"\^5' package.json
 
 # 우리 코드의 ts5 회피 패턴 — 본 plan 신규 도입 0건
-NEW_ANY=$(git diff origin/main -- 'src/**/*.ts' 'src/**/*.tsx' | grep -E '^\+.*\bas any\b|^\+.*: any\b' | grep -v ".test.")
+NEW_ANY=$(git diff origin/main -- 'src/**/*.ts' 'src/**/*.tsx' | grep -E '^\+.*\bas any\b|^\+.*: any\b' | grep -vE '\.test\.(ts|tsx):')
 if [ -n "$NEW_ANY" ]; then
   echo "⚠️ 본 plan 에서 신규 도입된 any 사용:"
   echo "$NEW_ANY"
@@ -55,8 +55,8 @@ git diff origin/main | grep -E '^\+.*@ts-ignore|^\+.*@ts-expect-error' | head
 ### 4. ADR-F19 본문 갱신 확인 (phase 04 산출물)
 
 ```bash
-# placeholder 항목 사라짐
-! grep -nE 'phase-01.*실측 결과를.*카테고리별 1~2줄로 기록\|breaking 대응 패턴.*실측 후 채움' docs/adr.md
+# placeholder 항목 사라짐 (-E ERE 모드: alternation 은 `|` 그대로, `\|` 는 리터럴이라 매치 안 됨)
+! grep -nE 'phase-01.*실측 결과를.*카테고리별 1~2줄로 기록|breaking 대응 패턴.*실측 후 채움' docs/adr.md
 
 # 실측 카테고리 항목 채워짐
 grep -E 'lib\.d\.ts 변경:|inference 변경:|peer dep 충돌:' docs/adr.md | wc -l   # >= 3

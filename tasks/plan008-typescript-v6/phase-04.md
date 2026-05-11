@@ -7,11 +7,11 @@
 ## Context (자기완결)
 
 - ADR-F19 는 본 plan 시작 시 작성됐으나 "breaking 대응 패턴" 본문이 placeholder — phase 1 의 카테고리 분류표 + phase 2~3 의 fix 적용 패턴을 1~2줄씩 기록.
-- ts6 신 옵션 후보 (가치 검토):
-  - `verbatimModuleSyntax` 강화
-  - `noUncheckedIndexedAccess` (기존 5.x 도 있지만 6.0 기본값 변경 검토)
-  - `exactOptionalPropertyTypes` 강화
-  - 신 module 옵션 (`module: "preserve"` 등)
+- tsconfig 옵션 ts6 컨텍스트 재검토 (기존 5.x 부터 존재하는 옵션이지만 ts6 기본값/권장값이 바뀐 가능성 점검):
+  - `verbatimModuleSyntax` (ts5 부터 존재 — ts6 권장값 재검토)
+  - `noUncheckedIndexedAccess` (ts5 부터 존재 — ts6 기본값/적용 효과 재검토)
+  - `exactOptionalPropertyTypes` (ts5 부터 존재 — ts6 기본값 재검토)
+  - 신 module 옵션 (`module: "preserve"` 등, ts5.4 부터 존재)
 - 본 phase 는 신 옵션 **도입 자체는 안 함** — 검토 결과만 ADR 또는 후속 plan 메모.
 
 ## 작업 항목

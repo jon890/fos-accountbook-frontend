@@ -49,3 +49,6 @@ next-env.d.ts
 .omc
 
 .claude/worktrees/
+
+# build-with-teams phase 산출물 (tsc 에러 dump 등)
+.scratch/
