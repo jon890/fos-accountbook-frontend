@@ -62,6 +62,7 @@ export async function ExpenseList({
   } = result.data;
 
   if (expenses.length === 0 && !hasFilter) {
+    // IncomeList 와 동일 카피 — 도메인 wording 만 다를 수 있으나 현재 plan 에선 통일
     return (
       <EmptyState
         icon={Inbox}

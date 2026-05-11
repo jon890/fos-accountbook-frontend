@@ -25,7 +25,7 @@ export function EmptyState({ icon: Icon, title, description, cta, tip }: EmptySt
       {cta && (
         <Link
           href={cta.href}
-          className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-brand-500 text-white text-sm font-semibold shadow-[0_6px_16px_-6px_oklch(0.640_0.140_188/0.5)] hover:opacity-90 transition-opacity mb-6"
+          className="inline-flex items-center gap-2 h-11 px-5 rounded-xl bg-brand-500 text-white text-sm font-semibold shadow-brand-btn hover:opacity-90 transition-opacity mb-6"
         >
           {cta.icon && <cta.icon className="size-4" />}
           {cta.label}

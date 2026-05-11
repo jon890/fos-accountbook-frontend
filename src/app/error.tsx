@@ -2,7 +2,7 @@
 
 import { ErrorBoundaryCard } from "@/components/error/ErrorBoundaryCard";
 
-export default function GlobalError({
+export default function RootError({
   error,
   reset,
 }: {
