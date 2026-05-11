@@ -33,31 +33,52 @@ import { DayPicker } from "@daypicker/react";
 
 style.css import 가 있으면 함께 교체 (`react-day-picker/dist/style.css` → `@daypicker/react/style.css`).
 
-### 2. 폐기 prop 직접 사용 점검 + 교체
+### 2. classNames 키 v10 ClassNames 타입과 1:1 매핑 검증 + 변경 키 교체 (CRITICAL)
 
-shadcn calendar.tsx 가 props 를 `...props` 로 forward 만 하므로 직접 폐기 prop 사용은 보통 없음. 단 `classNames` override 안에 폐기 키 (`day_outside` → `day` variant 등) 가 있는지 확인:
+현 calendar.tsx 가 사용하는 22개 키를 v10 `ClassNames` 타입과 대조. 단순 grep 으로는 silent regression 차단 불가 — **type-driven 검증** 사용.
 
 ```bash
-# 폐기 classNames key (release note 의 classNames diff 확인)
-grep -nE 'day_outside|day_selected|day_disabled|day_today|day_hidden|day_range_start|day_range_middle|day_range_end' src/components/ui/calendar.tsx
+# v10 ClassNames 타입의 키 목록 추출 (phase-01 의 dep 교체 후 node_modules 에 신 패키지 존재)
+grep -rnE 'type ClassNames|interface ClassNames|ClassNames =' node_modules/@daypicker/react/dist/ 2>/dev/null | head
+# d.ts 위치 확인 후 직접 열어서 ClassNames 의 모든 키 나열
 ```
 
-v10 의 classNames 구조 변경 시 동등 키로 교체. release note 또는 d.ts 참조.
+현 calendar.tsx 키 (v9 후반 shadcn 표준 기준):
+```
+months, month, caption, caption_label, nav, nav_button,
+nav_button_previous, nav_button_next, month_grid, weekdays,
+weekday, week, day, day_button, range_end, selected, today,
+outside, disabled, range_middle, hidden
+```
 
-### 3. type re-export 점검
+v9 → v10 가능한 rename 후보 (release note + d.ts 참조 필수):
+- `caption` / `caption_label` → `month_caption` / `caption_label` 가능성
+- `nav_button` / `nav_button_previous` / `nav_button_next` → `button_previous` / `button_next` 가능성
+- 기타 d.ts 가 권위
 
+검증 방법 — 타입 강제:
 ```ts
-export type CalendarProps = React.ComponentProps<typeof DayPicker>;
+import type { ClassNames } from "@daypicker/react";
+const classNames: Partial<ClassNames> = { /* 현 키 22개 */ };
 ```
 
-이건 그대로 — DayPicker 의 v10 시그니처가 자동 추론. 호출자 (Calendar 사용처) 의 폐기 prop 사용은 phase 시작 시 grep:
+`pnpm tsc --noEmit` 가 잘못된 키 (v10 에서 제거/이름 변경된 키) 를 모두 잡음. 발견 시 d.ts 의 신 키로 교체.
 
+### 3. Chevron component prop 시그니처 v10 호환 검증 (CRITICAL)
+
+`calendar.tsx:56-61` 의 `components.Chevron` 시그니처 (`orientation, className, ...props`) 가 v10 d.ts 와 일치하는지 확인:
+
+```bash
+grep -rnE 'ChevronProps|Chevron:' node_modules/@daypicker/react/dist/ 2>/dev/null | head
+```
+
+`orientation` 값 enum / 추가 props (`disabled`, `size` 등) 가 v10 에서 추가됐는지 d.ts 확인. 시그니처 차이 발견 시 destructuring 갱신.
+
+호출자 측 폐기 prop 점검 (phase-01 에서 0건 확인됨, 회귀 방지용 재확인):
 ```bash
 grep -rnE 'fromMonth|toMonth|fromYear|toYear|fromDate|toDate|initialFocus' src/ \
   --include='*.tsx' --include='*.ts' | grep -v calendar.tsx
 ```
-
-발견 시 호출자 측에서 동등 prop 으로 교체.
 
 ### 4. 자동 verification
 
@@ -77,7 +98,7 @@ grep -n 'from "@daypicker/react"' src/components/ui/calendar.tsx | wc -l   # = 1
 ! grep -rnE 'fromMonth|toMonth|fromYear|toYear|fromDate=|toDate=|initialFocus=' src/
 ```
 
-수동 smoke: dashboard `/dashboard` → CalendarView 표시 + 날짜 클릭 정상.
+수동 smoke (선택, human review): dashboard `/dashboard` → CalendarView 표시 + 날짜 클릭 정상. headless executor 는 skip — `tsc --noEmit` + `pnpm build` + step 2 type-driven 검증 통과로 갈음.
 
 ## Critical Files
 

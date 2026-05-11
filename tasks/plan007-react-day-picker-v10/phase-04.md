@@ -79,9 +79,12 @@ grep '^\*\*Status\*\*:' tasks/plan007-react-day-picker-v10/phase-04.md   # = "**
 | `tasks/plan007-react-day-picker-v10/index.json` | 모든 status `completed` |
 | `tasks/plan007-react-day-picker-v10/phase-04.md` | 본 파일 status `completed` |
 
+### 5. PR body 에 `Closes #222` 마커 (team-lead 가 PR 생성 시)
+
+PR description body 에 `Closes #222` 한 줄 포함 — Dependabot PR (`chore(deps): bump react-day-picker`) 이 본 plan PR 머지 시 자동 close 되도록.
+
 ## Out of Scope
 
-- PR #222 close — 본 plan PR 머지 후 사용자가 GitHub UI 에서 직접 close (또는 plan PR 의 `Closes #222` 마커로 자동)
 - v10 신규 기능 도입 (hidden, autoFocus 등) — 본 plan 은 호환만
 
 ## Risks

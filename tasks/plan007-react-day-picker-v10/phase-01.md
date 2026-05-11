@@ -42,11 +42,11 @@ grep -rnE 'formatMonthCaption|formatYearCaption|labelDay|labelCaption|isMatch|is
 ### 3. peer dep 점검
 
 ```bash
-# react-day-picker 구 이름에 의존하는 다른 dep 가 있는지
-grep -rnE '"react-day-picker"' node_modules/*/package.json 2>/dev/null | head
+# react-day-picker 구 이름에 의존하는 다른 dep 가 있는지 (transitive 포함)
+pnpm why react-day-picker 2>&1 | head -30
 ```
 
-shadcn 의존성 외 (이미 우리가 ui/calendar.tsx 로 wrap) 충돌 없을 것으로 추정. 충돌 발견 시 phase 본문 commit 에 보고 + 대안 검토.
+shadcn 의존성 외 (이미 우리가 ui/calendar.tsx 로 wrap) 충돌 없을 것으로 추정. transitive 의존이 발견되면 phase 본문 commit 에 보고 + 대안 검토.
 
 ### 4. 자동 verification
 

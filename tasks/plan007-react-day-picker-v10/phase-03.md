@@ -65,7 +65,7 @@ grep -n 'from "@daypicker/react"' src/components/dashboard/CalendarView.tsx | wc
 ! grep -nE 'onDayKey|onDayPointer|onDayTouch|onWeekNumberClick' src/components/dashboard/CalendarView.tsx
 ```
 
-수동 smoke: `/dashboard` → CalendarView 의 날짜 hover / 클릭 / 키보드 탐색 모두 정상.
+수동 smoke (선택, human review): `/dashboard` → CalendarView 의 날짜 hover / 클릭 / 키보드 탐색. headless executor 는 `pnpm test --run` + tsc + build 로 갈음.
 
 ## Critical Files
 
