@@ -43,12 +43,15 @@ const recentNotifications = notifications.slice(0, 10);
 ```tsx
 import { auth } from "@/lib/server/auth";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
 import { getNotificationsAction } from "@/actions/notification/get-notifications-action";
 import { NotificationsClient } from "./_components/NotificationsClient";
 
+const FilterSchema = z.enum(["all", "unread"]).default("all");
+
 interface NotificationsPageProps {
-  searchParams: Promise<{ filter?: "all" | "unread" }>;
+  searchParams: Promise<{ filter?: string | string[] }>;
 }
 
 export default async function NotificationsPage({ searchParams }: NotificationsPageProps) {
@@ -58,7 +61,11 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
   const familyUuid = await getSelectedFamilyUuid();
   if (!familyUuid) redirect("/");
 
-  const { filter = "all" } = await searchParams;
+  const raw = await searchParams;
+  // Zod 런타임 검증 (ADR-F06) — 잘못된 값은 default "all"
+  const filter = FilterSchema.catch("all").parse(
+    Array.isArray(raw.filter) ? raw.filter[0] : raw.filter
+  );
 
   const result = await getNotificationsAction(familyUuid);
   const notifications = result.success ? result.data.notifications : [];
@@ -75,19 +82,42 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
 
 ### 3. NotificationsClient — segmented + "모두 읽음" + list
 
-```ts
+```tsx
+"use client";
+
+import { useRouter } from "next/navigation";
+
 interface NotificationsClientProps {
   familyUuid: string;
   notifications: Notification[];
   filter: "all" | "unread";
 }
+
+export function NotificationsClient({ familyUuid, notifications, filter }: NotificationsClientProps) {
+  const router = useRouter();
+
+  // client-side filter — 페이지가 모든 알림을 받아 메모리 필터
+  const visible = filter === "unread"
+    ? notifications.filter((n) => !n.isRead)
+    : notifications;
+
+  const handleFilterChange = (next: "all" | "unread") => {
+    // URL = single source. router.push 가 server re-render 트리거하지만
+    // notifications 자체는 props 로 받은 메모리 데이터 재사용 (재요청 없음)
+    router.push(next === "all" ? "/notifications" : "/notifications?filter=unread");
+  };
+
+  // ... 헤더 + segmented (handleFilterChange) + list (visible) + empty 카드
+}
 ```
+
+⚠️ **반드시 첫 줄 `"use client"`** (CLAUDE.md 규칙). useRouter / 이벤트 핸들러가 client 훅이라 필수.
 
 구조:
 - 페이지 헤더: "알림" 22px font-bold + "모두 읽음" CTA (unreadCount > 0 시)
-- Segmented tablist (전체 / 안 읽음 — `bg-bg-muted` + 활성 `bg-bg-elev shadow-sm`) — URL `?filter=` 단방향
-- 본문: filter 적용된 list — phase 01 의 `NotificationItem` 재사용
-- Empty: filter="unread" + 0건 → "안 읽은 알림이 없어요" / filter="all" + 0건 → "알림이 없어요" (phase 01 의 empty 카드 재사용 또는 plan012 의 EmptyState 사용)
+- Segmented tablist (전체 / 안 읽음 — `bg-bg-muted` + 활성 `bg-bg-elev shadow-sm`) — `handleFilterChange` 가 router.push 로 URL 갱신, server re-render 후 props.filter 가 갱신됨. 표시 데이터는 메모리 `visible` 배열 (client-side 즉시 필터)
+- 본문: `visible` list — phase 01 의 `NotificationItem` 재사용
+- Empty: filter="unread" + visible 0건 → "안 읽은 알림이 없어요" / filter="all" + visible 0건 → "알림이 없어요" (phase 01 의 empty 카드 재사용 또는 plan012 의 EmptyState 사용)
 
 pagination 은 본 plan 미포함 (현재 100건 default 로 충분) — 후속 plan 검토.
 
@@ -151,6 +181,12 @@ grep -n 'href=["\x27]/notifications' src/components/notifications/NotificationLi
 
 # segmented + URL filter
 grep -nE 'filter=|searchParams.*filter' src/app/\(authenticated\)/notifications/ -r | wc -l   # >= 2
+
+# Zod 런타임 검증 (ADR-F06)
+grep -nE 'z\.enum\(\["all".*"unread"\]\)|FilterSchema' src/app/\(authenticated\)/notifications/page.tsx | wc -l   # >= 1
+
+# NotificationsClient "use client" 첫 줄
+head -1 src/app/\(authenticated\)/notifications/_components/NotificationsClient.tsx | grep -c 'use client'   # == 1
 
 # Skel 사용
 grep -n 'Skel\|ab-skel' src/app/\(authenticated\)/notifications/loading.tsx | wc -l   # >= 1

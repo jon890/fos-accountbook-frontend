@@ -198,3 +198,4 @@ grep -nE 'getNotificationTone|TONE_BG|TONE_FG' \
 | `bg-warning/10` / `bg-expense/10` alpha 변형 미작동 (Tailwind v4 + OKLCH) | plan011/013 의 동일 패턴 일관 — 작동 확인됨. 미작동 시 inline `style={{ background: "oklch(...)" }}` |
 | `--color-warning` 토큰 미정의 | plan001 점검 — warning 토큰 존재 확인 (Tailwind v4 `--color-warning` 매핑). 없으면 phase 시작 시 globals.css 추가 |
 | AlertTriangle vs AlertCircle 50/80% 구분 모호 | 50% = AlertTriangle, 80% = AlertCircle 로 일관 유지 (현재 패턴 보존). 톤만 warning 으로 통일 |
+| Badge `bg-expense text-white` 의 dark mode 대비 약화 | `--color-expense` OKLCH 값이 dark 에서 밝아질 경우 white 텍스트 contrast 부족 가능. **구현 후 dark mode 수동 smoke test 필수** — pnpm build 외에 시각 검증 추가. 부족 시 `text-expense-fg` 같은 의미론적 foreground 토큰 도입 (별도 plan) |
