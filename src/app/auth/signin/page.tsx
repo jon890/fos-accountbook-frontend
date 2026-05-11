@@ -1,10 +1,5 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Users } from "lucide-react";
+import { AuthCenterCard } from "@/components/auth/AuthCenterCard";
 import { SignInForm } from "@/components/auth/SignInForm";
 
 export default async function SignInPage({
@@ -22,32 +17,28 @@ export default async function SignInPage({
   const customMessage = params.message;
 
   return (
-    <div className="min-h-screen flex items-center justify-center app-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-2">
-          <CardTitle className="text-3xl font-bold">우리집 가계부</CardTitle>
-          <CardDescription>
-            가족과 함께 관리하는 스마트 가계부 💰
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {(error || customMessage) && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-              <p className="text-sm font-medium">
-                {customMessage || getErrorMessage(error!)}
-              </p>
-            </div>
-          )}
+    <AuthCenterCard
+      icon={Users}
+      iconBg="gradient-family"
+      iconColor="text-white"
+      title="우리집 가계부"
+      subtitle="가족과 함께 관리하는 스마트 가계부"
+    >
+      {(error || customMessage) && (
+        <div className="bg-expense/10 border border-expense/20 text-expense px-4 py-3 rounded-md">
+          <p className="text-sm font-medium">
+            {customMessage || getErrorMessage(error!)}
+          </p>
+        </div>
+      )}
 
-          <SignInForm callbackUrl={callbackUrl} />
+      <SignInForm callbackUrl={callbackUrl} />
 
-          <div className="text-center text-sm text-gray-500">
-            <p>로그인하시면 가족 가계부를</p>
-            <p>바로 시작하실 수 있습니다.</p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+      <div className="text-center text-sm text-fg-muted">
+        <p>로그인하시면 가족 가계부를</p>
+        <p>바로 시작하실 수 있습니다.</p>
+      </div>
+    </AuthCenterCard>
   );
 }
 

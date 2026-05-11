@@ -20,6 +20,12 @@ jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
 }));
 
+// Server Action 모킹
+const mockSignOutAction = jest.fn();
+jest.mock("@/actions/auth/signout-action", () => ({
+  signOutAction: (...args: unknown[]) => mockSignOutAction(...args),
+}));
+
 jest.mock("@/components/families/FamilySelectorDropdown", () => ({
   FamilySelectorDropdown: () => (
     <div data-testid="family-selector">Family Selector</div>
@@ -181,7 +187,7 @@ describe("Header", () => {
     });
   });
 
-  it("로그아웃 버튼을 클릭하면 로그아웃 페이지로 이동한다", async () => {
+  it("로그아웃 버튼을 클릭하면 signOutAction 을 호출한다", async () => {
     // Given
     const session = createMockSession();
     const user = userEvent.setup();
@@ -198,9 +204,9 @@ describe("Header", () => {
       await user.click(logoutButton);
     });
 
-    // Then
+    // Then — signOutAction 이 form submit 으로 호출됨
     await waitFor(() => {
-      expect(mockRouter.push).toHaveBeenCalledWith("/auth/signout");
+      expect(mockSignOutAction).toHaveBeenCalled();
     });
   });
 

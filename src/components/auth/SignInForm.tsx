@@ -1,8 +1,3 @@
-/**
- * 로그인 폼 컴포넌트
- * Google OAuth 및 Naver OAuth 로그인을 위한 폼
- */
-
 "use client";
 
 import { signInAction } from "@/actions/auth/signin/signin-action";
@@ -15,28 +10,27 @@ interface SignInFormProps {
 }
 
 export function SignInForm({ callbackUrl }: SignInFormProps) {
-  const iconClass = "size-5 mr-2 shrink-0";
-  const baseButtonClass = "w-full h-12 text-base font-medium shadow-sm";
+  const iconClass = "size-5 shrink-0";
+  const baseButtonClass = "w-full h-[52px] text-[14.5px] font-semibold gap-2.5";
 
   const providers = [
     {
       id: "google",
-      label: "Google로 로그인",
-      className:
-        "bg-white text-[#3C4043] border border-[#DADCE0] hover:bg-[#F8F9FA] active:bg-[#E8EAED] focus-visible:ring-[#4285F4]/30 focus-visible:ring-offset-2",
+      label: "Google 로 시작하기",
+      className: "bg-bg border border-border text-fg hover:bg-bg-muted",
       icon: <GoogleIcon className={iconClass} />,
     },
     {
       id: "naver",
-      label: "네이버로 로그인",
-      className:
-        "bg-[#03C75A] hover:bg-[#02B350] text-white focus-visible:ring-[#03C75A]/30 focus-visible:ring-offset-2",
+      label: "네이버로 시작하기",
+      // 외부 브랜드 가이드라인 (#03C75A — Naver 공식 브랜드 색, ADR-F13 OKLCH 예외)
+      className: "bg-[#03C75A] text-white hover:opacity-90",
       icon: <NaverIcon className={iconClass} />,
     },
   ];
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       {providers.map(({ id, label, className, icon }) => (
         <form key={id} action={signInAction}>
           <input type="hidden" name="callbackUrl" value={callbackUrl} />

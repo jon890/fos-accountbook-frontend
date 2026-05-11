@@ -15,6 +15,7 @@ import { Session } from "next-auth";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { signOutAction } from "@/actions/auth/signout-action";
 
 interface HeaderProps {
   session: Session;
@@ -98,12 +99,16 @@ export function Header({ session, selectedFamilyUuid }: HeaderProps) {
                   <span>설정</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => router.push("/auth/signout")}
-                  variant="destructive"
-                >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>로그아웃</span>
+                <DropdownMenuItem variant="destructive" asChild>
+                  <form action={signOutAction}>
+                    <button
+                      type="submit"
+                      className="flex items-center w-full"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>로그아웃</span>
+                    </button>
+                  </form>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

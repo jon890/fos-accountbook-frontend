@@ -14,7 +14,7 @@
 
 ### 1. `src/app/page.tsx` 신규 (Landing — Server Component)
 
-기존 `src/app/(authenticated)/page.tsx` 는 dashboard redirect — 그대로 보존. 새 `src/app/page.tsx` 가 `/` 의 실제 진입점:
+기존 `src/app/(authenticated)/page.tsx` 는 `defaultFamilyUuid` 분기 (없으면 `/families/create`, 있으면 `/dashboard`) — phase-04 에서 삭제 예정. 본 phase 의 새 `src/app/page.tsx` 가 `/` 의 실제 진입점이 되며, **인증 사용자 분기 로직을 그대로 포팅**:
 
 ```tsx
 // src/app/page.tsx
@@ -25,13 +25,19 @@ import { LandingPage } from "@/components/landing/LandingPage";
 export default async function Page() {
   const session = await auth();
   if (session?.user) {
+    const defaultFamilyUuid = session.user.profile?.defaultFamilyUuid;
+    if (!defaultFamilyUuid) {
+      redirect("/families/create");
+    }
     redirect("/dashboard");
   }
   return <LandingPage />;
 }
 ```
 
-middleware 의 redirect 우선순위 점검 — `/` 가 인증 안 한 사용자에게 Landing 표시되도록 middleware 처리. 미들웨어가 `/` 을 `/auth/signin` 으로 강제 redirect 하면 본 phase 가 작동 안 함. middleware 의 public route 목록에 `/` 추가.
+이유: `(authenticated)/page.tsx` 의 분기는 **첫 가입 유저 온보딩의 유일한 게이트** — 가족 없는 상태에서 `/dashboard` 직행 시 빈 상태. 신 `page.tsx` 가 이 책임을 인계받지 않으면 온보딩 회귀.
+
+**middleware 부재 확인**: 본 프로젝트에는 `src/middleware.ts` / `src/lib/server/middleware.ts` 둘 다 없음. auth 게이트는 `src/app/(authenticated)/layout.tsx` 단독 처리. 따라서 본 phase 에서 middleware public route 작업은 불필요 — 신 `src/app/page.tsx` 는 `(authenticated)` route group 밖이라 자동으로 인증 없이 진입 가능.
 
 ### 2. `LandingPage` 컴포넌트 (메인 client)
 
@@ -82,8 +88,8 @@ export const metadata: Metadata = {
 ### 5. 자동 verification
 
 ```bash
-# cwd: /Users/nhn/personal/fos-accountbook
-# branch: plan/011-landing-auth-redesign
+# cwd: /Users/nhn/personal/fos-accountbook/.claude/worktrees/plan011
+# branch: feat/plan011-landing-auth-redesign
 
 pnpm lint
 pnpm tsc --noEmit
@@ -92,6 +98,9 @@ pnpm build
 test -f src/app/page.tsx
 test -f src/components/landing/LandingPage.tsx
 test -f src/components/landing/MiniStats.tsx
+
+# defaultFamilyUuid 분기 포팅 확인
+grep -n 'defaultFamilyUuid' src/app/page.tsx | wc -l   # >= 1
 
 # Hero CTA → /auth/signin Link
 grep -nE 'href=["\x27]/auth/signin' src/components/landing/LandingPage.tsx | wc -l   # >= 2 (top bar + Hero CTA)
@@ -112,7 +121,6 @@ grep -n 'FeatureCard\|MiniDonut\|MiniBars\|CoupleAvatars' src/components/landing
 | `src/app/page.tsx` | 신규 (인증 안 한 사용자 — Landing 표시) |
 | `src/components/landing/LandingPage.tsx` | 신규 |
 | `src/components/landing/MiniStats.tsx` | 신규 (MiniDonut + MiniBars) |
-| `src/lib/server/middleware.ts` (또는 root middleware.ts) | 수정 — `/` public route 추가 |
 
 ## Out of Scope
 
@@ -125,6 +133,6 @@ grep -n 'FeatureCard\|MiniDonut\|MiniBars\|CoupleAvatars' src/components/landing
 
 | 리스크 | 완화 |
 |---|---|
-| middleware 의 / public 처리가 next-auth 기본 동작과 충돌 | middleware.ts grep 으로 현재 로직 확인. public matcher 에 `/` 추가 시 다른 protected route 보존 확인 |
+| `defaultFamilyUuid` 분기 누락 시 첫 가입 유저 온보딩 회귀 | 신 `src/app/page.tsx` 가 기존 `(authenticated)/page.tsx` 의 분기를 그대로 포팅 (위 작업 1 코드 참조). phase-04 에서 (authenticated)/page.tsx 삭제 전까지 두 경로 모두 동일 동작 |
 | LandingPage 가 client component 라 SEO 약화 | 메타데이터는 server `page.tsx` 가 export. LandingPage 자체는 인터랙션 (CTA Link) 만 → `"use client"` 없어도 무방. shadcn `<Button>` 도 server 동작 OK |
 | MiniDonut SVG segment 비율이 handoff 와 불일치 | handoff 의 정확한 값 그대로 inline 복제. recharts 사용 안 함 (overkill) |
