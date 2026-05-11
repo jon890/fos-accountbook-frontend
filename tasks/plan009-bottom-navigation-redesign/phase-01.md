@@ -1,7 +1,7 @@
 # Phase 01 — TabBar 디자인 갱신 (brand 토큰 + 활성 sw 강화)
 
 **Model**: sonnet
-**Status**: pending
+**Status**: completed
 **Goal**: BottomNavigation 의 5 탭 (홈/내역/추가/분석/설정) 시각을 handoff MobileShell TabBar 패턴에 맞춰 갱신. blue-600 하드코딩 → brand-600 토큰, 활성 상태 typography 강화.
 
 ## Context (자기완결)

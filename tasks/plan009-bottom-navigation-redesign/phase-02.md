@@ -1,7 +1,7 @@
 # Phase 02 — FAB 신 디자인 (brand 단색 + white ring + custom shadow)
 
 **Model**: sonnet
-**Status**: pending
+**Status**: completed
 **Goal**: 현 BottomNavigation 의 FAB 를 handoff `<FAB />` 디자인으로 교체 — `gradient-primary` 단색 → `bg-brand-500` + 4px white ring + Teal-toned soft shadow.
 
 ## Context (자기완결)
