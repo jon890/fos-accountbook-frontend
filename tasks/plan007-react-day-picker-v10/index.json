@@ -1,7 +1,7 @@
 {
   "name": "plan007-react-day-picker-v10",
   "description": "react-day-picker 9.14 → 10.0 메이저 + @daypicker/react 신 namespace 이전. 폐기 props (fromMonth/toMonth/initialFocus 등) 일괄 교체. PR #222 (Dependabot dep bump only) 대체.",
-  "status": "pending",
+  "status": "completed",
   "created_at": "2026-05-11",
   "total_phases": 4,
   "related_docs": [
@@ -17,28 +17,28 @@
       "file": "phase-01.md",
       "title": "@daypicker/react 패키지 추가 + react-day-picker 제거 + 폐기 prop 사용처 grep",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 2,
       "file": "phase-02.md",
       "title": "shadcn calendar.tsx 마이그레이션 (import 경로 + style.css + 폐기 prop 교체)",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 3,
       "file": "phase-03.md",
       "title": "CalendarView.tsx DayButton 마이그레이션 (DayButtonProps 시그니처 점검)",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 4,
       "file": "phase-04.md",
       "title": "통합 검증 + legacy 잔재 grep + index.json completed 마킹",
       "model": "haiku",
-      "status": "pending"
+      "status": "completed"
     }
   ]
 }

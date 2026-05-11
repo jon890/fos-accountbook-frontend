@@ -12,7 +12,7 @@ import { addMonths, format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { DayButtonProps } from "react-day-picker";
+import { DayButtonProps } from "@daypicker/react";
 import { toast } from "sonner";
 
 export function CalendarView() {
@@ -106,7 +106,7 @@ export function CalendarView() {
             classNames={{
               months: "w-full",
               month: "w-full space-y-4",
-              caption: "hidden", // 기본 헤더 숨김
+              month_caption: "hidden", // 기본 헤더 숨김
               nav: "hidden", // 기본 네비게이션 숨김
               month_grid: "w-full border-collapse", // table
               weekdays: "grid grid-cols-7 mb-2", // head_row
