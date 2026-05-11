@@ -115,6 +115,7 @@ Page (app/) → Action (actions/) → Service (services/) → lib/server/api
 - `console.log` 프로덕션 코드에 남기지 않기
 - `any` 타입 사용 금지
 - `NEXT_PUBLIC_` 없는 환경 변수를 클라이언트 번들에 노출 금지
+- Server Action 에서 `familyUuid` 같은 권한 식별자는 항상 `getSelectedFamilyUuid()` 등 세션 기반 helper 로만 결정. `formData.get("familyUuid")` 직접 사용 금지 — 클라이언트가 다른 가족 UUID 를 주입할 수 있어 권한 상승 위험. update 계열은 session vs formData 비교 검증으로 처리 (`updateExpenseAction` / `updateIncomeAction` 패턴 참조)
 
 ---
 
