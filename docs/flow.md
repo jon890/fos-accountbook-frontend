@@ -335,6 +335,18 @@ helper: `services/transaction/transaction-service.ts` 의 `groupTransactionsWith
 
 ---
 
+## 14-2. 빈 상태 / 에러 / 로딩 (plan012)
+
+App Router 의 segment 경계에서 일관 표시:
+
+- **Empty** (`src/components/empty/EmptyState.tsx`): 거래 0건 등 — 96px brand-50 round + inbox 아이콘 + 제목/부제 + (선택) CTA + (선택) 팁 박스
+- **Error** (`src/app/error.tsx` + `src/app/global-error.tsx` + `src/app/(authenticated)/error.tsx`): 88px expense/10 round + AlertCircle + "문제가 발생했어요" + DEV ONLY 디버그 박스 (production 숨김) + 다시 시도 / 홈으로
+- **Loading** (`src/app/(authenticated)/{dashboard,transactions,analytics,*}/loading.tsx`): `Skel` shimmer (ab-shimmer keyframe + .ab-skel class in globals.css) — 페이지별 구조 매치
+
+`error.tsx` 는 모두 `"use client"` 첫 줄 필수 (App Router 규약). `loading.tsx` 는 Server Component OK.
+
+---
+
 ## 14-3. /budget 페이지 (plan013)
 
 Dashboard BudgetHeroCard 의 확장 전용 페이지. 분석은 /analytics, 예산 소화는 /budget 으로 역할 분리.
