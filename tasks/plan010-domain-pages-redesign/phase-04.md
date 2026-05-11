@@ -16,7 +16,7 @@
 
 ## 작업 항목
 
-### 1. 배경 / 카드 클래스 교체
+### 1. 배경 / 카드 / 저장 버튼 토큰 교체
 
 ```tsx
 // 변경 전
@@ -36,7 +36,15 @@
 grep -rn 'app-background\|glass-card' src/ 2>/dev/null
 ```
 
-`app-background` 가 본 페이지 외 사용처 0 이면 globals.css 에서도 제거 (별도 작업항목). 0 아니면 본 페이지 className 만 교체.
+`app-background` 가 본 페이지 외 사용처 0 이면 globals.css 에서도 제거 (본 항목 안에서 함께). 0 아니면 본 페이지 className 만 교체.
+
+저장 버튼 토큰도 동일 작업으로 통합:
+
+```bash
+grep -n 'gradient-primary\|bg-primary\|bg-blue-' src/app/\(authenticated\)/families/create/page.tsx
+```
+
+저장 버튼: `bg-brand-500 hover:bg-brand-600 text-white w-full` 토큰으로 교체.
 
 ### 2. 상단 gradient-family 채널 (아이콘 원형)
 
@@ -104,16 +112,7 @@ grep -rn 'SegmentedToggle\|segmented-toggle' src/components/ui/ src/components/ 
 
 `brand-100` 등록 — plan001 `@theme` 에 이미 있음 (brand 50~900 전 스케일).
 
-### 5. 저장 버튼 brand 토큰
-
-기존 (확인 필요 — 본 phase 시작 시 점검):
-```bash
-grep -n 'gradient-primary\|bg-primary\|bg-blue-' src/app/\(authenticated\)/families/create/page.tsx
-```
-
-저장 버튼: `bg-brand-500 hover:bg-brand-600 text-white w-full` 토큰.
-
-### 6. 자동 verification
+### 5. 자동 verification
 
 ```bash
 # cwd: /Users/nhn/personal/fos-accountbook
