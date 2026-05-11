@@ -152,8 +152,9 @@ export function SettingsPageClient({
                         >
                           {family.name}
                           {currentDefaultFamily === family.uuid && (
-                            <span className="inline-flex items-center gap-1 ml-2 text-brand-500">
+                            <span className="inline-flex items-center gap-1 ml-2 text-brand-500 text-xs font-medium">
                               <Check className="w-3.5 h-3.5" strokeWidth={2.6} />
+                              현재 기본
                             </span>
                           )}
                         </span>

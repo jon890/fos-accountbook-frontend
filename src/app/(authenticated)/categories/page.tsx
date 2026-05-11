@@ -26,8 +26,8 @@ export default async function CategoriesPage() {
   return (
     <div className="container mx-auto py-6 px-4 max-w-4xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">카테고리 관리</h1>
-        <p className="text-gray-600 mt-1">
+        <h1 className="text-2xl font-bold text-fg">카테고리 관리</h1>
+        <p className="text-fg-muted mt-1">
           지출 카테고리를 추가, 수정, 삭제할 수 있습니다
         </p>
       </div>
