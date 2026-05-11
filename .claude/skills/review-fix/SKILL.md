@@ -418,7 +418,7 @@ review-fix 가 자의로 ADR 작성 금지. 후보 발견 시 `AskUserQuestion` 
 - (b) 경량 — `CLAUDE.md` 한 줄 + `code-architecture.md` 패턴 한 줄
 - (c) skip (당장 영구화 가치 없음)
 
-자명성 게이트 통과 기준 (ADR vs 경량 vs skip):
+ADR 작성 전 자체 점검 절차 통과 기준 (ADR vs 경량 vs skip):
 - **ADR**: "왜" + "대안 기각" + 코드만 봐서 추론 어려운 의사결정. 적용 범위 광범위 (라이브러리/스택 차원)
 - **common-pitfalls**: 코드 작성 시 한 줄 패턴 (Bad/Good 즉시 대비)
 - **skip**: 한 PR 의 1회성 fix, 일반화 어려움
