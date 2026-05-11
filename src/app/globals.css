@@ -309,12 +309,14 @@
     background-image: linear-gradient(
       90deg,
       transparent 0,
-      color-mix(in srgb, var(--color-bg-muted), white 35%) 50%,
+      color-mix(in oklch, var(--color-bg-muted) 65%, oklch(100% 0 0)) 50%,
       transparent 100%
     );
     background-size: 200px 100%;
     background-repeat: no-repeat;
     animation: ab-shimmer 1.4s ease-in-out infinite;
-    border-radius: 8px;
+    width: var(--skel-w, 100%);
+    height: var(--skel-h, 12px);
+    border-radius: var(--skel-r, 8px);
   }
 }
