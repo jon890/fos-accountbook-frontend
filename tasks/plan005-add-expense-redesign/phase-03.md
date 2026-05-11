@@ -29,18 +29,24 @@ interface ExpenseFormFieldsProps {
   onCategoryChange: (uuid: string) => void;
   date: string;             // ISO YYYY-MM-DD
   onDateChange: (next: string) => void;
-  memo: string;
-  onMemoChange: (next: string) => void;
+  description: string;             // FormData key 보존 — 기존 AddExpenseForm/EditExpenseDialog 가 name="description" 사용
+  onDescriptionChange: (next: string) => void;
   disabled?: boolean;
 }
 ```
+
+**FormData key 보존 — 결정**: handoff UI 라벨이 "메모" 로 표시되더라도 **prop 이름과 hidden input `name=` 은 `description` 으로 통일**. 이유:
+- 기존 `createExpenseAction` / `updateExpenseAction` 의 FormData key 가 `description`
+- `CreateExpenseFormState.errors.description` 도 동일 key 사용
+- action 시그니처 변경 시 backend dto / Zod schema 동시 변경 발생 → plan005 scope 외
+- UI 라벨은 `FieldLabel` 텍스트로 "메모" 표시, prop 만 description
 
 Layout (top → bottom):
 1. AmountInput (phase 1)
 2. divider (border-bottom)
 3. FieldLabel "카테고리" + CategoryGrid (phase 2)
 4. FieldLabel "날짜" + DateField (calendar Popover trigger)
-5. FieldLabel "메모" + Input (memo)
+5. FieldLabel "메모" + Input (name="description", value=description prop)
 
 `FieldLabel` / `FieldRow` 헬퍼는 컴포넌트 안 사적 정의 (handoff mockup line 277~285 참조).
 
@@ -49,8 +55,10 @@ Layout (top → bottom):
 `src/components/expenses/forms/AddExpenseForm.tsx` 재작성:
 - `useActionState` + `createExpenseAction` 흐름 그대로
 - form 본문을 `<ExpenseFormFields />` 로 교체
-- 4개 필드 state (amount/categoryUuid/date/memo) 는 `useState` 로 유지
-- form submit 시 hidden input 또는 FormData 로 action 에 전달 (기존 패턴 그대로)
+- 4개 필드 state (amount/categoryUuid/date/description) 는 `useState` 로 유지
+- form submit 시 hidden input 또는 FormData 로 action 에 전달 (기존 패턴 그대로 — `name="description"` 등)
+
+**Props 시그니처 변동**: 기존 `AddExpenseFormProps` 는 `categories`/`familyUuid`/`onSuccess?`/`onCancel?` 로 변경 없음 (호출자 `AddExpenseDialog` 무영향). form 내부 구조만 변경.
 
 ### 3. `EditExpenseDialog` 마이그레이션
 
@@ -61,7 +69,7 @@ Layout (top → bottom):
   categories={categories}
   amount={Number(expense.amount)}
   onAmountChange={setAmount}
-  categoryUuid={expense.category.uuid}
+  categoryUuid={expense.categoryUuid}
   // ...
 />
 ```
