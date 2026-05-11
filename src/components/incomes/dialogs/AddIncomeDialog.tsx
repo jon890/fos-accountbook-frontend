@@ -35,43 +35,58 @@ const initialState: CreateIncomeFormState = {
 };
 
 export function AddIncomeDialog({ open, onOpenChange }: AddIncomeDialogProps) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md bg-white">
+        <DialogHeader>
+          <DialogTitle>수입 추가</DialogTitle>
+          <DialogDescription>새로운 수입 내역을 추가합니다</DialogDescription>
+        </DialogHeader>
+        {/* open && <Body /> — useActionState / form input 자동 reset */}
+        {open ? <AddIncomeDialogBody onOpenChange={onOpenChange} /> : null}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function AddIncomeDialogBody({
+  onOpenChange,
+}: {
+  onOpenChange: (open: boolean) => void;
+}) {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [familyUuid, setFamilyUuid] = useState<string>("");
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [state, formAction] = useActionState(createIncomeAction, initialState);
 
-  // 다이얼로그가 열릴 때만 카테고리 로드
   useEffect(() => {
-    if (open) {
-      loadData();
-    } else {
-      // 다이얼로그가 닫힐 때 데이터 초기화
-      setCategories([]);
-      setFamilyUuid("");
-    }
-  }, [open]);
-
-  const loadData = async () => {
+    let cancelled = false;
+    // open 진입 시점 fetch 시작 신호 — derived value 로 대체 불가 (fetch 실패 시 영원히 loading)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoadingCategories(true);
-    try {
-      const result = await getFamilyCategoriesAction();
-      if (result.success) {
-        setCategories(result.data);
-        // 첫 번째 카테고리의 familyUuid 사용
-        if (result.data.length > 0) {
-          setFamilyUuid(result.data[0].familyUuid);
+    getFamilyCategoriesAction()
+      .then((result) => {
+        if (cancelled) return;
+        if (result.success) {
+          setCategories(result.data);
+          if (result.data.length > 0) {
+            setFamilyUuid(result.data[0].familyUuid);
+          }
+        } else {
+          toast.error(result.error.message);
         }
-      } else {
-        toast.error(result.error.message);
-      }
-    } catch {
-      toast.error("카테고리를 불러오는데 실패했습니다");
-    } finally {
-      setIsLoadingCategories(false);
-    }
-  };
+      })
+      .catch(() => {
+        if (!cancelled) toast.error("카테고리를 불러오는데 실패했습니다");
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingCategories(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  // 성공 시 처리
   useEffect(() => {
     if (state.success) {
       toast.success(state.message);
@@ -82,113 +97,94 @@ export function AddIncomeDialog({ open, onOpenChange }: AddIncomeDialogProps) {
   }, [state, onOpenChange]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-white">
-        <DialogHeader>
-          <DialogTitle>수입 추가</DialogTitle>
-          <DialogDescription>새로운 수입 내역을 추가합니다</DialogDescription>
-        </DialogHeader>
+    <form action={formAction} className="space-y-4">
+      <input type="hidden" name="familyUuid" value={familyUuid} />
 
-        <form action={formAction} className="space-y-4">
-          {/* familyUuid hidden input */}
-          <input type="hidden" name="familyUuid" value={familyUuid} />
+      <div className="space-y-2">
+        <Label htmlFor="amount">금액 *</Label>
+        <div className="relative">
+          <Input
+            id="amount"
+            name="amount"
+            type="number"
+            placeholder="0"
+            className="text-right pr-8"
+            required
+          />
+          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
+            원
+          </span>
+        </div>
+        {state.errors?.amount && (
+          <p className="text-sm text-red-500">{state.errors.amount[0]}</p>
+        )}
+      </div>
 
-          {/* 금액 입력 */}
-          <div className="space-y-2">
-            <Label htmlFor="amount">금액 *</Label>
-            <div className="relative">
-              <Input
-                id="amount"
-                name="amount"
-                type="number"
-                placeholder="0"
-                className="text-right pr-8"
-                required
-              />
-              <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
-                원
-              </span>
-            </div>
-            {state.errors?.amount && (
-              <p className="text-sm text-red-500">{state.errors.amount[0]}</p>
-            )}
+      <div className="space-y-2">
+        <Label htmlFor="categoryId">카테고리 *</Label>
+        {isLoadingCategories ? (
+          <div className="flex items-center justify-center py-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
           </div>
+        ) : (
+          <select
+            id="categoryId"
+            name="categoryId"
+            className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            required
+          >
+            <option value="">카테고리를 선택하세요</option>
+            {categories.map((category) => (
+              <option key={category.uuid} value={category.uuid}>
+                {category.icon} {category.name}
+              </option>
+            ))}
+          </select>
+        )}
+        {state.errors?.categoryId && (
+          <p className="text-sm text-red-500">{state.errors.categoryId[0]}</p>
+        )}
+      </div>
 
-          {/* 카테고리 선택 */}
-          <div className="space-y-2">
-            <Label htmlFor="categoryId">카테고리 *</Label>
-            {isLoadingCategories ? (
-              <div className="flex items-center justify-center py-2">
-                <Loader2 className="w-4 h-4 animate-spin" />
-              </div>
-            ) : (
-              <select
-                id="categoryId"
-                name="categoryId"
-                className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                required
-              >
-                <option value="">카테고리를 선택하세요</option>
-                {categories.map((category) => (
-                  <option key={category.uuid} value={category.uuid}>
-                    {category.icon} {category.name}
-                  </option>
-                ))}
-              </select>
-            )}
-            {state.errors?.categoryId && (
-              <p className="text-sm text-red-500">
-                {state.errors.categoryId[0]}
-              </p>
-            )}
-          </div>
+      <div className="space-y-2">
+        <Label htmlFor="date">날짜 *</Label>
+        <Input
+          id="date"
+          name="date"
+          type="date"
+          defaultValue={new Date().toISOString().split("T")[0]}
+          required
+        />
+        {state.errors?.date && (
+          <p className="text-sm text-red-500">{state.errors.date[0]}</p>
+        )}
+      </div>
 
-          {/* 날짜 선택 */}
-          <div className="space-y-2">
-            <Label htmlFor="date">날짜 *</Label>
-            <Input
-              id="date"
-              name="date"
-              type="date"
-              defaultValue={new Date().toISOString().split("T")[0]}
-              required
-            />
-            {state.errors?.date && (
-              <p className="text-sm text-red-500">{state.errors.date[0]}</p>
-            )}
-          </div>
+      <div className="space-y-2">
+        <Label htmlFor="description">메모</Label>
+        <Input
+          id="description"
+          name="description"
+          placeholder="간단한 메모를 입력하세요 (선택사항)"
+        />
+        {state.errors?.description && (
+          <p className="text-sm text-red-500">{state.errors.description[0]}</p>
+        )}
+      </div>
 
-          {/* 메모 입력 */}
-          <div className="space-y-2">
-            <Label htmlFor="description">메모</Label>
-            <Input
-              id="description"
-              name="description"
-              placeholder="간단한 메모를 입력하세요 (선택사항)"
-            />
-            {state.errors?.description && (
-              <p className="text-sm text-red-500">
-                {state.errors.description[0]}
-              </p>
-            )}
-          </div>
-
-          {/* 버튼들 */}
-          <div className="flex gap-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => onOpenChange(false)}
-            >
-              취소
-            </Button>
-            <SubmitButton className="flex-1" pendingText="추가 중...">
-              수입 추가
-            </SubmitButton>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+      <div className="flex gap-2 pt-4">
+        <Button
+          type="button"
+          variant="outline"
+          className="flex-1"
+          onClick={() => onOpenChange(false)}
+        >
+          취소
+        </Button>
+        <SubmitButton className="flex-1" pendingText="추가 중...">
+          수입 추가
+        </SubmitButton>
+      </div>
+    </form>
   );
 }

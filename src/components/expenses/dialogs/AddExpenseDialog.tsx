@@ -45,9 +45,46 @@ export function AddExpenseDialog({
   defaultType = "expense",
 }: AddExpenseDialogProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
+
+  // `open && <Body />` 로 inner body 가 매번 unmount/remount —
+  // useState + useActionState 자동 reset 으로 stale state 회피.
+  const body = open ? (
+    <AddExpenseDialogBody onOpenChange={onOpenChange} defaultType={defaultType} />
+  ) : null;
+
+  if (isDesktop) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-[720px] bg-bg-elev">
+          <DialogHeader>
+            <DialogTitle className="sr-only">거래 추가</DialogTitle>
+          </DialogHeader>
+          {body}
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="bottom" className="h-[100dvh] p-0 bg-bg-elev">
+        <SheetHeader className="px-5 py-3 border-b border-border">
+          <SheetTitle>거래 추가</SheetTitle>
+        </SheetHeader>
+        <div className="px-5 py-4 overflow-y-auto h-[calc(100dvh-56px)]">{body}</div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+interface AddExpenseDialogBodyProps {
+  onOpenChange: (open: boolean) => void;
+  defaultType: TransactionType;
+}
+
+function AddExpenseDialogBody({ onOpenChange, defaultType }: AddExpenseDialogBodyProps) {
   const [activeTypeDraft, setActiveTypeDraft] = useState<TransactionType | null>(null);
   const activeType = activeTypeDraft ?? defaultType;
-  const setActiveType = setActiveTypeDraft;
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [familyUuid, setFamilyUuid] = useState<string>("");
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
@@ -61,9 +98,7 @@ export function AddExpenseDialog({
   const [incomeState, incomeFormAction] = useActionState(createIncomeAction, initialIncomeState);
 
   useEffect(() => {
-    if (!open) return;
     let cancelled = false;
-    // open 진입 시점에 fetch 시작 신호 — derived value 로 대체 불가 (fetch 실패 시 영원히 loading)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoadingCategories(true);
     getFamilyCategoriesAction()
@@ -85,7 +120,7 @@ export function AddExpenseDialog({
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, []);
 
   useEffect(() => {
     if (expenseState.success) {
@@ -109,13 +144,13 @@ export function AddExpenseDialog({
   const formAction = isExpense ? expenseFormAction : incomeFormAction;
   const errors = isExpense ? expenseState.errors : incomeState.errors;
 
-  const body = (
+  return (
     <form action={formAction} className="space-y-5">
       <input type="hidden" name="familyUuid" value={familyUuid} />
       <div className="flex gap-1 bg-bg-muted p-1 rounded-xl">
         <button
           type="button"
-          onClick={() => setActiveType("expense")}
+          onClick={() => setActiveTypeDraft("expense")}
           className={cn(
             "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all",
             isExpense ? "gradient-expense text-white shadow-sm" : "text-fg-muted hover:text-fg",
@@ -126,7 +161,7 @@ export function AddExpenseDialog({
         </button>
         <button
           type="button"
-          onClick={() => setActiveType("income")}
+          onClick={() => setActiveTypeDraft("income")}
           className={cn(
             "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all",
             !isExpense ? "gradient-income text-white shadow-sm" : "text-fg-muted hover:text-fg",
@@ -166,29 +201,5 @@ export function AddExpenseDialog({
         </SubmitButton>
       </div>
     </form>
-  );
-
-  if (isDesktop) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-[720px] bg-bg-elev">
-          <DialogHeader>
-            <DialogTitle className="sr-only">거래 추가</DialogTitle>
-          </DialogHeader>
-          {body}
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[100dvh] p-0 bg-bg-elev">
-        <SheetHeader className="px-5 py-3 border-b border-border">
-          <SheetTitle>거래 추가</SheetTitle>
-        </SheetHeader>
-        <div className="px-5 py-4 overflow-y-auto h-[calc(100dvh-56px)]">{body}</div>
-      </SheetContent>
-    </Sheet>
   );
 }
