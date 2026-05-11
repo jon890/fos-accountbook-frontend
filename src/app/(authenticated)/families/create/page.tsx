@@ -11,14 +11,23 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SegmentedToggle } from "@/components/ui/segmented-toggle";
 import { useSessionRefresh } from "@/lib/client/use-session-refresh";
+import { Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+const FAMILY_TYPE_OPTIONS = [
+  { key: "family", label: "가족" },
+  { key: "personal", label: "개인" },
+] as const;
+
+type FamilyType = "personal" | "family";
+
 export default function CreateFamilyPage() {
   const [familyName, setFamilyName] = useState("");
-  const [familyType, setFamilyType] = useState<"personal" | "family">("family");
+  const [familyType, setFamilyType] = useState<FamilyType>("family");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { refreshSession } = useSessionRefresh();
@@ -34,18 +43,14 @@ export default function CreateFamilyPage() {
     setIsLoading(true);
 
     try {
-      // Server Action 호출 (백엔드 Access Token은 서버의 HTTP-only 쿠키에서 자동 전달)
       const result = await createFamilyAction({
         name: familyName.trim(),
         description: familyType === "personal" ? "개인 가계부" : undefined,
       });
 
       if (result.success) {
-        // 세션 갱신 (프로필의 defaultFamilyUuid가 변경됨)
         await refreshSession();
         toast.success("가족이 성공적으로 생성되었습니다!");
-        // 백엔드에서 첫 가족 생성 시 자동으로 defaultFamilyUuid 설정됨
-        // 대시보드로 바로 이동 (홈에서 리다이렉트 처리)
         router.push("/dashboard");
       } else {
         toast.error(result.error.message);
@@ -63,14 +68,17 @@ export default function CreateFamilyPage() {
   };
 
   return (
-    <div className="min-h-screen app-background p-4">
+    <div className="min-h-screen bg-bg p-4">
       <div className="max-w-md mx-auto pt-20">
-        <Card className="glass-card">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold text-primary">
-              가족 만들기
+        <Card className="bg-bg-elev border-border shadow-default">
+          <CardHeader className="text-center pt-8 pb-4">
+            <div className="mx-auto mb-3 w-24 h-24 rounded-full gradient-family flex items-center justify-center">
+              <Users className="w-10 h-10 text-white" strokeWidth={2.2} />
+            </div>
+            <CardTitle className="text-2xl font-bold tracking-tight text-fg">
+              우리집 가계부 시작하기
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-fg-muted">
               새로운 가족을 만들어 가계부를 시작해보세요
             </CardDescription>
           </CardHeader>
@@ -80,29 +88,14 @@ export default function CreateFamilyPage() {
               {/* 가족 타입 선택 */}
               <div className="space-y-3">
                 <Label className="text-sm font-medium">가족 타입</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    type="button"
-                    variant={familyType === "personal" ? "default" : "outline"}
-                    onClick={() => setFamilyType("personal")}
-                    className="h-12"
-                  >
-                    <div className="text-center">
-                      <div className="text-lg">👤</div>
-                      <div className="text-xs">혼자 사용</div>
-                    </div>
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={familyType === "family" ? "default" : "outline"}
-                    onClick={() => setFamilyType("family")}
-                    className="h-12"
-                  >
-                    <div className="text-center">
-                      <div className="text-lg">👨‍👩‍👧‍👦</div>
-                      <div className="text-xs">가족과 함께</div>
-                    </div>
-                  </Button>
+                <div className="flex justify-center">
+                  <SegmentedToggle
+                    options={FAMILY_TYPE_OPTIONS}
+                    value={familyType}
+                    onChange={(v) => setFamilyType(v as FamilyType)}
+                    disabled={isLoading}
+                    ariaLabel="가족 타입 선택"
+                  />
                 </div>
               </div>
 
@@ -129,12 +122,12 @@ export default function CreateFamilyPage() {
               {/* 제출 버튼 */}
               <Button
                 type="submit"
-                className="w-full h-12 text-white gradient-primary hover:opacity-90"
+                className="w-full h-12 bg-brand-500 hover:bg-brand-600 text-white"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                     생성 중...
                   </div>
                 ) : (
@@ -143,14 +136,14 @@ export default function CreateFamilyPage() {
               </Button>
             </form>
 
-            {/* 설명 텍스트 */}
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <h4 className="font-medium text-sm text-blue-900 mb-2">
+            {/* 안내 박스 */}
+            <div className="mt-6 p-4 bg-brand-50 rounded-md border border-brand-100">
+              <h4 className="font-semibold text-sm text-brand-700 mb-1">
                 {familyType === "personal"
                   ? "혼자 사용하기"
                   : "가족과 함께 사용하기"}
               </h4>
-              <p className="text-xs text-blue-700">
+              <p className="text-xs text-brand-700/80">
                 {familyType === "personal"
                   ? "개인 지출을 관리할 수 있는 가계부를 만듭니다. 언제든지 가족을 초대할 수 있습니다."
                   : "가족 구성원들과 함께 지출을 관리할 수 있는 공유 가계부를 만듭니다."}
