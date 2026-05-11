@@ -1,7 +1,7 @@
 {
   "name": "plan005-add-expense-redesign",
   "description": "지출 추가/편집 폼 Teal fintech 리디자인 — 큰 금액 input(56px num) + 빠른 추가 칩(+1k/+5k/+10k) + 카테고리 grid(plan002 톤 토큰) + Mobile bottom Sheet/Desktop 720px Dialog responsive. Edit 폼도 같이 통일.",
-  "status": "pending",
+  "status": "completed",
   "created_at": "2026-05-10",
   "total_phases": 5,
   "related_docs": [
@@ -23,35 +23,35 @@
       "file": "phase-01.md",
       "title": "AmountInput 신규 — 56px num input + 빠른 추가 칩 (+1k/+5k/+10k)",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 2,
       "file": "phase-02.md",
       "title": "CategoryGrid 신규 — 5×2 mobile / 10×1 desktop + 톤 ring (plan002 헬퍼 재사용)",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 3,
       "file": "phase-03.md",
       "title": "ExpenseFormFields 통합 + AddExpenseForm/EditExpenseDialog 마이그레이션",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 4,
       "file": "phase-04.md",
       "title": "AddExpenseSheet (mobile) / AddExpenseDialog (desktop) responsive wrapper + 진입점 분기",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 5,
       "file": "phase-05.md",
       "title": "통합 검증 + legacy 잔재 grep + index.json completed 마킹",
       "model": "haiku",
-      "status": "pending"
+      "status": "completed"
     }
   ]
 }
