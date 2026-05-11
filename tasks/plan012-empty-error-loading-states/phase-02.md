@@ -11,7 +11,7 @@
   - **반드시 Client Component** (`"use client"` 필수)
   - props: `{ error: Error & { digest?: string }, reset: () => void }`
   - 라우트별 경계 — 위치한 segment 하위에서 발생한 에러를 잡음
-- 현재 `src/app/(authenticated)/error.tsx` 또는 `src/app/error.tsx` 존재 여부 점검 (없으면 default Next.js error UI)
+- 실제 코드 상태: `src/app/(authenticated)/error.tsx` **이미 존재** (단순 메시지) — 본 phase 에서 **기존 파일 교체** (ErrorBoundaryCard 사용). `src/app/error.tsx`, `src/app/global-error.tsx` 는 부재 — **신규 생성**.
 
 ## 작업 항목
 
@@ -54,9 +54,9 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 }
 ```
 
-### 3. `(authenticated)` 그룹 error boundary
+### 3. `(authenticated)` 그룹 error boundary (기존 파일 교체)
 
-`src/app/(authenticated)/error.tsx` 신규 (`"use client"`) — 인증 영역 전반의 에러 캐치. 동일 카드 사용 + `homeHref="/dashboard"` 로 보조 링크 변경.
+`src/app/(authenticated)/error.tsx` 는 이미 존재 (단순 메시지). 본문을 ErrorBoundaryCard 호출로 교체 (`"use client"` 유지) + `homeHref="/dashboard"` 로 보조 링크 변경. diff 최소화 — 컴포넌트 호출 한 줄로 갈아끼움.
 
 ### 4. `global-error.tsx` (root layout 에러용)
 
@@ -82,8 +82,8 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 ### 5. 자동 verification
 
 ```bash
-# cwd: /Users/nhn/personal/fos-accountbook
-# branch: plan/012-empty-error-loading-states
+# cwd: /Users/nhn/personal/fos-accountbook/.claude/worktrees/plan012
+# branch: feat/plan012-empty-error-loading-states
 
 pnpm lint
 pnpm tsc --noEmit
@@ -93,6 +93,9 @@ test -f src/components/error/ErrorBoundaryCard.tsx
 test -f src/app/error.tsx
 test -f src/app/global-error.tsx
 test -f src/app/\(authenticated\)/error.tsx
+
+# 3 error.tsx 모두 ErrorBoundaryCard 호출 (기존 (authenticated)/error.tsx 도 교체됐는지)
+grep -n 'ErrorBoundaryCard' src/app/error.tsx src/app/global-error.tsx src/app/\(authenticated\)/error.tsx | wc -l   # >= 3
 
 # 모두 "use client" 첫 줄
 head -1 src/app/error.tsx src/app/global-error.tsx src/app/\(authenticated\)/error.tsx | grep -c 'use client'   # == 3
@@ -123,7 +126,7 @@ fi
 | `src/components/error/ErrorBoundaryCard.tsx` | 신규 (use client) |
 | `src/app/error.tsx` | 신규 (use client) |
 | `src/app/global-error.tsx` | 신규 (use client + html/body) |
-| `src/app/(authenticated)/error.tsx` | 신규 (use client) |
+| `src/app/(authenticated)/error.tsx` | 교체 — 기존 단순 메시지 → ErrorBoundaryCard 호출 (use client 유지) |
 
 ## Out of Scope
 

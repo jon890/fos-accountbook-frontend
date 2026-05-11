@@ -8,11 +8,11 @@
 
 - handoff 참조: `mobile-landing-auth.jsx` line 671~797 (MobileLoading + SHIMMER_CSS + Skel)
 - App Router `loading.tsx`: route segment 의 Suspense boundary. Server Component pending 동안 표시
-- 현재 `loading.tsx` 가 라우트별로 존재하는지 점검 — 없으면 default Next.js (빈 화면) 표시
+- 실제 코드 상태: `(authenticated)/loading.tsx`, `dashboard/loading.tsx`, `transactions/loading.tsx`, `settings/loading.tsx`, `categories/loading.tsx` 모두 **이미 존재** (현재 단순 spinner / 텍스트). 본 phase 는 **3개 기존 파일 교체** + `analytics/loading.tsx` **1개 신규 생성** + globals.css 에 shimmer 추가.
 
 ## 작업 항목
 
-### 1. `Skel` 컴포넌트 + shimmer 애니메이션
+### 1. `Skel` 컴포넌트 + shimmer 애니메이션 + 글로벌 `(authenticated)/loading.tsx` 교체
 
 `src/components/loading/Skel.tsx` 신규:
 
@@ -25,7 +25,7 @@ interface SkelProps {
 }
 ```
 
-shimmer 애니메이션은 `src/app/globals.css` 의 `@theme` 블록 외부에 추가:
+shimmer 애니메이션은 `src/app/globals.css` 의 `@layer utilities` 블록 내부 (기존 `@keyframes float` line 272 부근) 옆에 추가:
 
 ```css
 @keyframes ab-shimmer {
@@ -49,9 +49,11 @@ shimmer 애니메이션은 `src/app/globals.css` 의 `@theme` 블록 외부에 �
 
 `Skel` 컴포넌트는 `<div className="ab-skel" style={{ width, height, borderRadius }} />` 단순 wrapper.
 
-### 2. Dashboard `loading.tsx`
+이어서 `src/app/(authenticated)/loading.tsx` (기존 파일 교체) 를 generic skeleton 으로: 헤더 영역 (1 row) + 컨텐츠 영역 (3 card). `dashboard/transactions/analytics` 라우트별 loading 이 있는 경우 그쪽이 우선 적용되므로 본 generic 은 `/settings`, `/family`, `/categories` 같은 라우트의 폴백 역할.
 
-`src/app/(authenticated)/dashboard/loading.tsx` 신규:
+### 2. Dashboard `loading.tsx` (기존 파일 교체)
+
+`src/app/(authenticated)/dashboard/loading.tsx` 교체:
 
 handoff 의 MobileLoading 구조 그대로:
 - Header skeleton: 50%/22 + 32%/13
@@ -61,14 +63,14 @@ handoff 의 MobileLoading 구조 그대로:
 
 Server Component 로 작성 가능 (Skel 자체가 client 일 필요 없음 — CSS animation 만).
 
-### 3. Transactions `loading.tsx`
+### 3. Transactions `loading.tsx` (기존 파일 교체)
 
-`src/app/(authenticated)/transactions/loading.tsx` 신규:
+`src/app/(authenticated)/transactions/loading.tsx` 교체:
 - 헤더 skeleton (검색바 + filter chip)
 - Tab skeleton (3 segment)
 - List skeleton (8 row)
 
-### 4. Analytics `loading.tsx`
+### 4. Analytics `loading.tsx` (신규)
 
 `src/app/(authenticated)/analytics/loading.tsx` 신규:
 - Period toggle skeleton
@@ -76,16 +78,11 @@ Server Component 로 작성 가능 (Skel 자체가 client 일 필요 없음 — 
 - MonthlyTrendBar skeleton (12 bar 가변 높이)
 - CategoryDetailList skeleton (6 row)
 
-### 5. 글로벌 `loading.tsx`
-
-`src/app/(authenticated)/loading.tsx` 신규 — 위 라우트별 loading 이 없는 protected page (예: `/settings`, `/family`) 진입 시 generic skeleton:
-- 헤더 영역 (1 row) + 컨텐츠 영역 (3 card)
-
-### 6. 자동 verification
+### 5. 자동 verification
 
 ```bash
-# cwd: /Users/nhn/personal/fos-accountbook
-# branch: plan/012-empty-error-loading-states
+# cwd: /Users/nhn/personal/fos-accountbook/.claude/worktrees/plan012
+# branch: feat/plan012-empty-error-loading-states
 
 pnpm lint
 pnpm tsc --noEmit
@@ -100,8 +97,8 @@ test -f src/app/\(authenticated\)/analytics/loading.tsx
 # globals.css 에 ab-shimmer keyframe + .ab-skel 클래스
 grep -nE 'ab-shimmer|\.ab-skel' src/app/globals.css | wc -l   # >= 2
 
-# Skel 사용 카운트
-grep -rln 'Skel' src/app/\(authenticated\)/ | wc -l   # >= 4
+# 교체된 4 loading 파일 + 신규 analytics 모두 Skel 사용
+grep -l 'Skel' src/app/\(authenticated\)/loading.tsx src/app/\(authenticated\)/dashboard/loading.tsx src/app/\(authenticated\)/transactions/loading.tsx src/app/\(authenticated\)/analytics/loading.tsx | wc -l   # == 4
 ```
 
 수동 smoke:
@@ -113,10 +110,10 @@ grep -rln 'Skel' src/app/\(authenticated\)/ | wc -l   # >= 4
 | 파일 | 상태 |
 |---|---|
 | `src/components/loading/Skel.tsx` | 신규 |
-| `src/app/globals.css` | shimmer keyframe + .ab-skel 추가 |
-| `src/app/(authenticated)/loading.tsx` | 신규 (generic) |
-| `src/app/(authenticated)/dashboard/loading.tsx` | 신규 |
-| `src/app/(authenticated)/transactions/loading.tsx` | 신규 |
+| `src/app/globals.css` | shimmer keyframe + .ab-skel 추가 (@layer utilities 내, @keyframes float 옆) |
+| `src/app/(authenticated)/loading.tsx` | 교체 (generic 폴백 skeleton) |
+| `src/app/(authenticated)/dashboard/loading.tsx` | 교체 |
+| `src/app/(authenticated)/transactions/loading.tsx` | 교체 |
 | `src/app/(authenticated)/analytics/loading.tsx` | 신규 |
 
 ## Out of Scope

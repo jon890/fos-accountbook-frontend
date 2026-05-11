@@ -36,15 +36,26 @@ interface EmptyStateProps {
 
 ### 2. Transactions 빈 결과 EmptyState 적용
 
-`src/app/(authenticated)/transactions/page.tsx` (또는 `ExpenseListClient` / `IncomeListClient`):
+대상: `src/components/expenses/list/ExpenseList.tsx` (server component, fetch 결과 분기 위치) + `src/components/incomes/list/IncomeList.tsx` (server component, 동일 패턴).
 
-거래 0건이면 EmptyState 렌더:
-- icon: `Inbox`
-- title: "아직 거래가 없어요"
-- description: "지출이나 수입을 추가하면\n여기에 표시돼요."
-- cta: { label: "지출 추가", href: "?openAdd=expense", icon: Plus }
-  - 또는 기존 FAB 의존 (CTA 생략)
-- tip: { title: "팁", body: "가족 누구나 입력할 수 있어요. 카드 청구서 도착 전에\n그때 그때 짧게 적어두면 편해요." }
+`ExpenseList` 가 `getExpensesAction` 결과를 받아 `expenses.length === 0` 분기 처리. **검색/필터 적용 시에는 EmptyState 미표시** — searchParams 키 `categoryId`, `q`, `amountMin`, `amountMax` 중 **하나라도 truthy** 이면 0건이라도 기존 "검색 결과 없음" 메시지 유지 (별도 plan 처리).
+
+```tsx
+// ExpenseList.tsx 안에서
+const hasFilter = Boolean(categoryId || q || amountMin || amountMax);
+if (expenses.length === 0 && !hasFilter) {
+  return (
+    <EmptyState
+      icon={Inbox}
+      title="아직 거래가 없어요"
+      description={"지출이나 수입을 추가하면\n여기에 표시돼요."}
+      tip={{ title: "팁", body: "가족 누구나 입력할 수 있어요. 카드 청구서 도착 전에\n그때 그때 짧게 적어두면 편해요." }}
+    />
+  );
+}
+```
+
+CTA 는 기존 FAB (BottomNav) 가 처리하므로 EmptyState 의 cta prop 생략. IncomeList 도 동일 패턴 (`incomes.length === 0 && !hasFilter`, title/description 만 "수입" 으로 교체).
 
 ### 3. Dashboard 빈 상태 (가족 미생성 외 케이스)
 
@@ -58,8 +69,8 @@ EmptyState 컴포넌트의 mini 변형 또는 inline JSX. 본 phase 에선 inlin
 ### 4. 자동 verification
 
 ```bash
-# cwd: /Users/nhn/personal/fos-accountbook
-# branch: plan/012-empty-error-loading-states
+# cwd: /Users/nhn/personal/fos-accountbook/.claude/worktrees/plan012
+# branch: feat/plan012-empty-error-loading-states
 
 pnpm lint
 pnpm tsc --noEmit
@@ -67,8 +78,8 @@ pnpm build
 
 test -f src/components/empty/EmptyState.tsx
 
-# Transactions 페이지에서 EmptyState 사용
-grep -rln 'EmptyState' src/app/\(authenticated\)/transactions/ src/components/transactions/ | wc -l   # >= 1
+# Expense / Income List 에서 EmptyState 사용 + hasFilter 가드
+grep -n 'EmptyState\|hasFilter' src/components/expenses/list/ExpenseList.tsx src/components/incomes/list/IncomeList.tsx | wc -l   # >= 4
 
 # 하드코딩 색 0
 ! grep -rnE 'text-gray-|bg-gray-' src/components/empty/
@@ -84,8 +95,8 @@ grep -nE 'bg-brand-50|text-brand-500|text-brand-700' src/components/empty/EmptyS
 | 파일 | 상태 |
 |---|---|
 | `src/components/empty/EmptyState.tsx` | 신규 |
-| `src/app/(authenticated)/transactions/page.tsx` | 수정 — 0건 분기에 EmptyState |
-| `src/components/transactions/ExpenseListClient.tsx` | 수정 (해당 시) |
+| `src/components/expenses/list/ExpenseList.tsx` | 수정 — 0건 + !hasFilter 분기에 EmptyState |
+| `src/components/incomes/list/IncomeList.tsx` | 수정 — 동일 패턴 |
 | `src/components/dashboard/RecentActivity.tsx` | 수정 — 0건 inline 메시지 갱신 |
 | `src/components/dashboard/CategoryDistribution.tsx` | 수정 — 0건 placeholder |
 
