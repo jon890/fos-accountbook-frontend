@@ -51,6 +51,7 @@ export function EditExpenseDialog({
 }: EditExpenseDialogProps) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const [state, formAction] = useActionState(updateExpenseAction, initialState);
+  // 호출자는 매 expense 마다 unmount/remount 패턴 — 동일 인스턴스 prop 교체 시 초기값 미반영. 키 재사용 시 버그 가능
   const [amount, setAmount] = useState(Number(expense.amount));
   const [categoryUuid, setCategoryUuid] = useState<string | null>(expense.categoryUuid);
   const [date, setDate] = useState(toLocalDateInput(expense.date));

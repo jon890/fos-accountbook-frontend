@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { cn } from "@/lib/client/utils";
 
 interface AmountInputProps {
+  id?: string;
   value: number;
   onChange: (next: number) => void;
   disabled?: boolean;
@@ -12,7 +13,7 @@ interface AmountInputProps {
 const MOBILE_CHIPS = [1000, 5000, 10000] as const;
 const DESKTOP_ONLY_CHIP = 50000;
 
-export function AmountInput({ value, onChange, disabled }: AmountInputProps) {
+export function AmountInput({ id, value, onChange, disabled }: AmountInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleChipClick = (delta: number) => {
@@ -62,6 +63,7 @@ export function AmountInput({ value, onChange, disabled }: AmountInputProps) {
 
         {/* 직접 입력 hidden input */}
         <input
+          id={id}
           ref={inputRef}
           type="number"
           inputMode="numeric"

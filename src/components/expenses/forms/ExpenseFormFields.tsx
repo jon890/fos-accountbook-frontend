@@ -44,7 +44,7 @@ export function ExpenseFormFields({
     <div className="space-y-5">
       <div className="space-y-2">
         <Label htmlFor="amount">금액 *</Label>
-        <AmountInput value={amount} onChange={onAmountChange} disabled={disabled} />
+        <AmountInput id="amount" value={amount} onChange={onAmountChange} disabled={disabled} />
         <input type="hidden" name="amount" value={amount} />
         {errors?.amount && <p className="text-sm text-expense">{errors.amount[0]}</p>}
       </div>
