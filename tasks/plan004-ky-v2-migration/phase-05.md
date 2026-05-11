@@ -60,14 +60,33 @@ grep -nE 'afterResponse:\s*\[\s*async\s*\(\s*\{' src/lib/server/api/client.ts | 
 # HTTPError.data 활용
 grep -nE 'error\.data' src/lib/server/api/client.ts | wc -l   # >= 2
 
-# 빈 body 가드
-grep -nE 'response\.status === 204|content-length' src/lib/server/api/client.ts | wc -l   # >= 1
+# 빈 body 가드 (status 코드 기반 — Content-Length 헤더 의존 X)
+grep -nE 'response\.status === 204|response\.status === 304' src/lib/server/api/client.ts | wc -l   # >= 1
+! grep -nE 'content-length|Content-Length' src/lib/server/api/client.ts   # exit 1
+
+# 5개 helper 가 Promise<T | null> 시그니처
+grep -cE 'Promise<.*\| null>' src/lib/server/api/client.ts   # >= 5
 
 # mock 갱신
 grep -n 'data:\s*unknown\|this\.data' src/__mocks__/ky.ts | wc -l   # >= 1
 ```
 
-### 4. `index.json` + 본 phase status → `completed`
+### 4. DELETE 호출자 null 처리 점검 (phase 03 후속)
+
+`serverApiClient<T>` 반환 타입이 `Promise<T | null>` 로 변경됨에 따라 호출자가 null 분기를 명시했는지 cross-check:
+
+```bash
+# DELETE 사용처 식별 — 모두 null 가능 응답
+grep -rn 'serverApiDelete' src/services/ src/actions/ 2>/dev/null
+
+# 각 호출처가 결과 변수에 대한 null 체크 (?., ?? null, if (... === null)) 가지는지 점검.
+# 누락 시 TypeScript strict 가 컴파일 에러 → tsc --noEmit 통과로 1차 검증.
+# 단 `result.someField` 직접 접근 시 strict 에러. 해당 위치 식별 후 fix 또는 보고.
+```
+
+다른 helper (`Get`/`Post`/`Put`/`Patch`) 도 동일 — 단 200 응답이 일반적이라 null 케이스 드뭄. tsc 가 잡도록 둠.
+
+### 5. `index.json` + 본 phase status → `completed`
 
 ```bash
 sed -i '' 's/"status": "pending"/"status": "completed"/g' tasks/plan004-ky-v2-migration/index.json

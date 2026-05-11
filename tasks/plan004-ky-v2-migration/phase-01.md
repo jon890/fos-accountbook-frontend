@@ -42,7 +42,23 @@ pnpm add ky@^2.0.2
 기존: `async (error) => { ... if (response) { ... } ... return error; }`
 신규: `async (error, { request, options }) => { ... }`.
 
-ky 2.0 변경: 이제 모든 에러를 받음 (HTTPError 한정 아님). `error.response` 가 undefined 일 수 있으므로 기존 line 143 `if (response)` 가드 그대로 보존 — 추가 변경 0. `request`/`options` state 는 사용 안 하면 destructuring 생략.
+ky 2.0 변경: 이제 모든 에러를 받음 (HTTPError 한정 아님). 비-HTTPError (예: NetworkError, AbortError) 는 `response`/`data` 속성이 없으므로 **`instanceof HTTPError` 타입 가드로 early return** 명시:
+
+```ts
+beforeError: [
+  async (error, { request, options }) => {
+    if (!(error instanceof HTTPError)) return error;   // 비-HTTPError 는 변환 없이 반환
+
+    const { response } = error;
+    if (response) {
+      // 기존 errorData 추출 + error.message 갱신 로직
+    }
+    return error;
+  },
+],
+```
+
+기존 line 143 `if (response)` 가드는 `instanceof HTTPError` 통과 후 추가 안전망 (response 가 일부 케이스에서 undefined 가능). 두 가드 동시 보존. `request`/`options` state 는 사용 안 하면 destructuring 생략.
 
 ### 5. 자동 verification
 
