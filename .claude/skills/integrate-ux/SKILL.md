@@ -160,7 +160,7 @@ main에 바로 `gh pr merge`하지 않는다. PR 브랜치에서 main을 rebase�
 
 ```bash
 # cwd: <repo root>
-python3 scripts/run-phases.py tasks/{task-name}
+python3 .claude/skills/plan-and-build/run-phases.py tasks/{task-name}
 ```
 
 ### 9. PR 처리 (task 완료 후 필수)

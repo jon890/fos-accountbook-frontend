@@ -60,7 +60,7 @@ cat tasks/{plan_name}/index.json | jq                     # task 구조
 | 일반 critic 시드 | 같은 파일 § 1 | P# 4-section |
 | build-with-teams 프로세스 결함 | `.claude/skills/build-with-teams/SKILL.md` 해당 섹션 끝 | 1-2 줄 |
 | self-healing-teams 메커니즘 보강 | `.claude/skills/self-healing-teams/SKILL.md` 해당 메커니즘 섹션 | 1-2 줄 |
-| 도메인 의사결정 | `docs/adr.md` | 신규 ADR-### (자명성 게이트 통과 시만) |
+| 도메인 의사결정 | `docs/adr.md` | 신규 ADR-### (ADR 작성 전 자체 점검 절차 통과 시만) |
 | 페이지/컴포넌트 흐름 변경 | `docs/pages/{page}.md` | 해당 표 갱신 |
 
 ### 4. draft 작성 (SendMessage 본문)

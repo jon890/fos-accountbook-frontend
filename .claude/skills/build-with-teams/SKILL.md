@@ -533,7 +533,7 @@ executor 가 phase 실패 보고 시:
 |---|---|---|---|
 | critic 반복 지적 패턴 | critic 이 동일 결함 타입을 2회+ 지적 | `.claude/skills/_shared/common-pitfalls.md` | `### P{N}.` (Bad / Good / Why / How to apply 4-section) |
 | build-with-teams 프로세스 결함 | sub-agent 협업 / 게이트 / worktree 절차 자체에서 사고 발생 | 이 SKILL.md | 해당 섹션 (예: "팀원 자발적 실행 방지", "executor cwd 격리") 끝에 1-2줄 |
-| 도메인 의사결정 | "왜 X 를 선택했는가" 가 코드만 봐서는 추론 불가 + ADR 자명성 게이트 통과 | `docs/adr.md` | `## ADR-XXX` (결정 / 맥락 / 대안 기각 구조) |
+| 도메인 의사결정 | "왜 X 를 선택했는가" 가 코드만 봐서는 추론 불가 + ADR 작성 전 자체 점검 절차 통과 | `docs/adr.md` | `## ADR-XXX` (결정 / 맥락 / 대안 기각 구조) |
 | AI 에이전트 컨텍스트 | 프로젝트 전반 코딩 규칙 / 스택 / 레이어 / 금지사항 변경 | `CLAUDE.md` / `<dir>/AGENTS.md` | 기존 섹션 갱신 또는 신규 1-2줄 |
 | 페이지별 상세 | 특정 page.tsx 의 흐름 / 컴포넌트 / Data 변경 | `docs/pages/{page}.md` | Components / Data / Layout 표 갱신 |
 | 일회용 메모 (다음 plan 동안만 유효) | 재발 가능성 낮지만 잠시 잊지 않을 정보 | (누적 금지 — 사용자 보고로 끝) | — |
