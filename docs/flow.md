@@ -43,8 +43,8 @@
     │
     ├─ /invite/{token} 접속
     │   └─ (인증 안 한 상태면 callbackUrl 보존해 /auth/signin — 인증 후 invite 재진입)
-    │   └─ getInvitationInfoAction(token) — skipAuth (로그인 전 미리보기 허용)
-    │           ├─ 만료/사용됨/취소 → /?error=invalid_invitation
+    │   └─ getInvitationInfoAction(token) — skipAuth (로그인 전 미리보기 허용), token Zod uuid 검증 (ADR-F06)
+    │           ├─ 만료/사용됨/취소 → /?error=invalid_invitation (단일 코드 — 토큰 상태 열거 차단, 상세 사유는 서버 로그만)
     │           └─ 유효 → InvitePageClient (plan015 centered card 패턴)
     │                   │
     │                   ├─ 96px gradient-family round + Users 아이콘 (Auth 톤 일치)
@@ -52,7 +52,7 @@
     │                   ├─ (plan016 — backend #127 머지 후) 초대자 이름·아바타 + 멤버 수
     │                   │
     │                   └─ [수락 / 거절 CTA]
-    │                           └─ 수락 → acceptInvitationAction(token)
+    │                           └─ 수락 → acceptInvitationAction(token) — requireAuth + token Zod uuid 검증 (ADR-F06)
     │                                   └─ FamilyMember 생성 (MEMBER 역할)
     │                                   └─ defaultFamilyUuid 설정
     │                                   └─ /dashboard 리다이렉트
