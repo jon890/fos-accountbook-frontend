@@ -3,16 +3,17 @@
 ## 1. 최초 사용자 온보딩
 
 ```
-[앱 접속]
+[앱 접속 = /]
     │
     ▼
-세션 확인
+세션 확인 (src/app/page.tsx)
     │
-    ├─ 미로그인 → /auth/signin
-    │               └─ Google / Naver OAuth 선택
-    │                       └─ NextAuth 처리 → JWT 발급 → /
+    ├─ 미로그인 → / (Landing 표시: Hero + Features 3 + CTA)
+    │               └─ CTA "지금 시작하기" → /auth/signin
+    │                       └─ Google / Naver OAuth 선택
+    │                               └─ NextAuth 처리 → JWT 발급 → /
     │
-    └─ 로그인됨 → defaultFamilyUuid 확인
+    └─ 로그인됨 → /dashboard redirect → defaultFamilyUuid 확인
                     │
                     ├─ 없음 → /families/create
                     │           └─ 가족 이름 + 월 예산 입력
