@@ -6,6 +6,8 @@
 import { getDashboardStatsAction } from "@/actions/dashboard/get-dashboard-stats-action";
 import { getMonthlyDailyStatsAction } from "@/actions/dashboard/get-monthly-daily-stats-action";
 import { getExpensesAction } from "@/actions/expense/get-expenses-action";
+import { getCategoryBreakdownWithDeltaAction } from "@/actions/analytics/get-category-breakdown-with-delta-action";
+import { getMonthlyTrendAction } from "@/actions/analytics/get-monthly-trend-action";
 import { getSelectedFamilyUuid } from "@/lib/server/auth/auth-helpers";
 import { auth } from "@/lib/server/auth";
 import { redirect } from "next/navigation";
@@ -42,10 +44,12 @@ export default async function AnalyticsPage({
   const lastDay = new Date(year, month, 0).getDate();
   const endDate = `${year}-${String(month).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
 
-  const [statsResult, dailyResult, expensesResult] = await Promise.all([
+  const [statsResult, dailyResult, expensesResult, breakdownResult, trendResult] = await Promise.all([
     getDashboardStatsAction(),
     getMonthlyDailyStatsAction(year, month),
     getExpensesAction({ familyUuid: familyUuid, startDate, endDate, limit: 1000 }),
+    getCategoryBreakdownWithDeltaAction(year, month),
+    getMonthlyTrendAction(period, year, month),
   ]);
 
   return (
@@ -57,6 +61,8 @@ export default async function AnalyticsPage({
       initialExpenses={expensesResult.success ? expensesResult.data.items : []}
       familyUuid={familyUuid}
       period={period}
+      initialBreakdown={breakdownResult.success ? breakdownResult.data : null}
+      initialTrend={trendResult.success ? trendResult.data : null}
     />
   );
 }

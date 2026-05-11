@@ -6,20 +6,17 @@ import { getExpensesAction } from "@/actions/expense/get-expenses-action";
 import type { DailyTransactionSummary } from "@/actions/dashboard/get-monthly-daily-stats-action";
 import type { DashboardStats } from "@/types/dashboard";
 import type { Expense } from "@/types/expense";
-import { ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Wallet, BarChart2, PieChart as PieIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Wallet, BarChart2 } from "lucide-react";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { startTransition, useState, useMemo } from "react";
 import type { DailyBarChartData } from "./DailyBarChart";
 import { AnalyticsPeriodToggle } from "./AnalyticsPeriodToggle";
-import type { AnalyticsPeriod } from "@/types/analytics";
+import { AnalyticsCategoryDonut } from "./AnalyticsCategoryDonut";
+import type { AnalyticsPeriod, CategoryBreakdownWithDelta, MonthlyTrend } from "@/types/analytics";
 
 const DailyBarChart = dynamic(
   () => import("./DailyBarChart").then((m) => m.DailyBarChart),
-  { ssr: false }
-);
-const CategoryPieChart = dynamic(
-  () => import("./CategoryPieChart").then((m) => m.CategoryPieChart),
   { ssr: false }
 );
 
@@ -31,6 +28,8 @@ interface AnalyticsClientProps {
   initialExpenses: Expense[];
   familyUuid: string;
   period: AnalyticsPeriod;
+  initialBreakdown: CategoryBreakdownWithDelta | null;
+  initialTrend: MonthlyTrend | null;
 }
 
 interface CategoryStat {
@@ -63,6 +62,8 @@ export function AnalyticsClient({
   initialExpenses,
   familyUuid,
   period,
+  initialBreakdown,
+  initialTrend,
 }: AnalyticsClientProps) {
   const [year, setYear] = useState(initialYear);
   const [month, setMonth] = useState(initialMonth);
@@ -263,49 +264,16 @@ export function AnalyticsClient({
         )}
       </div>
 
-      {/* 카테고리별 지출 */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
-        <div className="flex items-center gap-2 mb-4">
-          <PieIcon className="w-4 h-4 text-gray-400" />
-          <h2 className="text-sm font-bold text-gray-700">카테고리별 지출</h2>
-          {totalExpense > 0 && (
-            <span className="ml-auto text-xs text-gray-400 font-medium">
-              총 ₩{formatAmount(totalExpense)}
-            </span>
-          )}
+      {/* 카테고리별 지출 — 신규 Donut (plan006 phase 3) */}
+      {initialBreakdown ? (
+        <AnalyticsCategoryDonut breakdown={initialBreakdown} />
+      ) : (
+        <div className="bg-bg-elev rounded-2xl p-4 shadow-[var(--shadow-default)]">
+          <div className="h-24 flex items-center justify-center text-fg-subtle text-sm">
+            카테고리 분포를 불러오지 못했습니다
+          </div>
         </div>
-
-        {categoryStats.length === 0 ? (
-          <div className="h-24 flex items-center justify-center text-gray-300 text-sm">
-            지출 내역이 없습니다
-          </div>
-        ) : (
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* 도넛 차트 */}
-            <div className="shrink-0 mx-auto">
-              <CategoryPieChart data={categoryStats} />
-            </div>
-
-            {/* 카테고리 리스트 */}
-            <div className="flex-1 space-y-2 min-w-0">
-              {categoryStats.map((cat) => (
-                <div key={cat.uuid} className="flex items-center gap-2">
-                  <div
-                    className="w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: cat.color }}
-                  />
-                  <span className="text-xs text-gray-500 shrink-0">{cat.icon}</span>
-                  <span className="text-xs font-medium text-gray-700 truncate flex-1">{cat.name}</span>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs font-bold text-gray-800">₩{formatAmount(cat.total)}</p>
-                    <p className="text-[10px] text-gray-400">{cat.percentage.toFixed(1)}%</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* 지출 TOP 5 */}
       {topExpenses.length > 0 && (
