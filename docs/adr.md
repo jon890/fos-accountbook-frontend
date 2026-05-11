@@ -281,5 +281,7 @@
   - URL 만 진실원 + 모든 입력 즉시 router.replace: 사용자 타이핑마다 navigation 발생 → 성능/UX 저하.
   - `key={searchParams}` 로 force-remount: 컴포넌트 내부 다른 state (Popover open 등) 도 reset 되는 부수효과.
 
-- **적용 범위**: URL searchParams 기반 client 필터 컴포넌트 전반. 첫 적용 사례 — `AmountRangeFilter.tsx` (plan003).
+- **적용 범위**: URL searchParams 기반 client 필터 컴포넌트 전반. 첫 적용 사례 — `AmountRangeFilter.tsx` (plan003). props 기반 추종에도 변형 적용 가능 (`AddExpenseDialog.tsx` 의 `activeTypeDraft ?? defaultType`, plan005).
+
+- **예외 — 외부 부수효과 진입 신호 (fetch trigger, subscription 등)**: `useEffect` 안 `setState(true)` 가 명백히 필요한 경우 (예: dialog open 시 fetch 시작 → `setIsLoadingCategories(true)` → fetch 결과로 `false`. derived value 로 대체 불가 — fetch 실패 시 영원히 loading) 는 해당 라인에 `// eslint-disable-next-line react-hooks/set-state-in-effect` + 1줄 사유 주석으로 허용. 신규 코드 작성 시 우선 derived 시도 → 막힐 경우만 적용. 첫 적용 사례 — `AddExpenseDialog.tsx:67` (plan005).
 
