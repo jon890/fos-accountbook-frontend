@@ -42,11 +42,17 @@
 [수락자]
     │
     ├─ /invite/{token} 접속
-    │   └─ getInvitationInfoAction(token)
-    │           ├─ 만료/사용됨 → 오류 메시지
-    │           └─ 유효 → 가족명 + 초대자 표시
-    │                   └─ "수락" 클릭
-    │                           └─ acceptInvitationAction(token)
+    │   └─ (인증 안 한 상태면 callbackUrl 보존해 /auth/signin — 인증 후 invite 재진입)
+    │   └─ getInvitationInfoAction(token) — skipAuth (로그인 전 미리보기 허용)
+    │           ├─ 만료/사용됨/취소 → /?error=invalid_invitation
+    │           └─ 유효 → InvitePageClient (plan015 centered card 패턴)
+    │                   │
+    │                   ├─ 96px gradient-family round + Users 아이콘 (Auth 톤 일치)
+    │                   ├─ 가족 이름 + 만료 일시 (24h 이내 시 expense/10 warning 배지)
+    │                   ├─ (plan016 — backend #127 머지 후) 초대자 이름·아바타 + 멤버 수
+    │                   │
+    │                   └─ [수락 / 거절 CTA]
+    │                           └─ 수락 → acceptInvitationAction(token)
     │                                   └─ FamilyMember 생성 (MEMBER 역할)
     │                                   └─ defaultFamilyUuid 설정
     │                                   └─ /dashboard 리다이렉트
