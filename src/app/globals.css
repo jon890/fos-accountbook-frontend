@@ -56,6 +56,8 @@
   --shadow-popover: 0 8px 24px -8px rgb(15 23 42 / 0.12), 0 2px 6px -2px rgb(15 23 42 / 0.06);
   --shadow-modal:   0 24px 48px -16px rgb(15 23 42 / 0.18), 0 8px 16px -8px rgb(15 23 42 / 0.10);
   --shadow-brand-btn: 0 6px 18px -6px oklch(0.640 0.140 188 / 0.5);
+  --shadow-hero-cta:  0 10px 28px -10px oklch(0.640 0.140 188 / 0.55);
+  --shadow-cta-white: 0 8px 24px oklch(0 0 0 / 0.18);
   --shadow-fab:     0 6px 20px -4px oklch(0.640 0.140 188 / 0.45),
                     0 2px 6px -2px rgb(15 23 42 / 0.10);
 
@@ -217,6 +219,10 @@
 
   .gradient-family {
     background-image: linear-gradient(135deg, oklch(0.810 0.105 188) 0%, oklch(0.640 0.140 188) 100%);
+  }
+
+  .hero-fade {
+    background: linear-gradient(180deg, var(--color-brand-tint) 0%, var(--color-bg) 400px);
   }
 
   .gradient-category {

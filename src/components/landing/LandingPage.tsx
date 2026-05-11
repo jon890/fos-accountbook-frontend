@@ -39,11 +39,7 @@ function FeatureCard({ badge, title, sub }: FeatureCardProps) {
 export function LandingPage() {
   return (
     <div
-      className="min-h-screen text-fg"
-      style={{
-        /* Hero fade height: 400px — brand-tint → bg 전환 */
-        background: `linear-gradient(180deg, var(--color-brand-tint) 0%, var(--color-bg) 400px)`,
-      }}
+      className="min-h-screen text-fg hero-fade"
     >
       {/* Top bar */}
       <div className="px-5 pt-[14px] flex items-center justify-between md:px-14 md:pt-5">
@@ -84,8 +80,7 @@ export function LandingPage() {
         <div className="mt-[26px] md:mt-8 flex flex-col items-start gap-3 md:flex-row">
           <Link
             href="/auth/signin"
-            className="w-full md:w-auto h-[54px] md:h-14 px-7 rounded-[13px] bg-brand-500 text-white flex items-center justify-center gap-2 text-[15.5px] font-bold"
-            style={{ boxShadow: "0 10px 28px -10px oklch(0.640 0.140 188 / 0.55)" }}
+            className="w-full md:w-auto h-[54px] md:h-14 px-7 rounded-[13px] bg-brand-500 text-white flex items-center justify-center gap-2 text-[15.5px] font-bold [box-shadow:var(--shadow-hero-cta)]"
           >
             지금 시작하기
             <ArrowRightIcon />
@@ -129,8 +124,7 @@ export function LandingPage() {
         </div>
         <Link
           href="/auth/signin"
-          className="mt-[18px] md:mt-0 h-[46px] md:h-14 px-6 md:px-9 rounded-[11px] md:rounded-[13px] bg-white text-brand-700 flex items-center justify-center gap-1.5 text-sm font-bold md:text-[15px] shrink-0"
-          style={{ boxShadow: "0 8px 24px oklch(0 0 0 / 0.18)" }}
+          className="mt-[18px] md:mt-0 h-[46px] md:h-14 px-6 md:px-9 rounded-[11px] md:rounded-[13px] bg-white text-brand-700 flex items-center justify-center gap-1.5 text-sm font-bold md:text-[15px] shrink-0 [box-shadow:var(--shadow-cta-white)]"
         >
           시작하기
           <ArrowRightIcon />
