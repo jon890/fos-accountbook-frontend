@@ -40,8 +40,12 @@ export function AmountRangeFilter() {
   const currentMax = searchParams.get("amountMax");
   const hasValue = currentMin !== null || currentMax !== null;
 
-  const [minInput, setMinInput] = useState(currentMin ?? "");
-  const [maxInput, setMaxInput] = useState(currentMax ?? "");
+  const [minDraft, setMinDraft] = useState<string | null>(null);
+  const [maxDraft, setMaxDraft] = useState<string | null>(null);
+  const minInput = minDraft ?? currentMin ?? "";
+  const maxInput = maxDraft ?? currentMax ?? "";
+  const setMinInput = setMinDraft;
+  const setMaxInput = setMaxDraft;
 
   const apply = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -60,17 +64,19 @@ export function AmountRangeFilter() {
     }
     params.set("page", "1");
     router.replace(`/transactions?${params.toString()}`);
+    setMinDraft(null);
+    setMaxDraft(null);
     setOpen(false);
   };
 
   const reset = () => {
-    setMinInput("");
-    setMaxInput("");
     const params = new URLSearchParams(searchParams.toString());
     params.delete("amountMin");
     params.delete("amountMax");
     params.set("page", "1");
     router.replace(`/transactions?${params.toString()}`);
+    setMinDraft(null);
+    setMaxDraft(null);
     setOpen(false);
   };
 

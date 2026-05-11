@@ -53,7 +53,9 @@ export default async function TransactionsPage({
     if (profileResult.success && profileResult.data.timezone) {
       timezone = profileResult.data.timezone;
     }
-  } catch {}
+  } catch (error) {
+    console.error("Failed to fetch user timezone, fallback to Asia/Seoul:", error);
+  }
 
   // 시간대 기준으로 현재 달의 시작일과 종료일 계산
   const { startDate: defaultStartDate, endDate: defaultEndDate } =

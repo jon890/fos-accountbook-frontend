@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { getCategoryTone } from "@/lib/utils/category-tone";
+import { getCategoryToneStyle } from "@/lib/utils/category-tone";
 import { formatCurrency } from "@/lib/utils/format";
 import { format, parseISO } from "date-fns";
 
@@ -32,7 +32,7 @@ export function TransactionRow({
 }: TransactionRowProps) {
   const catName = tx.category?.name ?? "기타";
   const catIcon = tx.category?.icon ?? "💸";
-  const tone = getCategoryTone(catName);
+  const toneStyle = getCategoryToneStyle(catName);
   const timeStr = format(parseISO(tx.date), "HH:mm");
   const absAmount = Math.abs(tx.amount);
   const isClickable = !!onEdit;
@@ -48,7 +48,7 @@ export function TransactionRow({
         {/* 카테고리 아이콘 */}
         <div
           className="size-9 shrink-0 rounded-xl flex items-center justify-center text-base"
-          style={{ background: tone.bg, color: tone.fg }}
+          style={toneStyle}
         >
           {catIcon}
         </div>
@@ -93,7 +93,7 @@ export function TransactionRow({
       {/* Col 1: 카테고리 아이콘 38px */}
       <div
         className="size-9 md:size-[38px] shrink-0 rounded-xl flex items-center justify-center text-base"
-        style={{ background: tone.bg, color: tone.fg }}
+        style={toneStyle}
       >
         {catIcon}
       </div>
@@ -113,7 +113,7 @@ export function TransactionRow({
       <div className="hidden md:flex items-center">
         <span
           className="text-xs font-medium px-2 py-0.5 rounded-full truncate max-w-[104px]"
-          style={{ background: tone.bg, color: tone.fg }}
+          style={toneStyle}
         >
           {catName}
         </span>
