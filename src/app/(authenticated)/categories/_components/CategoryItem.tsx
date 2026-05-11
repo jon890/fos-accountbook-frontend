@@ -12,6 +12,16 @@ interface CategoryItemProps {
   onDelete: (category: CategoryResponse) => void;
 }
 
+function withAlpha(color: string | undefined, a: number): string {
+  if (!color) return `oklch(0.510 0.110 188 / ${a})`;
+  if (color.startsWith("oklch(")) {
+    return color.replace(/(\s*\/\s*[\d.]+)?\)$/, ` / ${a})`);
+  }
+  // hex fallback: append 2-digit hex alpha (e.g. 0.16 → "29")
+  const hex = Math.round(a * 255).toString(16).padStart(2, "0");
+  return color + hex;
+}
+
 export function CategoryItem({
   category,
   onEdit,
@@ -24,7 +34,10 @@ export function CategoryItem({
           <div className="flex items-start justify-between">
             <div
               className="w-10 h-8 md:w-12 md:h-12 rounded-lg flex items-center justify-center text-xl md:text-2xl shrink-0"
-              style={{ backgroundColor: category.color + "20" }}
+              style={{
+                backgroundColor: withAlpha(category.color, 0.16),
+                color: category.color,
+              }}
             >
               {category.icon}
             </div>
@@ -43,14 +56,14 @@ export function CategoryItem({
                 className="h-6 w-6 md:h-8 md:w-8"
                 onClick={() => onDelete(category)}
               >
-                <Trash2 className="w-3 h-3 md:w-4 md:h-4 text-red-500" />
+                <Trash2 className="w-3 h-3 md:w-4 md:h-4 text-expense" />
               </Button>
             </div>
           </div>
 
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <h3 className="font-semibold text-sm md:text-base text-gray-900 truncate">
+              <h3 className="font-semibold text-sm md:text-base text-fg truncate">
                 {category.name}
               </h3>
 
@@ -62,7 +75,7 @@ export function CategoryItem({
               {category.excludeFromBudget && (
                 <Badge
                   variant="secondary"
-                  className="text-[10px] px-1.5 py-0 h-5 gap-1 text-gray-500 w-fit whitespace-nowrap shrink-0"
+                  className="text-[10px] px-1.5 py-0 h-5 gap-1 text-fg-muted w-fit whitespace-nowrap shrink-0"
                 >
                   <EyeOff className="w-3 h-3" />
                   <span className="hidden md:inline">예산 제외</span>
@@ -75,7 +88,7 @@ export function CategoryItem({
                 className="w-3 h-3 md:w-4 md:h-4 rounded-full"
                 style={{ backgroundColor: category.color }}
               />
-              <span className="text-xs text-gray-500">{category.color}</span>
+              <span className="text-xs text-fg-subtle">{category.color}</span>
             </div>
           </div>
         </div>

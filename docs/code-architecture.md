@@ -95,7 +95,7 @@ src/
 ├── services/{domain}/      API 호출·변환 함수
 ├── components/
 │   ├── ui/                 Shadcn 기반 기본 컴포넌트
-│   ├── layout/             Header, BottomNavigation
+│   ├── layout/             Header, BottomNavigation, SettingsCard (페이지 카드 helper)
 │   └── {domain}/           도메인별 UI 컴포넌트
 ├── app/(authenticated)/    인증 필요 라우트 (Server Component 기본)
 ├── app/api/auth/           NextAuth API Route

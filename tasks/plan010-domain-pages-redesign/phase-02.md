@@ -42,7 +42,7 @@ function AddCategoryDialogBody({ onOpenChange, ... }) {
 }
 ```
 
-EditCategoryDialog 의 `useEffect(() => setColor(category.color), [category.color])` 패턴은 inner body 안의 initial state 로 흡수 — open 변경 시 자동 reset, prop 변경은 key 또는 자체 동기화로.
+EditCategoryDialog 의 `useEffect(() => setColor(category.color), [category.color])` 패턴은 inner body 안의 initial state 로 흡수 — open 변경 시 자동 reset. **다른 카테고리 row 를 연속 수정 시 inner body 가 동일 prop shape 라 React 가 동일 mount 로 인식할 위험** → 반드시 `<EditCategoryDialogBody key={category.uuid} ... />` 로 key prop 강제. 강제 unmount/remount = initial value 새로 잡힘.
 
 ### 2. 색 팔레트 8개 → plan002 톤 fg 매핑
 
@@ -72,7 +72,17 @@ backend 가 hex 만 수용한다면 plan 본문에 보고 + plan011 로 backend 
 ### 3. CategoryList row 토큰 교체
 
 `CategoryList.tsx` + `CategoryItem.tsx`:
-- 카테고리 icon cell: `bg-[${color}]/15 text-[${color}]` 패턴 → `style={{ background: color + "26", color }}` (16% alpha hex `26`) 또는 inline OKLCH alpha
+- 카테고리 icon cell: 기존 `bg-[${color}]/15 text-[${color}]` Tailwind arbitrary 패턴 → inline style 로 교체. **color 가 OKLCH 문자열이므로 alpha 합성은 슬래시 문법 사용** (hex 접미사 `26` 같은 합성 불가):
+  ```ts
+  // OKLCH 슬래시 alpha 합성 helper
+  function withAlpha(oklch: string, a: number): string {
+    // "oklch(0.560 0.140 35)" → "oklch(0.560 0.140 35 / 0.16)"
+    return oklch.replace(/\)$/, ` / ${a})`);
+  }
+  // 사용
+  style={{ background: withAlpha(color, 0.16), color }}
+  ```
+  hex fallback (backend 거부 시) 의 경우만 `color + "29"` (16%) 사용 — 16진 alpha 는 hex string 일 때만 유효.
 - row hover: `hover:bg-bg-muted`
 - 텍스트: `text-fg` / `text-fg-muted` 토큰
 

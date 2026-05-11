@@ -56,7 +56,7 @@ export function CategoryList({
     return (
       <Card>
         <CardContent className="py-12">
-          <div className="text-center text-gray-500">
+          <div className="text-center text-fg-muted">
             <p className="text-lg mb-2">등록된 카테고리가 없습니다</p>
             <p className="text-sm">카테고리를 추가해주세요</p>
           </div>
