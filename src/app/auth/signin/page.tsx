@@ -1,11 +1,12 @@
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { SignInForm } from "@/components/auth/SignInForm";
+import { Users } from "lucide-react";
 
 export default async function SignInPage({
   searchParams,
@@ -22,17 +23,22 @@ export default async function SignInPage({
   const customMessage = params.message;
 
   return (
-    <div className="min-h-screen flex items-center justify-center app-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center space-y-2">
-          <CardTitle className="text-3xl font-bold">우리집 가계부</CardTitle>
-          <CardDescription>
-            가족과 함께 관리하는 스마트 가계부 💰
+    <div className="min-h-screen flex items-center justify-center bg-bg p-4">
+      <Card className="w-full max-w-md bg-bg-elev border-border shadow-default">
+        <CardHeader className="text-center pt-8 pb-4">
+          <div className="mx-auto mb-3 w-16 h-16 rounded-2xl gradient-family flex items-center justify-center">
+            <Users className="w-8 h-8 text-white" strokeWidth={1.7} />
+          </div>
+          <CardTitle className="text-2xl font-bold tracking-tight text-fg">
+            우리집 가계부
+          </CardTitle>
+          <CardDescription className="text-fg-muted">
+            가족과 함께 관리하는 스마트 가계부
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {(error || customMessage) && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="bg-expense/10 border border-expense/20 text-expense px-4 py-3 rounded-md">
               <p className="text-sm font-medium">
                 {customMessage || getErrorMessage(error!)}
               </p>
@@ -41,7 +47,7 @@ export default async function SignInPage({
 
           <SignInForm callbackUrl={callbackUrl} />
 
-          <div className="text-center text-sm text-gray-500">
+          <div className="text-center text-sm text-fg-muted">
             <p>로그인하시면 가족 가계부를</p>
             <p>바로 시작하실 수 있습니다.</p>
           </div>
