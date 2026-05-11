@@ -41,7 +41,8 @@ export function LandingPage() {
     <div
       className="min-h-screen text-fg"
       style={{
-        background: `linear-gradient(180deg, oklch(0.975 0.025 188) 0%, var(--color-bg) 400px)`,
+        /* Hero fade height: 400px — brand-tint → bg 전환 */
+        background: `linear-gradient(180deg, var(--color-brand-tint) 0%, var(--color-bg) 400px)`,
       }}
     >
       {/* Top bar */}
@@ -116,10 +117,7 @@ export function LandingPage() {
 
       {/* Bottom CTA section */}
       <div
-        className="mx-5 mb-6 p-7 rounded-[18px] text-white md:mx-14 md:mb-9 md:px-14 md:py-[52px] md:rounded-3xl md:flex md:items-center md:justify-between md:gap-8"
-        style={{
-          background: `linear-gradient(135deg, oklch(0.640 0.140 188) 0%, oklch(0.510 0.115 200) 100%)`,
-        }}
+        className="gradient-family mx-5 mb-6 p-7 rounded-[18px] text-white md:mx-14 md:mb-9 md:px-14 md:py-[52px] md:rounded-3xl md:flex md:items-center md:justify-between md:gap-8"
       >
         <div>
           <div className="text-[19px] font-bold tracking-[-0.02em] leading-[1.3] md:text-[32px] md:font-extrabold md:tracking-[-0.028em] md:leading-[1.2]">
@@ -132,7 +130,7 @@ export function LandingPage() {
         <Link
           href="/auth/signin"
           className="mt-[18px] md:mt-0 h-[46px] md:h-14 px-6 md:px-9 rounded-[11px] md:rounded-[13px] bg-white text-brand-700 flex items-center justify-center gap-1.5 text-sm font-bold md:text-[15px] shrink-0"
-          style={{ boxShadow: "0 8px 24px rgb(0 0 0 / 0.18)" }}
+          style={{ boxShadow: "0 8px 24px oklch(0 0 0 / 0.18)" }}
         >
           시작하기
           <ArrowRightIcon />
@@ -142,7 +140,7 @@ export function LandingPage() {
       {/* Footer */}
       <div className="px-5 pt-[18px] pb-8 border-t border-border mt-2 text-center md:px-14 md:py-6 md:flex md:items-center md:justify-between md:text-left">
         <div className="text-[11px] text-fg-subtle font-medium">
-          © 2026 fos-accountbook
+          © {new Date().getFullYear()} fos-accountbook
         </div>
         <div className="mt-2 flex gap-4 justify-center md:mt-0 md:gap-[22px]">
           <span className="text-[11px] text-fg-muted font-medium">이용약관</span>

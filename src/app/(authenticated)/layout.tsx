@@ -30,7 +30,7 @@ export default async function AuthenticatedLayout({
 
   return (
     <TimeZoneProvider timezone={timezone}>
-      <div className="min-h-screen app-background">
+      <div className="min-h-screen bg-bg">
         <Header session={session} selectedFamilyUuid={selectedFamilyUuid} />
 
         <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 md:py-6 pb-20 md:pb-24">

@@ -28,8 +28,7 @@ export default async function AuthErrorPage({
 
       <Link
         href="/auth/signin"
-        className="flex items-center justify-center gap-2 w-full h-[50px] rounded-xl bg-brand-500 text-white text-[14.5px] font-bold"
-        style={{ boxShadow: "0 6px 18px -6px oklch(0.640 0.140 188 / 0.5)" }}
+        className="flex items-center justify-center gap-2 w-full h-[50px] rounded-xl bg-brand-500 text-white text-[14.5px] font-bold shadow-brand-btn"
       >
         다시 시도
       </Link>
