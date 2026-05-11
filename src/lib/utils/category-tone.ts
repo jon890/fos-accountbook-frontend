@@ -55,3 +55,8 @@ export function getCategoryTone(name: string): CategoryTone {
   const key = NAME_TO_KEY[name.trim()] ?? "etc";
   return TONE_MAP[key];
 }
+
+export function getCategoryToneStyle(name: string): { background: string; color: string } {
+  const tone = getCategoryTone(name);
+  return { background: tone.bg, color: tone.fg };
+}

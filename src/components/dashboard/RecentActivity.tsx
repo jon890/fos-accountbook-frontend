@@ -1,72 +1,13 @@
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { getCategoryTone } from "@/lib/utils/category-tone";
-import { formatCurrency } from "@/lib/utils/format";
+import { TransactionRow } from "@/components/transactions/TransactionRow";
 import type { RecentExpense } from "@/types/dashboard";
 import { Wallet, Plus } from "lucide-react";
 import Link from "next/link";
 
 interface RecentActivityProps {
   expenses: RecentExpense[];
-}
-
-function formatRelativeDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffDays = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
-  );
-  if (diffDays === 0) return "오늘";
-  if (diffDays === 1) return "어제";
-  return `${diffDays}일 전`;
-}
-
-interface TxRowProps {
-  expense: RecentExpense;
-}
-
-function TxRow({ expense }: TxRowProps) {
-  const tone = getCategoryTone(expense.category.name);
-
-  return (
-    <div className="flex items-center gap-3 py-2.5">
-      {/* Left: category icon */}
-      <div
-        className="size-9 shrink-0 rounded-xl flex items-center justify-center text-base"
-        style={{ background: tone.bg, color: tone.fg }}
-      >
-        {expense.category.icon}
-      </div>
-
-      {/* Middle: memo + category · time */}
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-fg truncate">
-          {expense.description || expense.category.name}
-        </p>
-        <p className="text-[11.5px] text-fg-muted">
-          {expense.category.name} · {formatRelativeDate(expense.date)}
-        </p>
-      </div>
-
-      {/* Right: amount + creator avatar */}
-      <div className="flex flex-col items-end gap-1 shrink-0">
-        <span className="num text-sm font-bold text-fg">
-          {formatCurrency(expense.amount)}
-        </span>
-        {expense.createdBy?.name ? (
-          <Avatar className="size-4">
-            <AvatarFallback className="text-[8px] font-medium bg-brand-200 text-brand-800">
-              {expense.createdBy.name.charAt(0)}
-            </AvatarFallback>
-          </Avatar>
-        ) : (
-          <div className="size-4" />
-        )}
-      </div>
-    </div>
-  );
 }
 
 export function RecentActivity({ expenses }: RecentActivityProps) {
@@ -100,7 +41,18 @@ export function RecentActivity({ expenses }: RecentActivityProps) {
           <>
             <div className="divide-y divide-[var(--color-border)]">
               {expenses.map((expense) => (
-                <TxRow key={expense.uuid} expense={expense} />
+                <TransactionRow
+                  key={expense.uuid}
+                  variant="compact"
+                  tx={{
+                    uuid: expense.uuid,
+                    amount: Number(expense.amount),
+                    description: expense.description,
+                    date: expense.date,
+                    category: expense.category,
+                    createdBy: expense.createdBy ?? null,
+                  }}
+                />
               ))}
             </div>
             {expenses.length >= 10 && (

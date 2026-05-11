@@ -2,31 +2,27 @@
 
 **Model**: sonnet
 **Status**: pending
-**Goal**: /transactions 리디자인의 데이터 토대 — 일자별 그룹 helper, 검색/금액 필터 query param 확장, backend 응답 실측.
+**Goal**: /transactions 리디자인의 데이터 토대 — 일자별 그룹 helper, 검색/금액 필터 query param 확장.
 
 ## Context (자기완결)
 
 - 현재 `src/app/(authenticated)/transactions/page.tsx` 는 `searchParams { tab, categoryId, startDate, endDate, page, limit }` 를 받아 service 호출.
 - handoff filter chips: 카테고리 / 기간 / **금액** / **검색** — `amountMin/amountMax/q` query param 신규.
-- ADR-F16 (카테고리 집계는 Server Action 측) 정신 동일하게 — 일자 그룹/일일 합계도 service 측 집계. backend endpoint 신설 회피.
-- 기존 `src/services/expense/` 에 list 서비스 있음 (실측 필요). plan002 의 `category-tone.ts` 헬퍼는 row 디자인에서 재사용.
+- ADR-F16 (server-side 집계) 동일 정신 — 일자 그룹/일일 합계도 service 측. backend endpoint 신설 회피.
+- **기존 `src/lib/utils/group-by-date.ts` 의 `groupByDate<T extends { date: string }>` + `getDateLabel` 재사용** (신규 함수 생성 금지). plan003 은 이 위에 합계 필드만 추가하는 thin wrapper.
+- backend 의 `q/amountMin/amountMax` 지원 여부 미지수 — 옵션 인자로 정의 후 service 가 backend 응답을 그대로 받아 클라 측에서도 동일 필터 재적용 (hybrid). 임계 (월 500건+) 이내라 클라 필터로 충분.
 
-## 작업 항목
+## 작업 항목 (5개)
 
-### 1. backend 응답 실측 — 검색/금액 query param 지원 여부
+### 1. type 추가
 
-dev/staging 환경에서 `GET /families/{u}/expenses?q=foo&amountMin=1000&amountMax=50000` 호출. 결과를 phase commit message 에 명시 (`backend q/amount: 지원/미지원`).
-
-미지원 시 phase 3 의 검색/금액 필터는 클라 측 후처리 (받은 month 결과 안에서 필터). row 수가 임계 이내면 충분 (ADR-F16 임계 트리거 동일).
-
-### 2. type 추가
-
-`src/types/transaction.ts` (또는 expense.ts) 에:
+`src/types/transaction.ts` (또는 `expense.ts` 확장):
 
 ```ts
-export interface DateGroup<T> {
-  date: string;       // YYYY-MM-DD
-  totalAmount: number;
+export interface DateGroupWithTotal<T> {
+  dateKey: string;     // YYYY-MM-DD
+  label: string;       // "오늘" / "어제" / "M월 d일"
+  totalAmount: number; // 그룹 내 |amount| 합계
   items: T[];
 }
 
@@ -36,72 +32,100 @@ export interface TransactionFilters {
   endDate?: string;
   amountMin?: number;
   amountMax?: number;
-  q?: string;         // memo 검색
+  q?: string;          // memo 검색
 }
 ```
 
-### 3. service `groupTransactionsByDate(items)` 헬퍼
+### 2. service helper — 기존 `groupByDate` wrap + 합계 계산
 
-`src/services/expense/expense-service.ts` 또는 새 파일 `src/services/transaction/transaction-service.ts`. 입력 expenses/incomes 배열, 출력 `DateGroup<T>[]` (date desc 정렬, 같은 date 안에서는 시간 desc).
+`src/services/transaction/transaction-service.ts` 신규.
 
-`expense.date` 가 ISO 문자열이면 `YYYY-MM-DD` 만 추출해 grouping key. 합계 = `Math.abs(item.amount)` 누적 (수입/지출 모두 양수).
+```ts
+import { groupByDate } from "@/lib/utils/group-by-date";
 
-### 4. action 시그니처 확장 — 검색/금액 query
+export function groupTransactionsWithTotal<T extends { date: string; amount: number }>(
+  items: T[]
+): DateGroupWithTotal<T>[] {
+  const groups = groupByDate(items);
+  return groups.map((g) => ({
+    ...g,
+    totalAmount: g.items.reduce((s, x) => s + Math.abs(x.amount), 0),
+  }));
+}
 
-기존 `getExpensesAction` (또는 동일 책임 action) 에 `amountMin?, amountMax?, q?` 옵션 인자 추가. backend 가 query param 지원 시 그대로 전달, 미지원 시 service 가 fetch 후 클라 필터.
+export function applyClientFilters<T extends { amount: number; memo?: string | null }>(
+  items: T[], filters: { amountMin?: number; amountMax?: number; q?: string }
+): T[] { /* memo 검색 + amount 범위 */ }
+```
+
+신규 `groupByDate` 절대 작성 금지 — 기존 util 만 사용.
+
+### 3. action 시그니처 확장
+
+기존 `getExpensesAction` 에 `amountMin?, amountMax?, q?` 옵션 인자 추가. service 가 backend 결과를 받아 `applyClientFilters` 거친 뒤 `groupTransactionsWithTotal` 적용.
 
 ```ts
 export async function getExpensesAction(
   filters: TransactionFilters & { tab: "expenses" | "incomes" | "recurring", page?: number },
-): Promise<ActionResult<{ items: Expense[]; dateGroups: DateGroup<Expense>[]; totalCount: number }>>
+): Promise<ActionResult<{ items: Expense[]; dateGroups: DateGroupWithTotal<Expense>[]; totalCount: number }>>
 ```
 
-ADR-F04: action 은 인증·검증·service 호출만. 그룹화는 service 책임.
+**Client filter 정책**: `applyClientFilters` 는 idempotent — backend 가 일부/전부 query 지원해도 service 가 무조건 client 측 재적용 (안전 + 단순). 따라서 `totalCount` = client 필터 후 items 길이 (backend 원본 totalCount 무시). ADR-F04 — action 은 인증·검증·service 호출만, 그룹화/필터는 service.
 
-### 5. service 단위 테스트
+**탭별 반환 분기**: `tab` 가
+- `"expenses"` / `"incomes"` → `dateGroups: DateGroupWithTotal<Expense | Income>[]`
+- `"recurring"` → `RecurringExpense` 는 schedule 기반이라 `groupTransactionsWithTotal` 미적용. `dateGroups: null`, items 만 반환. UI (phase 4) 는 별도 행 렌더.
 
-`src/__tests__/services/transaction/groupTransactionsByDate.test.ts`. 케이스:
-- 정상 5건 → 3 date 그룹, 각 합계 정확
+Zod 검증 (ADR-F06): `amountMin/Max` 음수 금지, `q` 길이 ≤ 100자.
+
+### 4. service 단위 테스트
+
+`src/__tests__/services/transaction/transaction-service.test.ts`. 케이스:
+- `groupTransactionsWithTotal` 5건 → 3 그룹 + 합계 정확
 - 빈 배열 → `[]`
-- 같은 date 다른 시간 → 시간 desc 정렬
-- amountMin/amountMax 클라 필터 (backend 미지원 시) 동작
+- `applyClientFilters` amountMin/Max 경계 / q 부분일치 (case-insensitive)
+- ADR-F09 jest.mock 방식
 
-ADR-F09 jest.mock 방식.
-
-### 6. 자동 verification
+### 5. 자동 verification
 
 ```bash
+# cwd: <worktree root>
 pnpm lint
 pnpm tsc --noEmit
-pnpm test src/__tests__/services/transaction/ --run
+pnpm test src/__tests__/services/transaction/
 
-grep -nE 'DateGroup|TransactionFilters' src/types/ | wc -l   # >= 2
-grep -n 'groupTransactionsByDate' src/services/ -r | wc -l    # >= 1
+grep -nE 'DateGroupWithTotal|TransactionFilters' src/types/ -r | wc -l   # >= 2
+grep -n 'groupTransactionsWithTotal' src/services/transaction/transaction-service.ts | wc -l   # >= 1
+
+# 기존 groupByDate 재사용 — 신규 정의 금지
+grep -rn 'export function groupByDate\|function groupTransactionsByDate' src/services/ src/lib/ \
+  | grep -v 'group-by-date.ts'   # = 0 (lib 의 원본 외 다른 정의 없음)
 
 # ADR-F04 위반 없음
-! grep -nE 'from ["\x27]@/actions' src/services/transaction/ src/services/expense/expense-service.ts 2>/dev/null
+! grep -nE 'from ["\x27]@/actions' src/services/transaction/transaction-service.ts
 ```
 
 ## Critical Files
 
 | 파일 | 상태 |
 |---|---|
-| `src/types/transaction.ts` (또는 `expense.ts`) | 수정 — `DateGroup`, `TransactionFilters` 추가 |
-| `src/services/transaction/transaction-service.ts` (또는 기존 service) | 수정 — `groupTransactionsByDate` + 클라 필터 helper |
-| 기존 expenses/incomes action | 수정 — 시그니처에 `amountMin/amountMax/q` 추가 |
-| `src/__tests__/services/transaction/groupTransactionsByDate.test.ts` | 신규 |
+| `src/types/transaction.ts` | 신규 또는 `expense.ts` 확장 — `DateGroupWithTotal`, `TransactionFilters` |
+| `src/services/transaction/transaction-service.ts` | 신규 — `groupTransactionsWithTotal` + `applyClientFilters` |
+| 기존 `getExpensesAction` (또는 동등) | 수정 — 시그니처 + 호출 |
+| `src/__tests__/services/transaction/transaction-service.test.ts` | 신규 |
+| `src/lib/utils/group-by-date.ts` | **변경 금지 (재사용)** |
 
 ## Out of Scope
 
 - UI 컴포넌트 (phase 2~4)
-- backend `q/amountMin/amountMax` 신설 요청 — 부재 시 클라 필터로 우선 처리, plan004+ 에서 backend issue 분리
-- 페이지네이션 변경 (현재 `page/limit` 그대로)
-- `RecurringExpenseList` 의 데이터 구조 (탭 셋 안에 유지, row 디자인은 phase 4)
+- backend `q/amountMin/Max` 신설 요청 — 부재 시 클라 필터로 처리, 별도 plan/이슈 분리
+- 페이지네이션 변경 (현 `page/limit` 유지)
+- `RecurringExpenseList` 데이터 구조 (탭 셋 안에 유지, row 디자인은 phase 4)
 
 ## Risks
 
 | 리스크 | 완화 |
 |---|---|
-| 월 거래수가 클라 필터 한계 (500+) 초과 | ADR-F16 임계 트리거 — backend query param 도입 plan 분리 |
-| backend 가 `q` 만 지원하고 `amount*` 미지원 (또는 반대) | service 측 hybrid — backend 지원 query 는 server, 미지원은 client. 결과는 동일 shape |
-| 그룹 key 가 timezone 영향 받음 | `date-timezone.ts` (이미 utils 에 있음) 사용 — UTC 기반 통일 |
+| 월 거래수가 클라 필터 한계 (500+) 초과 | ADR-F16 임계 트리거 — backend query param 도입 별도 plan |
+| backend 가 일부 query 만 지원 | service hybrid — backend 지원 query 는 server, 미지원은 client. 결과 shape 동일 |
+| 그룹 key 가 timezone 영향 | 기존 `group-by-date.ts` 가 `format(parseISO(date), "yyyy-MM-dd")` 사용 — 로컬 일자 기준. 별도 처리 불필요 |

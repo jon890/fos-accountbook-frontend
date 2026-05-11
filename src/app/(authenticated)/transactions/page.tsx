@@ -29,6 +29,9 @@ interface SearchParams {
   endDate?: string;
   page?: string;
   limit?: string;
+  q?: string;
+  amountMin?: string;
+  amountMax?: string;
 }
 
 interface TransactionsPageProps {
@@ -51,7 +54,7 @@ export default async function TransactionsPage({
       timezone = profileResult.data.timezone;
     }
   } catch (error) {
-    console.error("Failed to fetch user timezone:", error);
+    console.error("Failed to fetch user timezone, fallback to Asia/Seoul:", error);
   }
 
   // 시간대 기준으로 현재 달의 시작일과 종료일 계산
@@ -96,7 +99,7 @@ export default async function TransactionsPage({
           {/* 카테고리별 지출 요약 */}
           <Suspense
             fallback={
-              <Card className="w-full border-0 bg-white/80 backdrop-blur-sm shadow-xl">
+              <Card className="w-full border-0 bg-bg-elev backdrop-blur-sm shadow-xl">
                 <CardContent className="flex justify-center items-center min-h-[200px] py-8">
                   <LoadingSpinner />
                 </CardContent>
@@ -187,7 +190,7 @@ async function RecurringExpenseListWrapper({
     return (
       <Card className="w-full">
         <CardContent className="flex justify-center items-center min-h-[200px] py-8">
-          <p className="text-gray-500 text-sm">고정지출을 불러올 수 없습니다</p>
+          <p className="text-fg-muted text-sm">고정지출을 불러올 수 없습니다</p>
         </CardContent>
       </Card>
     );

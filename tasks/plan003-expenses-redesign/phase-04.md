@@ -6,7 +6,7 @@
 
 ## Context (자기완결)
 
-- phase 1 의 `groupTransactionsByDate` service + `DateGroup<T>` type 활용.
+- phase 1 의 `groupTransactionsWithTotal` service + `DateGroupWithTotal<T>` type 활용.
 - handoff Mobile (mobile.jsx line 384~412):
   - 그룹 헤더: 날짜 (12.5px font-semibold text-fg-muted) + "합계 ₩X" (11.5px text-fg-subtle)
   - 카드: `bg-bg-elev rounded-md border-border` 안에 TxRow 여러 개, 행 간 divider
@@ -33,13 +33,13 @@ plan002 의 RecentActivity 가 이 컴포넌트를 import 하도록 리팩토링
 
 ### 2. `DateGroupSection` 컴포넌트
 
-`src/components/transactions/DateGroupSection.tsx`. Props: `group: DateGroup<Expense | Income>`. 헤더 (날짜 + 합계) + 카드 안에 `TransactionRow` 리스트.
+`src/components/transactions/DateGroupSection.tsx`. Props: `group: DateGroupWithTotal<Expense | Income>`. 헤더 (날짜 + 합계) + 카드 안에 `TransactionRow` 리스트.
 
 날짜 포맷 헬퍼 (`formatDateHeader(date)` — "오늘 / 어제 / N월 N일 (요일)") `src/lib/utils/date-format.ts` 또는 기존 utils 재사용.
 
 ### 3. `ExpenseList` / `IncomeList` 통합
 
-기존 `src/components/expenses/list/ExpenseList.tsx` 와 `src/components/incomes/list/IncomeList.tsx` 의 row 렌더 부분을 `DateGroupSection` 호출로 교체. 데이터를 `groupTransactionsByDate` (phase 1) 로 그룹화 후 전달.
+기존 `src/components/expenses/list/ExpenseList.tsx` 와 `src/components/incomes/list/IncomeList.tsx` 의 row 렌더 부분을 `DateGroupSection` 호출로 교체. 데이터를 `groupTransactionsWithTotal` (phase 1) 로 그룹화 후 전달.
 
 `RecurringExpenseList` 는 데이터 모델이 다름 (반복 스케줄) → 본 phase 에서 행 디자인만 동일 토큰 (TransactionRow 안 쓰고 별도 row, 단 색/typography 토큰 통일). 일자 그룹 미적용.
 
@@ -58,7 +58,7 @@ test -f src/components/transactions/TransactionRow.tsx
 test -f src/components/transactions/DateGroupSection.tsx
 
 # 5-col desktop grid
-grep -nE 'grid-cols\[44px|md:grid-cols' src/components/transactions/TransactionRow.tsx | wc -l   # >= 1
+grep -nE 'md:grid-cols-\[44px_1fr_110px_28px_140px\]' src/components/transactions/TransactionRow.tsx | wc -l   # >= 1 (handoff desktop 5-col grid)
 
 # 카테고리 톤 토큰 사용 (plan002 helper)
 grep -n 'category-tone\|--color-cat-' src/components/transactions/TransactionRow.tsx | wc -l   # >= 1

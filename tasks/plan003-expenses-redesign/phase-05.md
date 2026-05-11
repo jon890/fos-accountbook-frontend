@@ -1,7 +1,7 @@
 # Phase 05 — 통합 검증 + legacy 잔재 grep + completed 마킹
 
 **Model**: haiku
-**Status**: pending
+**Status**: completed
 **Goal**: phase 01~04 산출물 통합 검증, legacy 잔재 0건 증명, `index.json` status `completed` 마킹.
 
 ## Context (자기완결)
@@ -15,10 +15,11 @@
 ### 1. 빌드 / lint / type / test 통과
 
 ```bash
+# cwd: <worktree root>
 pnpm lint
 pnpm tsc --noEmit
 pnpm build
-pnpm test --run
+pnpm test
 ```
 
 각 exit 0. 실패 시 `PHASE_BLOCKED: build failed` 출력 후 어느 phase 산출물이 회귀를 만들었는지 식별 + 보고.
@@ -32,8 +33,8 @@ test -f src/app/\(authenticated\)/transactions/_components/AmountRangeFilter.tsx
 test -f src/components/transactions/TransactionRow.tsx
 test -f src/components/transactions/DateGroupSection.tsx
 
-grep -n 'DateGroup\|TransactionFilters' src/types/ -r | wc -l   # >= 2
-grep -n 'groupTransactionsByDate' src/services/ -r | wc -l       # >= 1
+grep -n 'DateGroupWithTotal\|TransactionFilters' src/types/ -r | wc -l   # >= 2
+grep -n 'groupTransactionsWithTotal' src/services/transaction/ | wc -l    # >= 1
 ```
 
 ### 3. 탭/필터 동작 검증 (URL searchParams)
@@ -59,13 +60,27 @@ grep -rnE '#[0-9a-fA-F]{6}\b|hsl\(|rgb\(' src/components/transactions/ src/app/\
 
 ### 5. `index.json` + 본 phase status → `completed`
 
-```bash
-sed -i '' 's/"status": "pending"/"status": "completed"/g' tasks/plan003-expenses-redesign/index.json
-sed -i '' 's/"status": "in_progress"/"status": "completed"/g' tasks/plan003-expenses-redesign/index.json
-grep -c '"status": "completed"' tasks/plan003-expenses-redesign/index.json   # = 6 (top + 5 phases)
+cross-platform 호환을 위해 node 스크립트로 갱신:
 
-sed -i '' 's/^\*\*Status\*\*: pending$/**Status**: completed/' tasks/plan003-expenses-redesign/phase-05.md
-grep '^\*\*Status\*\*:' tasks/plan003-expenses-redesign/phase-05.md   # = "**Status**: completed"
+```bash
+# cwd: <worktree root>
+node -e "
+const fs=require('fs');
+const p='tasks/plan003-expenses-redesign/index.json';
+const j=JSON.parse(fs.readFileSync(p,'utf8'));
+j.status='completed';
+j.phases.forEach(ph=>ph.status='completed');
+fs.writeFileSync(p, JSON.stringify(j,null,2)+'\n');
+"
+node -e "
+const fs=require('fs');
+const p='tasks/plan003-expenses-redesign/phase-05.md';
+fs.writeFileSync(p, fs.readFileSync(p,'utf8').replace(/^\*\*Status\*\*: pending$/m,'**Status**: completed'));
+"
+
+# 검증
+grep -c '"status": "completed"' tasks/plan003-expenses-redesign/index.json   # = 6 (top + 5 phases)
+grep '^\*\*Status\*\*:' tasks/plan003-expenses-redesign/phase-05.md           # = "**Status**: completed"
 ```
 
 이 phase 의 모든 산출물 (status 변경 + 검증 grep 출력) 은 단일 commit 으로 묶음.
@@ -87,4 +102,4 @@ grep '^\*\*Status\*\*:' tasks/plan003-expenses-redesign/phase-05.md   # = "**Sta
 | 리스크 | 완화 |
 |---|---|
 | 검증 grep false positive (주석 안 문자열) | JSX 태그 패턴 / 라인 시작 앵커 사용 |
-| macOS BSD `sed -i ''` vs Linux GNU `sed -i` | 본 plan macOS 환경 가정 (fos-blog 동일) |
+| BSD vs GNU sed 환경 차이 | node 기반 스크립트로 통일 (cross-platform) |
