@@ -302,3 +302,18 @@
   - `onWeekNumberClick/onDayKey*/onDayPointer*/onDayTouch*` → 커스텀 `WeekNumber`/`DayButton` 컴포넌트
 - **적용 범위**: `package.json`, `src/components/ui/calendar.tsx`, `src/components/dashboard/CalendarView.tsx`.
 
+---
+
+## ADR-F19: TypeScript 5.9 → 6.0 메이저 이전 + breaking 대응 패턴 (2026-05-11)
+
+- **결정**: TypeScript 컴파일러를 `^5` 에서 `^6` 메이저로 이전. release note 의 stricter inference / lib.d.ts 변경 / decorator 표준 채택 등으로 발생하는 type 에러를 plan008 의 각 phase 에서 카테고리별 패턴 적용으로 일괄 수정.
+- **맥락**: PR #179 (Dependabot) 가 단순 dep bump 만 제안 — typescript 메이저는 전체 `.ts/.tsx` 컴파일에 영향이라 tsc 실측 후 에러 카테고리 식별 필수. ky/react-day-picker (단일 파일) 대비 영향 면적 큼. 미루면 보안/성능 개선 누적 손실 + msw·jest·eslint-config-next 등 peer dep 가 ts6 로 먼저 옮겨가면 빌드 분리 위험.
+- **대안 기각**:
+  - ts5 stick: 보안/유지보수 + 신 inference 혜택 미수용. peer dep 호환 점진 분리 위험.
+  - Dependabot PR #179 그대로 머지: tsc 에러 무대응으로 빌드 회귀.
+- **트레이드오프**: 메이저 dep bump 의 첫 번째 적용. 발견 에러를 단순 fix 로 처리 못 하는 케이스 (예: inference 변경으로 라이브러리 측 타입 깨짐) 는 별도 plan 으로 분리.
+- **breaking 대응 패턴 (실측 후 채움)**:
+  - plan008 phase-01 의 release note fetch + tsc 실측 결과를 본 ADR 본문에 카테고리별 1~2줄로 추가 (lib.d.ts 변경 / inference 변경 / decorator / 기타).
+  - 향후 ts7+ 이전 시 본 ADR 참조점.
+- **적용 범위**: `package.json`, `tsconfig.json`, src/ 전체 (해당 파일만 fix).
+
