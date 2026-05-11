@@ -55,7 +55,7 @@
   --shadow-popover: 0 8px 24px -8px rgb(15 23 42 / 0.12), 0 2px 6px -2px rgb(15 23 42 / 0.06);
   --shadow-modal:   0 24px 48px -16px rgb(15 23 42 / 0.18), 0 8px 16px -8px rgb(15 23 42 / 0.10);
   --shadow-fab:     0 6px 20px -4px oklch(0.640 0.140 188 / 0.45),
-                    0 2px 6px -2px rgb(0 0 0 / 0.12);
+                    0 2px 6px -2px rgb(15 23 42 / 0.10);
 
   /* ── font (mono only — sans/num from next/font) ─ */
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", monospace;
