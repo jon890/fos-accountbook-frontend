@@ -11,7 +11,23 @@ import { auth } from "@/lib/server/auth";
 import { redirect } from "next/navigation";
 import { AnalyticsClient } from "./_components/AnalyticsClient";
 
-export default async function AnalyticsPage() {
+import type { AnalyticsPeriod } from "@/types/analytics";
+
+interface AnalyticsSearchParams {
+  period?: string;
+}
+
+function parsePeriod(raw: string | undefined): AnalyticsPeriod {
+  return raw === "m3" || raw === "m6" || raw === "y1" ? raw : "m1";
+}
+
+export default async function AnalyticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<AnalyticsSearchParams>;
+}) {
+  const resolved = await searchParams;
+  const period = parsePeriod(resolved.period);
   const session = await auth();
   if (!session) redirect("/auth/signin");
 
@@ -40,6 +56,7 @@ export default async function AnalyticsPage() {
       initialDailyStats={dailyResult.success ? dailyResult.data : []}
       initialExpenses={expensesResult.success ? expensesResult.data.items : []}
       familyUuid={familyUuid}
+      period={period}
     />
   );
 }

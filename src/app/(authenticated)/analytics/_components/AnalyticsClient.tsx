@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { startTransition, useState, useMemo } from "react";
 import type { DailyBarChartData } from "./DailyBarChart";
+import { AnalyticsPeriodToggle } from "./AnalyticsPeriodToggle";
+import type { AnalyticsPeriod } from "@/types/analytics";
 
 const DailyBarChart = dynamic(
   () => import("./DailyBarChart").then((m) => m.DailyBarChart),
@@ -28,6 +30,7 @@ interface AnalyticsClientProps {
   initialDailyStats: DailyTransactionSummary[];
   initialExpenses: Expense[];
   familyUuid: string;
+  period: AnalyticsPeriod;
 }
 
 interface CategoryStat {
@@ -59,6 +62,7 @@ export function AnalyticsClient({
   initialDailyStats,
   initialExpenses,
   familyUuid,
+  period,
 }: AnalyticsClientProps) {
   const [year, setYear] = useState(initialYear);
   const [month, setMonth] = useState(initialMonth);
@@ -181,9 +185,12 @@ export function AnalyticsClient({
 
   return (
     <div className={`space-y-4 transition-opacity duration-200 ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
-      {/* 헤더: 월 선택기 */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold text-gray-900">분석</h1>
+      {/* 헤더: 기간 토글 + 월 선택기 */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-3">
+          <h1 className="text-lg font-bold text-fg">분석</h1>
+          <AnalyticsPeriodToggle period={period} />
+        </div>
         <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-100 shadow-sm px-1 py-1">
           <button
             onClick={() => handleMonthChange("prev")}
