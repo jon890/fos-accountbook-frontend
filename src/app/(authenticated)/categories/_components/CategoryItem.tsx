@@ -15,7 +15,7 @@ interface CategoryItemProps {
 function withAlpha(color: string | undefined, a: number): string {
   if (!color) return `oklch(0.510 0.110 188 / ${a})`;
   if (color.startsWith("oklch(")) {
-    return color.replace(/\)$/, ` / ${a})`);
+    return color.replace(/(\s*\/\s*[\d.]+)?\)$/, ` / ${a})`);
   }
   // hex fallback: append 2-digit hex alpha (e.g. 0.16 → "29")
   const hex = Math.round(a * 255).toString(16).padStart(2, "0");

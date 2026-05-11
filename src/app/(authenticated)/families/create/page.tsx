@@ -92,7 +92,7 @@ export default function CreateFamilyPage() {
                   <SegmentedToggle
                     options={FAMILY_TYPE_OPTIONS}
                     value={familyType}
-                    onChange={(v) => setFamilyType(v as FamilyType)}
+                    onChange={(v) => setFamilyType(v)}
                     disabled={isLoading}
                     ariaLabel="가족 타입 선택"
                   />
