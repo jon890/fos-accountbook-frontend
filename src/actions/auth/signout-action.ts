@@ -39,5 +39,5 @@ export async function signOutAction(): Promise<void> {
   });
 
   // 3. NextAuth signOut 호출 (세션 무효화 + 로그인 페이지로 리다이렉트)
-  await signOut({ redirectTo: "/auth/signin" });
+  await signOut({ redirectTo: "/auth/signout" });
 }
