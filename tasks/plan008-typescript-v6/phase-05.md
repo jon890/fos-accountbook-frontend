@@ -1,7 +1,7 @@
 # Phase 05 — 통합 검증 + legacy 잔재 grep + completed 마킹
 
 **Model**: haiku
-**Status**: pending
+**Status**: completed
 **Goal**: phase 01~04 산출물 통합 검증, typescript 5.x 잔재 0건 증명, `index.json` status `completed` 마킹.
 
 ## Context (자기완결)

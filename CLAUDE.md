@@ -56,7 +56,7 @@ Claude Code가 항상 따라야 할 규칙과 참조 문서 포인터.
 
 ## 기술 스택
 
-Next.js 16 (App Router) · TypeScript 5 (strict) · Tailwind CSS v4 · Radix UI + Shadcn · NextAuth v5 · pnpm 10 · Jest + Testing Library
+Next.js 16 (App Router) · TypeScript 6 (strict) · Tailwind CSS v4 · Radix UI + Shadcn · NextAuth v5 · pnpm 10 · Jest + Testing Library
 
 ---
 
