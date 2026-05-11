@@ -2,7 +2,8 @@
  * Analytics 관련 타입
  */
 
-export type AnalyticsPeriod = "m1" | "m3" | "m6" | "y1";
+export const ANALYTICS_PERIODS = ["m1", "m3", "m6", "y1"] as const;
+export type AnalyticsPeriod = (typeof ANALYTICS_PERIODS)[number];
 
 export interface MonthlyTrendPoint {
   year: number;

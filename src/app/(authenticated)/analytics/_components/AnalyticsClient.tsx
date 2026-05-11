@@ -138,20 +138,20 @@ export function AnalyticsClient({
           <h1 className="text-lg font-bold text-fg">분석</h1>
           <AnalyticsPeriodToggle period={period} />
         </div>
-        <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-100 shadow-sm px-1 py-1">
+        <div className="flex items-center gap-2 bg-bg-elev rounded-xl border border-border shadow-[var(--shadow-subtle)] px-1 py-1">
           <button
             onClick={() => handleMonthChange("prev")}
-            className="p-1.5 rounded-lg hover:bg-gray-50 transition-colors text-gray-500 hover:text-gray-800"
+            className="p-1.5 rounded-lg hover:bg-bg-muted transition-colors text-fg-muted hover:text-fg"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-sm font-semibold text-gray-800 min-w-[72px] text-center">
+          <span className="text-sm font-semibold text-fg min-w-[72px] text-center">
             {year}년 {MONTH_NAMES[month - 1]}
           </span>
           <button
             onClick={() => handleMonthChange("next")}
             disabled={isNextDisabled}
-            className="p-1.5 rounded-lg hover:bg-gray-50 transition-colors text-gray-500 hover:text-gray-800 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-lg hover:bg-bg-muted transition-colors text-fg-muted hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

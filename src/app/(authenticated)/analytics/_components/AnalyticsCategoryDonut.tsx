@@ -10,7 +10,7 @@ interface AnalyticsCategoryDonutProps {
   topN?: number;
 }
 
-const EMPTY_DONUT_FILL = "var(--color-neutral-200)";
+const EMPTY_DONUT_FILL = "var(--color-bg-muted)";
 const EMPTY_DONUT = [{ value: 1, fill: EMPTY_DONUT_FILL }];
 
 const MONTH_LABEL = ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"];

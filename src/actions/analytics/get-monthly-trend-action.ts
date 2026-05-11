@@ -12,10 +12,10 @@ import {
   getSelectedFamilyUuid,
 } from "@/lib/server/auth/auth-helpers";
 import { getMonthlyTrend } from "@/services/analytics/analytics-service";
-import type { AnalyticsPeriod, MonthlyTrend } from "@/types/analytics";
+import { ANALYTICS_PERIODS, type AnalyticsPeriod, type MonthlyTrend } from "@/types/analytics";
 
 const schema = z.object({
-  period: z.enum(["m1", "m3", "m6", "y1"]),
+  period: z.enum(ANALYTICS_PERIODS),
   year: z.number().int().min(2000).max(2100),
   month: z.number().int().min(1).max(12),
 });

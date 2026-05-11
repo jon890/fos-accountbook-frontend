@@ -13,14 +13,16 @@ import { auth } from "@/lib/server/auth";
 import { redirect } from "next/navigation";
 import { AnalyticsClient } from "./_components/AnalyticsClient";
 
-import type { AnalyticsPeriod } from "@/types/analytics";
+import { ANALYTICS_PERIODS, type AnalyticsPeriod } from "@/types/analytics";
 
 interface AnalyticsSearchParams {
   period?: string;
 }
 
 function parsePeriod(raw: string | undefined): AnalyticsPeriod {
-  return raw === "m3" || raw === "m6" || raw === "y1" ? raw : "m1";
+  return (ANALYTICS_PERIODS as readonly string[]).includes(raw ?? "")
+    ? (raw as AnalyticsPeriod)
+    : "m1";
 }
 
 export default async function AnalyticsPage({
