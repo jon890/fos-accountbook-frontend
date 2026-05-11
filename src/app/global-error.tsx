@@ -2,12 +2,18 @@
 
 import { ErrorBoundaryCard } from "@/components/error/ErrorBoundaryCard";
 
-export default function AuthenticatedError({
+export default function GlobalError({
   error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  return <ErrorBoundaryCard error={error} reset={reset} homeHref="/dashboard" />;
+  return (
+    <html lang="ko">
+      <body>
+        <ErrorBoundaryCard error={error} reset={reset} />
+      </body>
+    </html>
+  );
 }

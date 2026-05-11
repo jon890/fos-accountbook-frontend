@@ -298,4 +298,25 @@
       transform: translateY(-8px);
     }
   }
+
+  @keyframes ab-shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+  }
+
+  .ab-skel {
+    background-color: var(--color-bg-muted);
+    background-image: linear-gradient(
+      90deg,
+      transparent 0,
+      color-mix(in oklch, var(--color-bg-muted) 65%, oklch(100% 0 0)) 50%,
+      transparent 100%
+    );
+    background-size: 200px 100%;
+    background-repeat: no-repeat;
+    animation: ab-shimmer 1.4s ease-in-out infinite;
+    width: var(--skel-w, 100%);
+    height: var(--skel-h, 12px);
+    border-radius: var(--skel-r, 8px);
+  }
 }

@@ -9,8 +9,8 @@
 ### 1. 통합 빌드/린트/테스트
 
 ```bash
-# cwd: /Users/nhn/personal/fos-accountbook
-# branch: plan/012-empty-error-loading-states
+# cwd: /Users/nhn/personal/fos-accountbook/.claude/worktrees/plan012
+# branch: feat/plan012-empty-error-loading-states
 
 pnpm lint
 pnpm tsc --noEmit
@@ -48,7 +48,9 @@ for f in src/app/error.tsx src/app/global-error.tsx src/app/\(authenticated\)/er
 done
 ```
 
-### 4. 수동 smoke (사용자)
+### 4. index.json completed 마킹 + 수동 smoke 시나리오 표
+
+수동 smoke 표 (사용자 PR 머지 전 확인):
 
 | 시나리오 | 기대 |
 |---|---|
@@ -58,18 +60,7 @@ done
 | `/auth/signin` 진입 (loading.tsx 없음) | 즉시 표시 (이상 없음) |
 | Dark mode + 위 시나리오 | 모두 자연스러운 톤 |
 
-### 5. index.json completed 마킹
-
-```bash
-# 모든 phase status="completed" + 최상위 status="completed" + completed_at
-```
-
-### 6. 최종 커밋
-
-```bash
-git add tasks/plan012-empty-error-loading-states/index.json
-git commit -m "chore(plan012): mark completed"
-```
+index.json 의 모든 phase `status="completed"` + 최상위 `status="completed"` + `completed_at="2026-05-11"` 추가. team-lead 가 별도 최종 커밋 (`chore(plan012): mark completed`) 으로 처리.
 
 ## Out of Scope
 

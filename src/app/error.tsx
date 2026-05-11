@@ -2,12 +2,12 @@
 
 import { ErrorBoundaryCard } from "@/components/error/ErrorBoundaryCard";
 
-export default function AuthenticatedError({
+export default function RootError({
   error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  return <ErrorBoundaryCard error={error} reset={reset} homeHref="/dashboard" />;
+  return <ErrorBoundaryCard error={error} reset={reset} />;
 }

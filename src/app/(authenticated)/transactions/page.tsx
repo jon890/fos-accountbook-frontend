@@ -132,6 +132,9 @@ export default async function TransactionsPage({
               endDate={endDate}
               page={page}
               limit={limit}
+              q={resolvedSearchParams.q}
+              amountMin={resolvedSearchParams.amountMin}
+              amountMax={resolvedSearchParams.amountMax}
             />
           </Suspense>
         </div>
@@ -154,6 +157,9 @@ export default async function TransactionsPage({
             endDate={endDate}
             page={page}
             limit={limit}
+            q={resolvedSearchParams.q}
+            amountMin={resolvedSearchParams.amountMin}
+            amountMax={resolvedSearchParams.amountMax}
           />
         </Suspense>
       }

@@ -1,6 +1,8 @@
 import { getExpensesAction } from "@/actions/expense/get-expenses-action";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/empty/EmptyState";
 import type { CategoryResponse } from "@/types/category";
+import { Inbox } from "lucide-react";
 import { ExpenseListClient } from "./ExpenseListClient";
 import { ExpensePagination } from "./ExpensePagination";
 
@@ -12,6 +14,9 @@ interface ExpenseListProps {
   endDate?: string;
   page?: number;
   limit?: number;
+  q?: string;
+  amountMin?: string;
+  amountMax?: string;
 }
 
 export async function ExpenseList({
@@ -22,7 +27,11 @@ export async function ExpenseList({
   endDate,
   page = 1,
   limit = 25,
+  q,
+  amountMin,
+  amountMax,
 }: ExpenseListProps) {
+  const hasFilter = !!(categoryId || q || amountMin || amountMax);
   // Server Action으로 지출 목록 조회
   const result = await getExpensesAction({
     familyUuid: familyId,
@@ -52,15 +61,18 @@ export async function ExpenseList({
     currentPage,
   } = result.data;
 
-  if (expenses.length === 0) {
+  if (expenses.length === 0 && !hasFilter) {
+    // IncomeList 와 동일 카피 — 도메인 wording 만 다를 수 있으나 현재 plan 에선 통일
     return (
-      <Card className="border-0 bg-white/80 backdrop-blur-sm shadow-xl">
-        <CardContent className="py-10 md:py-16">
-          <p className="text-center text-gray-500 text-sm md:text-base">
-            아직 지출 내역이 없습니다. 첫 번째 지출을 추가해보세요!
-          </p>
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={Inbox}
+        title="아직 거래가 없어요"
+        description={"지출이나 수입을 추가하면\n여기에 표시돼요."}
+        tip={{
+          title: "팁",
+          body: "가족 누구나 입력할 수 있어요. 카드 청구서 도착 전에\n그때 그때 짧게 적어두면 편해요.",
+        }}
+      />
     );
   }
 
