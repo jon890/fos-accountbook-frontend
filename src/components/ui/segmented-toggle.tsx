@@ -1,6 +1,5 @@
 "use client";
 
-import { useId } from "react";
 import { cn } from "@/lib/client/utils";
 
 interface SegmentedToggleProps<T extends string> {
@@ -18,8 +17,6 @@ export function SegmentedToggle<T extends string>({
   disabled,
   ariaLabel,
 }: SegmentedToggleProps<T>) {
-  const groupId = useId();
-
   const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     if (disabled) return;
     const idx = options.findIndex((opt) => opt.key === value);
@@ -48,7 +45,6 @@ export function SegmentedToggle<T extends string>({
             type="button"
             role="tab"
             aria-selected={isActive}
-            aria-controls={`${groupId}-${opt.key}`}
             tabIndex={isActive ? 0 : -1}
             disabled={disabled}
             onClick={() => onChange(opt.key)}

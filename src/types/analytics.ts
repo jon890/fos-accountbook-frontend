@@ -25,7 +25,7 @@ export interface CategoryWithDelta {
   deltaPercent: number | null; // 전월 대비 %, null = 직전 달 데이터 없음
 }
 
-// service `getCategoryBreakdownWithDelta` 의 반환 wrapper (phase 3 UI 가 직접 사용)
+// `getCategoryBreakdownWithDelta` 의 반환 형태
 export interface CategoryBreakdownWithDelta {
   year: number;
   month: number;
