@@ -54,28 +54,33 @@
 
 ---
 
-## 3. 지출 등록 플로우
+## 3. 거래 등록 플로우 (plan014 통합)
+
+ADR-F21 에 따라 6 진입점 (Dashboard QuickActions / BottomNav FAB / Transactions 의 지출·수입·고정지출 탭 / Settings 고정지출) 이 동일한 `AddTransactionDialog` 호출.
 
 ```
-[트랜잭션 페이지 또는 대시보드]
+[6 진입점 — defaultType 만 다름]
     │
-    └─ "+ 지출 추가" 버튼 (BottomNav FAB / QuickActions)
-            └─ AddExpenseDialog (responsive: mobile Sheet / md+ Dialog 720px)
-                    │
-                    ├─ Segmented toggle: 지출 / 수입 (gradient-expense / gradient-income)
-                    │
-                    ├─ ExpenseFormFields
-                    │   ├─ AmountInput (₩ + 56/64px num, 빠른 추가 칩 +1k/+5k/+10k, md+ 추가 +50k)
-                    │   ├─ CategoryGrid (5×2 mobile / 10×1 desktop, role=radiogroup, --color-cat-*-bg/-fg 톤)
-                    │   ├─ Date input (type="date", default: 오늘)
-                    │   └─ Description input (name="description", FormData key 보존)
-                    │
-                    └─ 저장 → createExpenseAction() / createIncomeAction()
-                            ├─ requireAuthOrRedirect()
-                            ├─ Zod 검증
-                            └─ create* → POST /families/{uuid}/{expenses|incomes}
-                                    └─ revalidatePath → toast 성공 메시지
+    └─ AddTransactionDialog (responsive: mobile Sheet bottom / md+ Dialog 720px)
+            │
+            ├─ Segmented 3 토글: 지출 / 수입 / 고정지출
+            │       (gradient-expense / gradient-income / gradient-budget)
+            │
+            ├─ TransactionFormFields (type 분기)
+            │   ├─ AmountInput (₩ + 56/64px num, 빠른 추가 칩 +1k/+5k/+10k, md+ +50k)
+            │   ├─ CategoryGrid (5×2 mobile / 10×1 desktop, role=radiogroup, --color-cat-*-bg/-fg 톤)
+            │   ├─ Description input (메모, name="description")
+            │   ├─ [expense/income 일 때] Date input (type="date", default: 오늘)
+            │   └─ [recurring 일 때]  Name input + DayOfMonth (1~28)
+            │
+            └─ 저장 → type 분기
+                    ├─ expense  → createExpenseAction()         → POST /families/{uuid}/expenses
+                    ├─ income   → createIncomeAction()          → POST /families/{uuid}/incomes
+                    └─ recurring→ createRecurringExpenseAction()→ POST /families/{uuid}/recurring-expenses
+                            └─ revalidatePath → toast 성공 메시지
 ```
+
+type 전환 시: amount / category / description 은 유지, type-specific 필드 (date vs name+dayOfMonth) 만 초기화.
 
 ---
 
