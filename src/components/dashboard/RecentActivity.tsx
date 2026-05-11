@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { TransactionRow } from "@/components/transactions/TransactionRow";
 import type { RecentExpense } from "@/types/dashboard";
-import { Wallet, Plus } from "lucide-react";
+import { Inbox } from "lucide-react";
 import Link from "next/link";
 
 interface RecentActivityProps {
@@ -23,19 +23,11 @@ export function RecentActivity({ expenses }: RecentActivityProps) {
       <div className="px-4 md:px-6 pb-4 md:pb-5">
         {!hasExpenses ? (
           <div className="text-center py-8">
-            <div className="size-14 bg-bg-muted rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Wallet className="size-7 text-fg-subtle" />
+            <div className="size-8 rounded-full bg-brand-50 flex items-center justify-center mx-auto mb-3">
+              <Inbox className="size-4 text-brand-500" />
             </div>
-            <p className="text-sm font-semibold text-fg mb-1">
-              아직 지출 내역이 없습니다
-            </p>
-            <p className="text-xs text-fg-muted mb-4">첫 번째 지출을 추가해보세요!</p>
-            <Link href="/expenses">
-              <Button className="gradient-primary text-white rounded-xl text-sm px-6 hover:opacity-90">
-                <Plus className="size-4 mr-1.5" />
-                첫 지출 추가하기
-              </Button>
-            </Link>
+            <p className="text-sm font-semibold text-fg mb-1">아직 거래가 없어요</p>
+            <p className="text-xs text-fg-muted">지출이나 수입을 추가하면 여기에 표시돼요.</p>
           </div>
         ) : (
           <>

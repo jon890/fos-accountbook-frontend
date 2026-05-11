@@ -55,9 +55,13 @@ export function CategoryDistribution({ breakdown }: CategoryDistributionProps) {
       </h3>
 
       {isEmpty ? (
-        <p className="text-sm text-fg-muted text-center py-8">
-          이번 달 지출 없음
-        </p>
+        <div className="text-center py-8">
+          <div className="size-8 rounded-full bg-brand-50 flex items-center justify-center mx-auto mb-3">
+            <span className="text-base">📊</span>
+          </div>
+          <p className="text-sm font-semibold text-fg mb-1">이번 달 지출이 아직 없어요</p>
+          <p className="text-xs text-fg-muted">지출을 추가하면 카테고리별로 분포가 표시돼요.</p>
+        </div>
       ) : (
         <div className="flex gap-4 md:gap-6 items-start">
           {/* Donut */}
