@@ -13,10 +13,9 @@
 - shadcn 컴포넌트:
   - `src/components/ui/sheet.tsx` (이미 사용 중)
   - `src/components/ui/dialog.tsx` (이미 사용 중)
-- 진입점:
-  - `src/components/layout/BottomNavigation.tsx:97` — FAB → AddExpenseDialog
-  - `src/components/dashboard/QuickActions.tsx:47` — 버튼 → AddExpenseDialog
-  - `src/app/(authenticated)/transactions/_components/ExpenseTabContent.tsx` — 페이지 내 추가
+- 진입점 (실측 — 2곳):
+  - `src/components/layout/BottomNavigation.tsx:98` — FAB → AddExpenseDialog
+  - `src/components/dashboard/QuickActions.tsx:122` — 버튼 → AddExpenseDialog
 - 모든 진입점이 `AddExpenseDialog` 호출 → wrapper 한 곳만 고치면 전파.
 
 ## 작업 항목
@@ -73,17 +72,17 @@ grep -rn "useMediaQuery\|useBreakpoint\|matchMedia" src/hooks src/lib 2>/dev/nul
 
 또는 CSS-only 분기 (`md:hidden` / `hidden md:block` 두 wrapper 모두 렌더) 가능하나 — 두 트리 모두 mount 되면 form state 가 둘로 나뉨. JS hook 분기가 단순.
 
-### 3. 진입점 검증 (변경 0)
+### 3. 진입점 검증 (변경 0 — 2곳 실측)
 
 ```bash
 # cwd: /Users/nhn/personal/fos-accountbook
 # branch: plan/005-add-expense-redesign
 
-# 진입점 3곳에서 AddExpenseDialog 호출 그대로
-grep -rn 'AddExpenseDialog' src/components/layout/ src/components/dashboard/QuickActions.tsx src/app/\(authenticated\)/transactions/ 2>/dev/null
+# 진입점 2곳에서 AddExpenseDialog 호출 그대로
+grep -rn 'AddExpenseDialog' src/components/layout/BottomNavigation.tsx src/components/dashboard/QuickActions.tsx 2>/dev/null | wc -l   # >= 2 (각 파일 import + 사용)
 ```
 
-각 호출 site 변경 0. props (open/onOpenChange/categories) 시그니처 동일.
+각 호출 site 변경 0. props (open/onOpenChange/categories/familyUuid) 시그니처 동일.
 
 ### 4. EditExpenseDialog 도 동일 패턴
 
@@ -128,11 +127,12 @@ grep -nE 'from ["\x27]@/components/ui/sheet|from ["\x27]@/components/ui/dialog' 
 - BottomNavigation FAB 디자인 변경 — 별도 plan
 - /add 전용 라우트 신설 (사용자 결정으로 X)
 - ExpenseFilters / Recurring sheet 의 responsive 패턴 — 별도 plan
+- viewport 회전 중 form state 보존 — 빈도 낮음, lift state 비용 큰 변경. 사용자 보고 빈도 따라 차후 plan 분리
 
 ## Risks
 
 | 리스크 | 완화 |
 |---|---|
-| viewport 전환 시 폼 state 손실 (Dialog → Sheet 또는 반대) | 부모 컴포넌트에서 form state 관리 + AddExpenseDialog 는 단순 wrapper. open prop 만 부모가 통제. 단 phase 03 의 form state 위치 점검 — 폼 컴포넌트 내부면 wrapper 교체 시 unmount 됨 |
+| viewport 전환 시 폼 state 손실 (Dialog → Sheet 또는 반대) | **Out of Scope 결정** — viewport 회전 중 폼 reset 은 허용 (실사용 빈도 낮음, lift state 시 prop drill 4개 + AddExpenseDialog API 복잡화). 모바일 회전 / 데스크톱 resize 가 768px breakpoint 를 넘는 경우만 발생. 차후 사용자 보고 빈도 보고 plan 분리 검토 |
 | `useMediaQuery` SSR hydration mismatch | 초기값 false (모바일 가정) + `useEffect` 로 mount 후 갱신. 첫 렌더 mismatch 가능성 있으면 `suppressHydrationWarning` 명시 또는 `useSyncExternalStore` 패턴 |
 | Sheet `h-[100dvh]` 가 iOS Safari 의 동적 viewport 와 충돌 | `100dvh` 가 표준. 폴백 `100vh` 하드코딩 회피 — 표준 단위 사용 |

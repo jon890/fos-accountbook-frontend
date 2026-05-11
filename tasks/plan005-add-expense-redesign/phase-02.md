@@ -17,6 +17,20 @@
 
 ## 작업 항목
 
+### 0. `category-tone.ts` 에 `getCategoryToneKey` export 추가 (선행 — 필수)
+
+현재 `src/lib/utils/category-tone.ts` 는 `getCategoryTone(name): CategoryTone`, `getCategoryToneStyle(name)`, `CategoryToneKey` 타입만 export. **키 추출 헬퍼 부재** — 본 phase 의 `CategoryGrid` 가 정적 클래스 record 를 키로 lookup 하려면 키 자체가 필요.
+
+추가:
+
+```ts
+export function getCategoryToneKey(name: string): CategoryToneKey {
+  return NAME_TO_KEY[name.trim()] ?? "etc";
+}
+```
+
+(기존 `getCategoryTone` 내부 로직과 동일 — 한 줄 export 만 추가)
+
 ### 1. `CategoryGrid` 신규 컴포넌트
 
 `src/components/expenses/forms/CategoryGrid.tsx`. Props:
@@ -33,10 +47,31 @@ interface CategoryGridProps {
 Layout:
 - container `grid gap-2 grid-cols-5 md:grid-cols-10`
 - cell: 32px (mobile) / 28px (desktop) icon + 11px label
-- 선택 시: `bg-[var(--color-cat-{key}-bg)]` + `border-[var(--color-cat-{key}-fg)]` (1.5px) + label `text-[var(--color-cat-{key}-fg)]` `font-bold`
+- 선택 시: 정적 record 의 톤 className 적용
 - 비선택: `bg-bg` + `border-border` + label `text-fg-muted` `font-medium`
 
-`category-tone.ts` 의 `getCategoryToneKey(category.name)` 으로 톤 키 추출. 매칭 실패 시 `etc` 톤 (plan002 기본 동작).
+`category-tone.ts` 의 `getCategoryToneKey(category.name)` 으로 톤 키 추출 (위 §0 에서 추가됨). 매칭 실패 시 `etc` 톤.
+
+**Tailwind v4 dynamic class 회피 — 정적 record 필수**:
+
+```ts
+import type { CategoryToneKey } from "@/lib/utils/category-tone";
+
+const TONE_CLASS: Record<CategoryToneKey, { bg: string; border: string; text: string }> = {
+  food:      { bg: "bg-[var(--color-cat-food-bg)]",      border: "border-[var(--color-cat-food-fg)]",      text: "text-[var(--color-cat-food-fg)]" },
+  cafe:      { bg: "bg-[var(--color-cat-cafe-bg)]",      border: "border-[var(--color-cat-cafe-fg)]",      text: "text-[var(--color-cat-cafe-fg)]" },
+  transit:   { bg: "bg-[var(--color-cat-transit-bg)]",   border: "border-[var(--color-cat-transit-fg)]",   text: "text-[var(--color-cat-transit-fg)]" },
+  telecom:   { bg: "bg-[var(--color-cat-telecom-bg)]",   border: "border-[var(--color-cat-telecom-fg)]",   text: "text-[var(--color-cat-telecom-fg)]" },
+  home:      { bg: "bg-[var(--color-cat-home-bg)]",      border: "border-[var(--color-cat-home-fg)]",      text: "text-[var(--color-cat-home-fg)]" },
+  shopping:  { bg: "bg-[var(--color-cat-shopping-bg)]",  border: "border-[var(--color-cat-shopping-fg)]",  text: "text-[var(--color-cat-shopping-fg)]" },
+  health:    { bg: "bg-[var(--color-cat-health-bg)]",    border: "border-[var(--color-cat-health-fg)]",    text: "text-[var(--color-cat-health-fg)]" },
+  leisure:   { bg: "bg-[var(--color-cat-leisure-bg)]",   border: "border-[var(--color-cat-leisure-fg)]",   text: "text-[var(--color-cat-leisure-fg)]" },
+  education: { bg: "bg-[var(--color-cat-education-bg)]", border: "border-[var(--color-cat-education-fg)]", text: "text-[var(--color-cat-education-fg)]" },
+  etc:       { bg: "bg-[var(--color-cat-etc-bg)]",       border: "border-[var(--color-cat-etc-fg)]",       text: "text-[var(--color-cat-etc-fg)]" },
+};
+```
+
+동적 보간 (`bg-[var(--color-cat-${key}-bg)]`) 절대 금지 — Tailwind 빌드 시 누락. **사전 정의된 10 키만 사용**.
 
 ### 2. 아이콘 매핑
 

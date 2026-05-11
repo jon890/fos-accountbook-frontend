@@ -58,21 +58,22 @@
 ```
 [트랜잭션 페이지 또는 대시보드]
     │
-    └─ "+ 지출 추가" 버튼
-            └─ AddExpenseDialog (Sheet) 열림
+    └─ "+ 지출 추가" 버튼 (BottomNav FAB / QuickActions)
+            └─ AddExpenseDialog (responsive: mobile Sheet / md+ Dialog 720px)
                     │
-                    ├─ 카테고리 선택 (드롭다운)
-                    ├─ 금액 입력 (숫자)
-                    ├─ 날짜 선택 (DatePicker, default: 오늘)
-                    └─ 메모 입력 (선택)
-                            │
-                            └─ 저장 → createExpenseAction()
-                                    ├─ requireAuthOrRedirect()
-                                    ├─ getSelectedFamilyUuid()
-                                    ├─ Zod 검증
-                                    └─ createExpense() → POST /families/{uuid}/expenses
-                                            └─ revalidatePath 3곳
-                                                    └─ toast 성공 메시지
+                    ├─ Segmented toggle: 지출 / 수입 (gradient-expense / gradient-income)
+                    │
+                    ├─ ExpenseFormFields
+                    │   ├─ AmountInput (₩ + 56/64px num, 빠른 추가 칩 +1k/+5k/+10k, md+ 추가 +50k)
+                    │   ├─ CategoryGrid (5×2 mobile / 10×1 desktop, role=radiogroup, --color-cat-*-bg/-fg 톤)
+                    │   ├─ Date input (type="date", default: 오늘)
+                    │   └─ Description input (name="description", FormData key 보존)
+                    │
+                    └─ 저장 → createExpenseAction() / createIncomeAction()
+                            ├─ requireAuthOrRedirect()
+                            ├─ Zod 검증
+                            └─ create* → POST /families/{uuid}/{expenses|incomes}
+                                    └─ revalidatePath → toast 성공 메시지
 ```
 
 ---

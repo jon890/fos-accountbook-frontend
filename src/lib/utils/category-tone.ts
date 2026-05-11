@@ -51,9 +51,12 @@ const NAME_TO_KEY: Record<string, CategoryToneKey> = {
   기타: "etc",
 };
 
+export function getCategoryToneKey(name: string): CategoryToneKey {
+  return NAME_TO_KEY[name.trim()] ?? "etc";
+}
+
 export function getCategoryTone(name: string): CategoryTone {
-  const key = NAME_TO_KEY[name.trim()] ?? "etc";
-  return TONE_MAP[key];
+  return TONE_MAP[getCategoryToneKey(name)];
 }
 
 export function getCategoryToneStyle(name: string): { background: string; color: string } {
