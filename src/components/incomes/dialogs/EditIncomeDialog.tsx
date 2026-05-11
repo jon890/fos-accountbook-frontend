@@ -140,7 +140,7 @@ function EditIncomeDialogBody({
             <option value="">카테고리를 선택하세요</option>
             {categories.map((category) => (
               <option key={category.uuid} value={category.uuid}>
-                {category.icon} {category.name}
+                {category.icon ?? "🏷️"} {category.name}
               </option>
             ))}
           </select>

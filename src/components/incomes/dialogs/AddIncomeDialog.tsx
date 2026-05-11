@@ -37,7 +37,7 @@ const initialState: CreateIncomeFormState = {
 export function AddIncomeDialog({ open, onOpenChange }: AddIncomeDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-white">
+      <DialogContent className="sm:max-w-md bg-bg-elev">
         <DialogHeader>
           <DialogTitle>수입 추가</DialogTitle>
           <DialogDescription>새로운 수입 내역을 추가합니다</DialogDescription>
@@ -55,7 +55,6 @@ function AddIncomeDialogBody({
   onOpenChange: (open: boolean) => void;
 }) {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
-  const [familyUuid, setFamilyUuid] = useState<string>("");
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [state, formAction] = useActionState(createIncomeAction, initialState);
 
@@ -69,9 +68,6 @@ function AddIncomeDialogBody({
         if (cancelled) return;
         if (result.success) {
           setCategories(result.data);
-          if (result.data.length > 0) {
-            setFamilyUuid(result.data[0].familyUuid);
-          }
         } else {
           toast.error(result.error.message);
         }
@@ -98,8 +94,6 @@ function AddIncomeDialogBody({
 
   return (
     <form action={formAction} className="space-y-4">
-      <input type="hidden" name="familyUuid" value={familyUuid} />
-
       <div className="space-y-2">
         <Label htmlFor="amount">금액 *</Label>
         <div className="relative">
@@ -111,12 +105,12 @@ function AddIncomeDialogBody({
             className="text-right pr-8"
             required
           />
-          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">
+          <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-fg-muted">
             원
           </span>
         </div>
         {state.errors?.amount && (
-          <p className="text-sm text-red-500">{state.errors.amount[0]}</p>
+          <p className="text-sm text-destructive">{state.errors.amount[0]}</p>
         )}
       </div>
 
@@ -130,19 +124,19 @@ function AddIncomeDialogBody({
           <select
             id="categoryId"
             name="categoryId"
-            className="w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="w-full rounded-md border border-input bg-bg-elev px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             required
           >
             <option value="">카테고리를 선택하세요</option>
             {categories.map((category) => (
               <option key={category.uuid} value={category.uuid}>
-                {category.icon} {category.name}
+                {category.icon ?? "🏷️"} {category.name}
               </option>
             ))}
           </select>
         )}
         {state.errors?.categoryId && (
-          <p className="text-sm text-red-500">{state.errors.categoryId[0]}</p>
+          <p className="text-sm text-destructive">{state.errors.categoryId[0]}</p>
         )}
       </div>
 
@@ -156,7 +150,7 @@ function AddIncomeDialogBody({
           required
         />
         {state.errors?.date && (
-          <p className="text-sm text-red-500">{state.errors.date[0]}</p>
+          <p className="text-sm text-destructive">{state.errors.date[0]}</p>
         )}
       </div>
 
@@ -168,7 +162,7 @@ function AddIncomeDialogBody({
           placeholder="간단한 메모를 입력하세요 (선택사항)"
         />
         {state.errors?.description && (
-          <p className="text-sm text-red-500">{state.errors.description[0]}</p>
+          <p className="text-sm text-destructive">{state.errors.description[0]}</p>
         )}
       </div>
 

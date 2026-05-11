@@ -28,12 +28,7 @@ export async function createIncomeAction(
   try {
     await requireAuthOrRedirect();
 
-    let familyUuid = formData.get("familyUuid")?.toString();
-    if (!familyUuid) {
-      const selectedUuid = await getSelectedFamilyUuid();
-      familyUuid = selectedUuid || undefined;
-    }
-
+    const familyUuid = await getSelectedFamilyUuid();
     if (!familyUuid) {
       throw ActionError.familyNotSelected();
     }
