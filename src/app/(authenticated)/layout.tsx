@@ -22,7 +22,7 @@ export default async function AuthenticatedLayout({
 }: AuthenticatedLayoutProps) {
   const session = await auth();
   if (!session?.user) {
-    redirect("/auth/signin");
+    redirect("/");
   }
 
   const selectedFamilyUuid = await getSelectedFamilyUuid();
