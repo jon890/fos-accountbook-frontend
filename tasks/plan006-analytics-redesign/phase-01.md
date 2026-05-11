@@ -7,7 +7,7 @@
 ## Context (자기완결)
 
 - 현재 코드: `src/app/(authenticated)/analytics/_components/{AnalyticsClient,CategoryPieChart,DailyBarChart}.tsx`. service/action layer 미존재 (page.tsx 가 직접 처리하거나 dashboard action 재사용 추정 — 점검).
-- plan002 의 `getMonthlyCategoryBreakdownAction(year, month)` 가 존재 (ADR-F16) — 본 plan 재사용 + 직전 달 호출로 delta 계산.
+- plan002 의 service 함수 `getMonthlyCategoryBreakdown(familyUuid, year, month)` 가 `src/services/dashboard/dashboard-service.ts:85` 에 존재 (ADR-F16) — 본 plan 재사용 + 직전 달 호출로 delta 계산. Action 아니라 service 함수 직접 import (ADR-F04 위반 아님 — service → service).
 - handoff 가 요구하는 데이터:
   - 월별 합계 추이 (6~12 month: 기간 토글 m3/m6/y1)
   - 카테고리별 전월 대비 delta % (이번 달 + 직전 달 비교)
@@ -42,6 +42,15 @@ export interface CategoryWithDelta {
   percentage: number;
   deltaPercent: number | null;   // 전월 대비 %, null = 직전 달 데이터 없음
 }
+
+// service `getCategoryBreakdownWithDelta` 의 반환 wrapper (phase 3 UI 가 직접 사용)
+export interface CategoryBreakdownWithDelta {
+  year: number;
+  month: number;
+  totalExpense: number;
+  totalDelta: number | null;     // 전체 합계의 전월 대비 %, null = 직전 달 데이터 없음
+  items: CategoryWithDelta[];
+}
 ```
 
 ### 2. service `getMonthlyTrend` + `getCategoryBreakdownWithDelta`
@@ -49,7 +58,7 @@ export interface CategoryWithDelta {
 `src/services/analytics/analytics-service.ts` 신규:
 
 - `getMonthlyTrend(familyUuid, period)`: period 에 따라 시작 월 계산 (m1=1, m3=3, m6=6, y1=12). 각 월별 expenses fetch 후 합계 누적. 평균 계산.
-- `getCategoryBreakdownWithDelta(familyUuid, year, month)`: plan002 `getMonthlyCategoryBreakdown` 을 이번 달 + 직전 달 두 번 호출. 각 카테고리 uuid 매칭으로 delta % 계산 (`((cur - prev) / prev) * 100`). 직전 달 부재 시 deltaPercent=null.
+- `getCategoryBreakdownWithDelta(familyUuid, year, month): Promise<CategoryBreakdownWithDelta>`: plan002 `getMonthlyCategoryBreakdown` 을 이번 달 + 직전 달 두 번 호출. 각 카테고리 uuid 매칭으로 delta % 계산 (`((cur - prev) / prev) * 100`). 직전 달 부재 시 `deltaPercent: null`. 전체 합계의 `totalDelta` 도 동일 계산 (직전 달 totalExpense=0 시 null).
 
 ADR-F04: services 가 actions 호출 금지. 기존 expense service 재사용.
 
@@ -112,14 +121,14 @@ EOF
 
 issue URL 을 commit message 본문에 명시.
 
-### 5. service 단위 테스트
+### 5. service 단위 테스트 + verification
 
 `src/__tests__/services/analytics/`:
 - `getMonthlyTrend.test.ts` — m1/m3/m6/y1 각 기간별 점 개수 + 평균 검증, 빈 월 (expenses 0건) 처리
 - `getCategoryBreakdownWithDelta.test.ts` — 이번 달 only / 직전 달 only / 양쪽 있음 케이스, delta % 정확성, deltaPercent=null 케이스
 - ADR-F09 jest.mock 방식
 
-### 6. 자동 verification
+자동 verification:
 
 ```bash
 # cwd: /Users/nhn/personal/fos-accountbook

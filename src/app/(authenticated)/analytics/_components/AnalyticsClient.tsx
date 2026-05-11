@@ -6,20 +6,14 @@ import { getExpensesAction } from "@/actions/expense/get-expenses-action";
 import type { DailyTransactionSummary } from "@/actions/dashboard/get-monthly-daily-stats-action";
 import type { DashboardStats } from "@/types/dashboard";
 import type { Expense } from "@/types/expense";
-import { ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Wallet, BarChart2, PieChart as PieIcon } from "lucide-react";
+import { ChevronLeft, ChevronRight, TrendingDown, TrendingUp, Wallet } from "lucide-react";
 import { toast } from "sonner";
-import dynamic from "next/dynamic";
 import { startTransition, useState, useMemo } from "react";
-import type { DailyBarChartData } from "./DailyBarChart";
-
-const DailyBarChart = dynamic(
-  () => import("./DailyBarChart").then((m) => m.DailyBarChart),
-  { ssr: false }
-);
-const CategoryPieChart = dynamic(
-  () => import("./CategoryPieChart").then((m) => m.CategoryPieChart),
-  { ssr: false }
-);
+import { AnalyticsPeriodToggle } from "./AnalyticsPeriodToggle";
+import { AnalyticsCategoryDonut } from "./AnalyticsCategoryDonut";
+import { MonthlyTrendBar } from "./MonthlyTrendBar";
+import { CategoryDetailList } from "./CategoryDetailList";
+import type { AnalyticsPeriod, CategoryBreakdownWithDelta, MonthlyTrend } from "@/types/analytics";
 
 interface AnalyticsClientProps {
   initialYear: number;
@@ -28,16 +22,9 @@ interface AnalyticsClientProps {
   initialDailyStats: DailyTransactionSummary[];
   initialExpenses: Expense[];
   familyUuid: string;
-}
-
-interface CategoryStat {
-  uuid: string;
-  name: string;
-  icon: string;
-  color: string;
-  total: number;
-  count: number;
-  percentage: number;
+  period: AnalyticsPeriod;
+  initialBreakdown: CategoryBreakdownWithDelta | null;
+  initialTrend: MonthlyTrend | null;
 }
 
 function formatAmount(amount: number) {
@@ -59,6 +46,9 @@ export function AnalyticsClient({
   initialDailyStats,
   initialExpenses,
   familyUuid,
+  period,
+  initialBreakdown,
+  initialTrend,
 }: AnalyticsClientProps) {
   const [year, setYear] = useState(initialYear);
   const [month, setMonth] = useState(initialMonth);
@@ -116,45 +106,6 @@ export function AnalyticsClient({
     });
   };
 
-  // 일별 차트 데이터 (월의 모든 날짜 채우기)
-  const barChartData = useMemo<DailyBarChartData[]>(() => {
-    const daysInMonth = new Date(year, month, 0).getDate();
-    return Array.from({ length: daysInMonth }, (_, i) => {
-      const day = i + 1;
-      const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-      const found = dailyStats.find((d) => d.date === dateStr);
-      return { day, 지출: found?.expense ?? 0, 수입: found?.income ?? 0 };
-    });
-  }, [year, month, dailyStats]);
-
-  // 카테고리별 집계
-  const categoryStats: CategoryStat[] = useMemo(() => {
-    const map = new Map<string, CategoryStat>();
-    for (const expense of expenses) {
-      const amount = Number(expense.amount);
-      const cat = expense.category;
-      if (!cat) continue;
-      const existing = map.get(cat.uuid);
-      if (existing) {
-        existing.total += amount;
-        existing.count += 1;
-      } else {
-        map.set(cat.uuid, {
-          uuid: cat.uuid,
-          name: cat.name,
-          icon: cat.icon ?? "💸",
-          color: cat.color ?? "#6366f1",
-          total: amount,
-          count: 1,
-          percentage: 0,
-        });
-      }
-    }
-    const list = Array.from(map.values()).sort((a, b) => b.total - a.total);
-    const total = list.reduce((s, c) => s + c.total, 0);
-    list.forEach((c) => { c.percentage = total > 0 ? (c.total / total) * 100 : 0; });
-    return list;
-  }, [expenses]);
 
   const totalExpense = useMemo(
     () => expenses.reduce((s, e) => s + Number(e.amount), 0),
@@ -181,23 +132,26 @@ export function AnalyticsClient({
 
   return (
     <div className={`space-y-4 transition-opacity duration-200 ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
-      {/* 헤더: 월 선택기 */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold text-gray-900">분석</h1>
-        <div className="flex items-center gap-2 bg-white rounded-xl border border-gray-100 shadow-sm px-1 py-1">
+      {/* 헤더: 기간 토글 + 월 선택기 */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-3">
+          <h1 className="text-lg font-bold text-fg">분석</h1>
+          <AnalyticsPeriodToggle period={period} />
+        </div>
+        <div className="flex items-center gap-2 bg-bg-elev rounded-xl border border-border shadow-[var(--shadow-subtle)] px-1 py-1">
           <button
             onClick={() => handleMonthChange("prev")}
-            className="p-1.5 rounded-lg hover:bg-gray-50 transition-colors text-gray-500 hover:text-gray-800"
+            className="p-1.5 rounded-lg hover:bg-bg-muted transition-colors text-fg-muted hover:text-fg"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-sm font-semibold text-gray-800 min-w-[72px] text-center">
+          <span className="text-sm font-semibold text-fg min-w-[72px] text-center">
             {year}년 {MONTH_NAMES[month - 1]}
           </span>
           <button
             onClick={() => handleMonthChange("next")}
             disabled={isNextDisabled}
-            className="p-1.5 rounded-lg hover:bg-gray-50 transition-colors text-gray-500 hover:text-gray-800 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-lg hover:bg-bg-muted transition-colors text-fg-muted hover:text-fg disabled:opacity-30 disabled:cursor-not-allowed"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -237,68 +191,35 @@ export function AnalyticsClient({
         </div>
       </div>
 
-      {/* 일별 지출/수입 추이 */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart2 className="w-4 h-4 text-gray-400" />
-          <h2 className="text-sm font-bold text-gray-700">일별 추이</h2>
-          <div className="ml-auto flex items-center gap-3 text-[11px] text-gray-400">
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: "var(--chart-expense)" }} />지출</span>
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: "var(--chart-income)" }} />수입</span>
-          </div>
-        </div>
-        {totalExpense === 0 && totalIncome === 0 ? (
-          <div className="h-32 flex items-center justify-center text-gray-300 text-sm">
-            이 달의 데이터가 없습니다
-          </div>
+      {/* 카테고리 분포 + 월별 추이 (plan006) */}
+      <div className="grid grid-cols-1 md:grid-cols-[1fr_1.2fr] gap-4">
+        {initialBreakdown ? (
+          <AnalyticsCategoryDonut breakdown={initialBreakdown} />
         ) : (
-          <DailyBarChart data={barChartData} />
-        )}
-      </div>
-
-      {/* 카테고리별 지출 */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
-        <div className="flex items-center gap-2 mb-4">
-          <PieIcon className="w-4 h-4 text-gray-400" />
-          <h2 className="text-sm font-bold text-gray-700">카테고리별 지출</h2>
-          {totalExpense > 0 && (
-            <span className="ml-auto text-xs text-gray-400 font-medium">
-              총 ₩{formatAmount(totalExpense)}
-            </span>
-          )}
-        </div>
-
-        {categoryStats.length === 0 ? (
-          <div className="h-24 flex items-center justify-center text-gray-300 text-sm">
-            지출 내역이 없습니다
-          </div>
-        ) : (
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* 도넛 차트 */}
-            <div className="shrink-0 mx-auto">
-              <CategoryPieChart data={categoryStats} />
+          <div className="bg-bg-elev rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-default)]">
+            <div className="h-24 flex items-center justify-center text-fg-subtle text-sm">
+              카테고리 분포를 불러오지 못했습니다
             </div>
-
-            {/* 카테고리 리스트 */}
-            <div className="flex-1 space-y-2 min-w-0">
-              {categoryStats.map((cat) => (
-                <div key={cat.uuid} className="flex items-center gap-2">
-                  <div
-                    className="w-2 h-2 rounded-full shrink-0"
-                    style={{ backgroundColor: cat.color }}
-                  />
-                  <span className="text-xs text-gray-500 shrink-0">{cat.icon}</span>
-                  <span className="text-xs font-medium text-gray-700 truncate flex-1">{cat.name}</span>
-                  <div className="text-right shrink-0">
-                    <p className="text-xs font-bold text-gray-800">₩{formatAmount(cat.total)}</p>
-                    <p className="text-[10px] text-gray-400">{cat.percentage.toFixed(1)}%</p>
-                  </div>
-                </div>
-              ))}
+          </div>
+        )}
+        {initialTrend ? (
+          <MonthlyTrendBar trend={initialTrend} />
+        ) : (
+          <div className="bg-bg-elev rounded-[var(--radius-xl)] p-4 shadow-[var(--shadow-default)]">
+            <div className="h-24 flex items-center justify-center text-fg-subtle text-sm">
+              월별 추이를 불러오지 못했습니다
             </div>
           </div>
         )}
       </div>
+
+      {/* 카테고리 상세 (progress + 전월 delta) */}
+      {initialBreakdown && initialBreakdown.items.length > 0 && (
+        <CategoryDetailList
+          items={initialBreakdown.items}
+          totalExpense={initialBreakdown.totalExpense}
+        />
+      )}
 
       {/* 지출 TOP 5 */}
       {topExpenses.length > 0 && (

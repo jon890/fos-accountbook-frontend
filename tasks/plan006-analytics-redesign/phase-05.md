@@ -1,7 +1,7 @@
 # Phase 05 — 통합 검증 + legacy 잔재 grep + completed 마킹
 
 **Model**: haiku
-**Status**: pending
+**Status**: completed
 **Goal**: phase 01~04 산출물 통합 검증, legacy 잔재 0건 증명, `index.json` status `completed` 마킹.
 
 ## Context (자기완결)
@@ -55,6 +55,16 @@ grep -n 'AnalyticsPeriod\|MonthlyTrend\|CategoryWithDelta' src/types/analytics.t
 
 ```bash
 node -e "const s=require('fs').readFileSync('src/app/(authenticated)/analytics/_components/AnalyticsClient.tsx','utf8'); const order=['<AnalyticsPeriodToggle','<AnalyticsCategoryDonut','<MonthlyTrendBar','<CategoryDetailList']; let last=-1; for (const c of order) { const i=s.indexOf(c); if (i<0||i<=last) { console.error('order broken:', c); process.exit(1) } last=i; } console.log('ok')"
+```
+
+### 4-2. Dark mode 셀렉터 회귀 방지 (ADR-F15)
+
+```bash
+# .dark 클래스 신규 추가 0건 (analytics 영역)
+grep -rnE '\.dark\b|className=["\x27][^"\x27]*\bdark:' src/app/\(authenticated\)/analytics/ src/components/analytics/ 2>/dev/null | wc -l   # = 0
+
+# 신규 사용된 dark mode 셀렉터는 [data-theme="dark"] 만 (globals.css 외 신규 추가 0건)
+git diff origin/main -- src/app/\(authenticated\)/analytics/ src/components/analytics/ 2>/dev/null | grep -E '^\+.*\bdark:' | wc -l   # = 0
 ```
 
 ### 5. Hardcoded 색 잔재 0건 (plan001/002 효과 회귀 방지)

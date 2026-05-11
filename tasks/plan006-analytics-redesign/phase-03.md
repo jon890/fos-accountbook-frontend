@@ -36,11 +36,9 @@ Layout:
 - 데스크톱: Donut 160px 좌측 + 1fr legend 우측 (이름 + %)
 - Donut 색: plan002 의 `getCategoryToneKey` + `--color-cat-{key}-fg` 토큰 (Pie cell fill)
 
-### 2. 전체 합계 delta 계산
+### 2. 전체 합계 delta 사용
 
-`getCategoryBreakdownWithDelta` 의 각 item 은 카테고리 별 delta. **전체 합계 delta** 는 별도 — `items.reduce((s, i) => s + i.totalAmount, 0)` 이번 달 vs 직전 달 동일 계산. service 측에서 함께 반환하거나 (phase-01 추가) 클라 계산.
-
-→ service 반환에 `totalDelta: number | null` 추가 (phase-01 type 보강 필요. 본 phase 시작 시 점검).
+phase-01 의 `CategoryBreakdownWithDelta.totalDelta` 가 이미 service 측에서 계산됨 (`((curTotal - prevTotal) / prevTotal) * 100`, prev=0 시 null). UI 는 `breakdown.totalDelta` 를 그대로 표시.
 
 ### 3. `CategoryPieChart.tsx` 제거
 
@@ -86,7 +84,6 @@ grep -nE 'className=["\x27].*num' src/app/\(authenticated\)/analytics/_component
 | `src/app/(authenticated)/analytics/_components/AnalyticsCategoryDonut.tsx` | 신규 |
 | `src/app/(authenticated)/analytics/_components/CategoryPieChart.tsx` | 삭제 |
 | `src/app/(authenticated)/analytics/_components/AnalyticsClient.tsx` | 수정 (import 교체) |
-| `src/types/analytics.ts` 또는 `services/analytics/` | 수정 — `totalDelta` 필드 추가 |
 
 ## Out of Scope
 

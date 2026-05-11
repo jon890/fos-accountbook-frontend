@@ -32,6 +32,8 @@ interface SegmentedToggleProps<T extends string> {
 
 스타일 토큰 (`bg-bg-muted` / 활성 `bg-bg-elev shadow-subtle`) 은 그대로. plan003 TransactionsTabs 는 후속 plan 에서 이 generic 으로 마이그레이션 — 본 plan 범위 외 (Out of Scope).
 
+**접근성 (WAI-ARIA)** — `role="tablist"` + 각 button `role="tab"` + `aria-selected={key === value}` + `aria-controls` (해당 패널 ID). 키보드 ←→ 으로 옵션 이동 (`onKeyDown` 으로 prev/next index 계산 후 `onChange(options[nextIdx].key)`).
+
 ### 2. `AnalyticsPeriodToggle` 신규
 
 `src/app/(authenticated)/analytics/_components/AnalyticsPeriodToggle.tsx`. Props: `period: AnalyticsPeriod`, `onChange: (next: AnalyticsPeriod) => void`. 내부에서 `SegmentedToggle<AnalyticsPeriod>` 사용.
@@ -57,9 +59,24 @@ interface AnalyticsSearchParams {
 const period: AnalyticsPeriod = ["m1","m3","m6","y1"].includes(rawPeriod) ? rawPeriod as AnalyticsPeriod : "m1";
 ```
 
-`AnalyticsClient` 또는 신규 wrapper 가 `useRouter().replace('?period=...')` 로 URL 갱신. ADR-F17 패턴:
-- draft state 는 local (즉시 시각 반영)
-- URL commit 은 onChange 즉시 (debounce 불필요 — 4종 토글이라 빈번한 변경 X)
+`AnalyticsClient` 또는 신규 wrapper 가 `useRouter().replace('?period=...')` 로 URL 갱신.
+
+**ADR-F17 (draft 패턴) 적용** — period 의 source of truth = URL. AnalyticsPeriodToggle 은 useState 사용하지 말 것. URL searchParams 에서 period 를 prop 으로 받아 표시 + onChange 시 `router.replace('?period=...')` 만 호출. **useEffect 안 setState 절대 금지**:
+
+```tsx
+// ✅ AnalyticsPeriodToggle (source of truth = URL)
+export function AnalyticsPeriodToggle({ period }: { period: AnalyticsPeriod }) {
+  const router = useRouter();
+  const handleChange = (next: AnalyticsPeriod) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("period", next);
+    router.replace(`?${params.toString()}`);
+  };
+  return <SegmentedToggle options={PERIOD_OPTIONS} value={period} onChange={handleChange} />;
+}
+```
+
+`debounce` 불필요 — 4종 토글이라 빈번한 변경 X.
 
 ### 4. 데스크톱 날짜 범위 chip (선택 표시)
 

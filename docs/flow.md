@@ -145,6 +145,33 @@ helper: `services/transaction/transaction-service.ts` 의 `groupTransactionsWith
 
 ---
 
+## 5-3. /analytics 페이지 구조 (plan006)
+
+```
+[page.tsx (server) — searchParams { period: m1|m3|m6|y1 }]
+    │
+    └─ Promise.all 5 Action:
+        ├─ getDashboardStatsAction()
+        ├─ getMonthlyDailyStatsAction(year, month)
+        ├─ getExpensesAction({ familyUuid, startDate, endDate, limit: 1000 })
+        ├─ getCategoryBreakdownWithDeltaAction(year, month)   # 이번 달 vs 직전 달 비교
+        └─ getMonthlyTrendAction(period, year, month)         # period 기반 월별 추이
+    │
+    └─ AnalyticsClient (use client)
+            ├─ AnalyticsPeriodToggle (segmented role=tablist, URL ?period= 단방향)
+            ├─ AnalyticsCategoryDonut (172/160px Donut + 중앙 totalDelta ↑/↓)
+            ├─ MonthlyTrendBar (순수 CSS bar, 마지막 막대 bg-brand-500 강조)
+            └─ CategoryDetailList (progress + 전월 delta % 2-col grid)
+```
+
+데이터 흐름 핵심:
+- `services/analytics/analytics-service.ts` 가 `services/dashboard/getMonthlyCategoryBreakdown` 직접 재사용 (service→service, ADR-F04 위반 아님)
+- `getCategoryBreakdownWithDelta`: 이번 달 + 직전 달 두 번 fetch → uuid 매칭 후 `((cur-prev)/prev)*100` delta 계산. prev=0 시 null
+- `getMonthlyTrend`: m1/m3/m6/y1 → 1~12개월 시점 누적 fetch → 합계 + 평균
+- backend `monthly-trend` endpoint 분리는 후속 (issue #126) — 클라 집계 임계 (월 500건 / TTI 700ms) 도달 시 plan007+ 전환
+
+---
+
 ## 6. 예산 알림 플로우 (백엔드)
 
 ```
