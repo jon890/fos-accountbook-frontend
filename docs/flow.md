@@ -329,6 +329,27 @@ helper: `services/transaction/transaction-service.ts` 의 `groupTransactionsWith
 
 ---
 
+## 14-3. /budget 페이지 (plan013)
+
+Dashboard BudgetHeroCard 의 확장 전용 페이지. 분석은 /analytics, 예산 소화는 /budget 으로 역할 분리.
+
+```
+[/budget (server) — Promise.all 3 Action]
+    ├─ getDashboardStatsAction() → { budget, monthlyExpense, remainingBudget, year, month }
+    ├─ getMonthlyDailyStatsAction(year, month) → { items: { date, expense, income }[] }
+    └─ getMonthlyCategoryBreakdownAction() → { items: { categoryUuid, name, color?, totalAmount }[] }
+            │
+            └─ BudgetClient (use client)
+                    ├─ BudgetHeroCard (Dashboard 와 시각 일치)
+                    ├─ 3-col 통계: 일 평균 지출 / 남은 일수 / 권장 일 예산 (남은예산÷남은일수)
+                    ├─ BudgetCumulativeLine (recharts LineChart + ReferenceLine 예산선)
+                    └─ BudgetCategoryBars (수평 bar top 5 + 예산 대비 % + ↑많음 라벨)
+```
+
+예산 0 시: EmptyState 카드 + "예산 설정하기" → /settings 로. 라인 차트 + 카테고리 bar 자체 미렌더.
+
+---
+
 ## 14. 대시보드 고정비 카드
 
 ```
