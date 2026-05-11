@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import * as React from "react";
-import { DayPicker } from "react-day-picker";
+import { DayPicker, type ChevronProps } from "@daypicker/react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/client/utils";
@@ -22,15 +22,17 @@ function Calendar({
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
-        caption: "flex justify-center pt-1 relative items-center",
+        month_caption: "flex justify-center pt-1 relative items-center",
         caption_label: "text-sm font-medium",
         nav: "space-x-1 flex items-center",
-        nav_button: cn(
+        button_previous: cn(
           buttonVariants({ variant: "outline" }),
-          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute left-1",
         ),
-        nav_button_previous: "absolute left-1",
-        nav_button_next: "absolute right-1",
+        button_next: cn(
+          buttonVariants({ variant: "outline" }),
+          "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 absolute right-1",
+        ),
         month_grid: "w-full border-collapse space-y-1",
         weekdays: "flex",
         weekday:
@@ -54,9 +56,9 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        Chevron: ({ orientation, className, ...props }) => {
+        Chevron: ({ orientation, className }: ChevronProps) => {
           const Icon = orientation === "left" ? ChevronLeft : ChevronRight;
-          return <Icon className={cn("h-4 w-4", className)} {...props} />;
+          return <Icon className={cn("h-4 w-4", className)} />;
         },
       }}
       {...props}
