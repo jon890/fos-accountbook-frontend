@@ -54,7 +54,6 @@ export function AmountInput({ value, onChange, disabled }: AmountInputProps) {
             "overflow-hidden text-ellipsis whitespace-nowrap max-w-[280px] md:max-w-[360px]",
             "[letter-spacing:-0.035em]"
           )}
-          style={{ letterSpacing: "-0.035em" }}
           aria-live="polite"
           aria-label={`금액 ${displayValue}원`}
         >
