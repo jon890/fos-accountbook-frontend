@@ -353,6 +353,24 @@ App Router 의 segment 경계에서 일관 표시:
 
 ---
 
+## 14-2-2. 404 / 403 / 500 상태 카드 (plan018)
+
+`StatusCard` 공용 helper 가 3 상태를 톤으로 구분:
+
+| status | 톤 | 아이콘 | 메시지 | CTA |
+|---|---|---|---|---|
+| 404 | brand (bg-brand-50 + text-brand-700) | Compass | "찾을 수 없어요" | "홈으로" → `/` |
+| 403 | warning (bg-warning/10 + text-warning) | Lock | "권한이 없어요" | "홈으로" → `/` (+ 보조: "로그인 다시 시도" → `/auth/signin`) |
+| 500 | expense (bg-expense/10 + text-expense) | AlertCircle | "문제가 발생했어요" | "다시 시도" → reset() + "홈으로" |
+
+라우팅:
+- `src/app/not-found.tsx` (전역, public 라우트용)
+- `src/app/(authenticated)/not-found.tsx` (Header 보존 + StatusCard 404)
+- `src/app/(authenticated)/forbidden.tsx` (Next.js 16 `forbidden()` 호출 시) — status=403
+- 500 은 기존 `error.tsx` (plan012) 가 자동 처리 + 동일 StatusCard 사용
+
+---
+
 ## 14-3. /budget 페이지 (plan013)
 
 Dashboard BudgetHeroCard 의 확장 전용 페이지. 분석은 /analytics, 예산 소화는 /budget 으로 역할 분리.
