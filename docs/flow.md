@@ -201,10 +201,23 @@ helper: `services/transaction/transaction-service.ts` 의 `groupTransactionsWith
                     └─ 100% 이상 → BUDGET_EXCEEDED Notification 생성
                                     (yearMonth 기준 중복 방지)
 
-[프론트엔드]
-    └─ Header의 NotificationBell
-            ├─ getUnreadCountAction() (주기적 조회)
-            └─ 클릭 → 알림 목록 → markNotificationReadAction()
+[프론트엔드 — plan017]
+    └─ Header 의 NotificationBell (Popover trigger)
+            ├─ getUnreadCountAction() (1분 폴링) → bg-expense Badge (count > 99 시 "99+")
+            └─ 클릭 → Popover (NotificationList, max-h-[500px])
+                    │
+                    ├─ 최근 10개 + "전체보기" 링크 → /notifications
+                    │
+                    └─ NotificationItem 톤 매핑 (2 단계):
+                            ├─ BUDGET_50_EXCEEDED / BUDGET_80_EXCEEDED → warning 톤 (bg-warning/10 + text-warning)
+                            ├─ BUDGET_100_EXCEEDED                       → expense 톤 (bg-expense/10 + text-expense)
+                            └─ default                                    → brand 톤 (bg-brand-50 + text-brand-700)
+
+[/notifications 전용 페이지 — plan017]
+    └─ 전체 알림 목록 + segmented (전체 / 안 읽음) + pagination
+            ├─ Skel skeleton (plan012 .ab-skel 재사용) — loading 상태
+            ├─ EmptyState (plan012 EmptyState 재사용) — "알림이 없어요"
+            └─ "모두 읽음" 버튼 (페이지 최상단)
 ```
 
 ---
