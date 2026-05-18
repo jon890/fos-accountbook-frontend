@@ -26,12 +26,12 @@ import type { UpdateExpenseFormState, Expense } from "@/types/expense";
 import type { UpdateIncomeFormState, Income } from "@/types/income";
 import type { RecurringExpense } from "@/types/recurring-expense";
 import type { CategoryResponse } from "@/types/category";
+import type { TransactionType } from "@/types/transaction";
 import { TrendingDown, TrendingUp, Repeat } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-type TransactionType = "expense" | "income" | "recurring";
 type TransactionUnion = Expense | Income | RecurringExpense;
 
 interface EditTransactionDialogProps {
@@ -62,6 +62,14 @@ const recurringClientSchema = z.object({
 
 function isRecurringExpense(t: TransactionUnion): t is RecurringExpense {
   return "dayOfMonth" in t;
+}
+
+function getDateInitial(t: TransactionUnion): string {
+  return isRecurringExpense(t) ? "" : toLocalDateInput(t.date);
+}
+
+function getDescriptionInitial(t: TransactionUnion): string {
+  return isRecurringExpense(t) ? "" : (t.description ?? "");
 }
 
 async function updateRecurringWrapper(_prev: FormState, fd: FormData): Promise<FormState> {
@@ -150,12 +158,11 @@ function EditTransactionDialogBody({
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   const recurring = isRecurringExpense(transaction) ? transaction : null;
-  const nonRecurring = !recurring ? (transaction as Expense | Income) : null;
 
   const [amount, setAmount] = useState(Number(transaction.amount));
   const [categoryUuid, setCategoryUuid] = useState<string | null>(transaction.categoryUuid);
-  const [date, setDate] = useState(nonRecurring ? toLocalDateInput(nonRecurring.date) : "");
-  const [description, setDescription] = useState(nonRecurring?.description ?? "");
+  const [date, setDate] = useState(() => getDateInitial(transaction));
+  const [description, setDescription] = useState(() => getDescriptionInitial(transaction));
   const [name, setName] = useState(recurring?.name ?? "");
   const [dayOfMonth, setDayOfMonth] = useState<number | undefined>(recurring?.dayOfMonth);
 

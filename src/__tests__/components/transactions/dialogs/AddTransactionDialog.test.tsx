@@ -171,12 +171,9 @@ describe("AddTransactionDialog", () => {
     expect(screen.queryByRole("button", { name: /추가/ })).not.toBeInTheDocument();
   });
 
-  it("expense 저장 시 createExpenseAction 이 호출된다", async () => {
-    mockCreateExpense.mockResolvedValue({
-      success: true,
-      message: "지출이 등록되었습니다",
-      errors: {},
-    } as never);
+  it("expense 저장 시 createExpenseAction 이 useActionState 에 등록된다", async () => {
+    const { useActionState } = jest.requireMock("react");
+    useActionState.mockClear();
 
     render(
       <AddTransactionDialog open={true} onOpenChange={onOpenChange} defaultType="expense" />,
@@ -186,16 +183,13 @@ describe("AddTransactionDialog", () => {
       expect(screen.getByRole("button", { name: /지출 추가/ })).toBeInTheDocument();
     });
 
-    // useActionState 가 mock 이므로 formAction = mockCreateExpense 자체가 됨
-    expect(mockCreateExpense).toBeDefined();
+    const actions = useActionState.mock.calls.map((c: [unknown]) => c[0]);
+    expect(actions).toContain(mockCreateExpense);
   });
 
-  it("income 저장 시 createIncomeAction 이 호출된다", async () => {
-    mockCreateIncome.mockResolvedValue({
-      success: true,
-      message: "수입이 등록되었습니다",
-      errors: {},
-    } as never);
+  it("income 저장 시 createIncomeAction 이 useActionState 에 등록된다", async () => {
+    const { useActionState } = jest.requireMock("react");
+    useActionState.mockClear();
 
     render(
       <AddTransactionDialog open={true} onOpenChange={onOpenChange} defaultType="income" />,
@@ -205,12 +199,11 @@ describe("AddTransactionDialog", () => {
       expect(screen.getByRole("button", { name: /수입 추가/ })).toBeInTheDocument();
     });
 
-    expect(mockCreateIncome).toBeDefined();
+    const actions = useActionState.mock.calls.map((c: [unknown]) => c[0]);
+    expect(actions).toContain(mockCreateIncome);
   });
 
-  it("recurring 저장 시 createRecurringExpenseAction 이 사용된다", async () => {
-    mockCreateRecurring.mockResolvedValue({ success: true, data: {} } as never);
-
+  it("recurring 저장 시 createRecurringExpenseAction 이 wrapper 통해 사용된다", async () => {
     render(
       <AddTransactionDialog open={true} onOpenChange={onOpenChange} defaultType="recurring" />,
     );
@@ -219,6 +212,7 @@ describe("AddTransactionDialog", () => {
       expect(screen.getByRole("button", { name: /고정지출 추가/ })).toBeInTheDocument();
     });
 
+    // recurring 은 wrapper 가 useActionState 에 등록되므로 모듈 정의 존재만 검증
     expect(mockCreateRecurring).toBeDefined();
   });
 });

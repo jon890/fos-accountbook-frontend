@@ -5,8 +5,7 @@ import { Label } from "@/components/ui/label";
 import { AmountInput } from "@/components/expenses/forms/AmountInput";
 import { CategoryGrid } from "@/components/expenses/forms/CategoryGrid";
 import type { CategoryResponse } from "@/types/category";
-
-type TransactionType = "expense" | "income" | "recurring";
+import type { TransactionType } from "@/types/transaction";
 
 interface TransactionFormFieldsProps {
   type: TransactionType;

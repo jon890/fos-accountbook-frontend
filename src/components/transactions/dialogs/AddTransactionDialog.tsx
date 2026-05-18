@@ -25,12 +25,11 @@ import { toLocalDateInput } from "@/lib/utils/format";
 import type { CreateExpenseFormState } from "@/types/expense";
 import type { CreateIncomeFormState } from "@/types/income";
 import type { CategoryResponse } from "@/types/category";
+import type { TransactionType } from "@/types/transaction";
 import { TrendingDown, TrendingUp, Repeat } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-
-type TransactionType = "expense" | "income" | "recurring";
 
 interface AddTransactionDialogProps {
   open: boolean;

@@ -96,7 +96,7 @@ type 전환 시: amount / category / description 은 유지, type-specific 필�
 [ExpenseItem]
     │
     ├─ 수정 아이콘 클릭
-    │   └─ EditExpenseDialog 열림 (기존 값 pre-fill)
+    │   └─ EditTransactionDialog (type=expense, 잠금) 열림 (기존 값 pre-fill)
     │           └─ 수정 후 저장 → updateExpenseAction()
     │                   └─ 검증 → updateExpense() → PUT /expenses/{uuid}
     │                           └─ revalidatePath → UI 갱신
@@ -277,7 +277,7 @@ helper: `services/transaction/transaction-service.ts` 의 `groupTransactionsWith
 [거래내역 > 고정지출 탭]
     │
     └─ "+ 고정지출 추가" 버튼
-            └─ AddRecurringExpenseSheet 열림
+            └─ AddTransactionDialog (defaultType=recurring) 열림
                     ├─ 이름 (필수)
                     ├─ 카테고리 선택 (드롭다운)
                     ├─ 금액 입력 (숫자)
@@ -318,7 +318,7 @@ helper: `services/transaction/transaction-service.ts` 의 `groupTransactionsWith
 [RecurringExpenseItem 아코디언]
     │
     ├─ 수정 버튼 클릭
-    │   └─ EditRecurringExpenseSheet 열림 (기존 값 pre-fill)
+    │   └─ EditTransactionDialog (type=recurring, 잠금) 열림 (기존 값 pre-fill)
     │           └─ 수정 후 저장 → updateRecurringExpenseAction()
     │                   └─ PUT /families/{uuid}/recurring-expenses/{uuid}
     │                           └─ "다음 스케줄부터 반영됩니다" toast
