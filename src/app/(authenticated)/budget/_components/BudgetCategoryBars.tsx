@@ -2,10 +2,12 @@ import { getCategoryTone } from "@/lib/utils/category-tone";
 import type { CategoryBreakdownItem } from "@/types/dashboard";
 import { formatCurrency } from "@/lib/utils/format";
 
+const WARNING_BUDGET_PCT = 30;
+const BAR_SCALE_FLOOR_RATIO = 0.5;
+
 interface BudgetCategoryBarsProps {
   items: CategoryBreakdownItem[];
   budget: number;
-  monthlyExpense: number;
 }
 
 export function BudgetCategoryBars({
@@ -17,7 +19,7 @@ export function BudgetCategoryBars({
     .slice(0, 5);
 
   const maxAmount = top5[0]?.totalAmount ?? 0;
-  const barBase = Math.max(maxAmount, budget * 0.5);
+  const barBase = Math.max(maxAmount, budget * BAR_SCALE_FLOOR_RATIO);
 
   if (top5.length === 0) {
     return (
@@ -48,7 +50,6 @@ export function BudgetCategoryBars({
 
           return (
             <div key={item.categoryUuid} className="flex items-center gap-3">
-              {/* 카테고리 아이콘 */}
               <div
                 className="h-9 w-9 flex-shrink-0 rounded-xl flex items-center justify-center"
                 style={{ background: tone.bg }}
@@ -61,7 +62,6 @@ export function BudgetCategoryBars({
                 </span>
               </div>
 
-              {/* 본문 */}
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-baseline gap-2">
                   <span className="text-fg text-sm font-medium truncate">
@@ -79,7 +79,7 @@ export function BudgetCategoryBars({
                 </div>
                 <div className="mt-1 flex justify-between text-xs text-fg-muted">
                   <span>예산의 {budgetPct}%</span>
-                  {budgetPct >= 30 && (
+                  {budgetPct >= WARNING_BUDGET_PCT && (
                     <span className="text-expense font-semibold">↑ 많음</span>
                   )}
                 </div>

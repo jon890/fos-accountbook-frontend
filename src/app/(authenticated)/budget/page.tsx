@@ -1,8 +1,3 @@
-/**
- * Budget Page - Server Component
- * 예산 관리 전용 페이지
- */
-
 import { getDashboardStatsAction } from "@/actions/dashboard/get-dashboard-stats-action";
 import { getMonthlyCategoryBreakdownAction } from "@/actions/dashboard/get-monthly-category-breakdown-action";
 import { getMonthlyDailyStatsAction } from "@/actions/dashboard/get-monthly-daily-stats-action";

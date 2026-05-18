@@ -63,7 +63,6 @@ export function BudgetCumulativeLine({
     expenseByDay.set(day, item.expense);
   }
 
-  // 누적 시퀀스 계산
   const chartData: ChartEntry[] = [];
   let cumulative = 0;
   for (let day = 1; day <= daysInMonth; day++) {

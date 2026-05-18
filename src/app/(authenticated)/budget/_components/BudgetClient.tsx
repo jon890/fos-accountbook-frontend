@@ -242,11 +242,7 @@ export function BudgetClient({
       )}
 
       {/* 카테고리 top 5 */}
-      <BudgetCategoryBars
-        items={categoryItems}
-        budget={budget}
-        monthlyExpense={monthlyExpense}
-      />
+      <BudgetCategoryBars items={categoryItems} budget={budget} />
 
       {/* 예산 수정 링크 */}
       {hasBudget && (
