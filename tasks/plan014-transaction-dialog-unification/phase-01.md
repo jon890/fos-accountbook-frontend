@@ -78,12 +78,12 @@ interface TransactionFormFieldsProps {
 - `{type === "recurring"}` → Name input + DayOfMonth (1~28) input
 - `{type !== "recurring"}` → Date input (default: 오늘)
 
-### 4. 3 Action dispatch 분기
+### 4. 3 Action dispatch 분기 + recurring wrapper
 
 ```ts
 const [expenseState, expenseFormAction] = useActionState(createExpenseAction, initialExpenseState);
 const [incomeState,  incomeFormAction]  = useActionState(createIncomeAction,  initialIncomeState);
-const [recurringState, recurringFormAction] = useActionState(createRecurringExpenseAction, initialRecurringState);
+const [recurringState, recurringFormAction] = useActionState(createRecurringWrapper, initialFormState);
 
 const formAction =
   type === "expense"   ? expenseFormAction :
@@ -91,17 +91,49 @@ const formAction =
                           recurringFormAction;
 ```
 
+**recurring Action 시그니처 비호환 처리** (critic 검증):
+- `createRecurringExpenseAction(data: unknown) => Promise<ActionResult<...>>` — 단일 인자, `{success, data, error}` 반환
+- expense/income Action 은 `(prevState: FormState, FormData) => Promise<FormState>` — `{success, errors, message}`
+
+→ TransactionFormFields 가 통일된 `errors: Record<string, string[]>` prop 을 받기 위해 wrapper 가 **시그니처 + 반환형 + 필드별 errors 매핑**까지 변환:
+
+```ts
+async function createRecurringWrapper(_prev: FormState, fd: FormData): Promise<FormState> {
+  const raw = {
+    name: String(fd.get("name") ?? ""),
+    categoryUuid: String(fd.get("categoryUuid") ?? ""),
+    amount: Number(fd.get("amount")),
+    dayOfMonth: Number(fd.get("dayOfMonth")),
+  };
+  const parsed = recurringClientSchema.safeParse(raw);
+  if (!parsed.success) {
+    const errors: Record<string, string[]> = {};
+    for (const issue of parsed.error.issues) {
+      const key = String(issue.path[0] ?? "_form");
+      (errors[key] ??= []).push(issue.message);
+    }
+    return { success: false, errors, message: "" };
+  }
+  const result = await createRecurringExpenseAction(parsed.data);
+  return result.success
+    ? { success: true, errors: {}, message: "고정지출이 등록되었습니다" }
+    : { success: false, errors: { _form: [result.error?.message ?? "등록 실패"] }, message: "" };
+}
+```
+
+`recurringClientSchema` 는 action 내부 `createRecurringExpenseSchema` 와 동일 룰. 본 phase 에선 wrapper 안에 인라인 정의 + 후속 통합 정리 TODO 주석. update 도 phase-03 에서 동일 패턴 (uuid + data 2 인자) 적용.
+
 각 state 의 success → toast + onOpenChange(false). errors 는 해당 type 의 errors 만 form fields 에 전달.
 
-`createRecurringExpenseAction` 의 현재 시그니처가 plain object 인지 useActionState 호환 (state, formData) 인지 확인 — 호환 안 되면 wrapper 추가 (`async (_, fd) => createRecurringExpenseAction(parseFormData(fd))`).
-
-### 5. CTA 버튼 톤
+### 5. CTA 버튼 톤 + Verification 안내
 
 - expense → `gradient-expense text-white`
 - income → `gradient-income text-white`
 - recurring → `gradient-budget text-white`
 
-### 6. 자동 verification
+Verification 명령은 아래 별도 `## Verification` 섹션 참조.
+
+## Verification
 
 ```bash
 # cwd: /Users/nhn/personal/fos-accountbook

@@ -15,7 +15,8 @@
 | 3 | `src/app/(authenticated)/transactions/_components/IncomeTabContent.tsx` | AddIncomeDialog | AddTransactionDialog (defaultType=income) |
 | 4 | `src/app/(authenticated)/transactions/_components/RecurringTabContent.tsx` | AddRecurringExpenseSheet | AddTransactionDialog (defaultType=recurring) |
 | 5 | `src/components/recurring-expense/RecurringExpenseList.tsx` | AddRecurringExpenseSheet | AddTransactionDialog (defaultType=recurring) |
-| 6 | `src/components/expenses/dialogs/AddExpenseDialog.tsx` 사용처 (지출 탭의 FAB 등) | AddExpenseDialog | AddTransactionDialog (defaultType=expense) |
+
+> (critic 검증) 위 5 파일이 실제 Add 다이얼로그 import 전부. ExpenseListClient/ExpenseItem 등은 Edit 다이얼로그만 사용 (phase-03 대상). QuickActions 가 2 호출이라 표 row 는 5 이지만 call site 는 6.
 
 ## 작업 항목
 
@@ -90,8 +91,9 @@ pnpm build
 [ ! -f src/components/recurring-expense/AddRecurringExpenseSheet.tsx ]
 [ ! -f src/components/expenses/dialogs/AddExpenseDialog.tsx ]
 
-# AddTransactionDialog 사용처 6+ 곳
-grep -rln 'AddTransactionDialog' src/ --include='*.tsx' | wc -l   # >= 6
+# AddTransactionDialog 사용처 5 파일 (QuickActions 가 2 호출이라 grep -c 합 >= 6)
+grep -rln 'AddTransactionDialog' src/ --include='*.tsx' | wc -l   # >= 5
+grep -rh 'AddTransactionDialog' src/ --include='*.tsx' | wc -l    # >= 6 (component 사용 + import)
 ```
 
 수동 smoke:
