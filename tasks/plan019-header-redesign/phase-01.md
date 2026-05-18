@@ -29,7 +29,7 @@
 <header className="sticky top-0 z-50 backdrop-blur-xl bg-bg-elev/95 border-b border-border shadow-sm">
 ```
 
-`bg-bg-elev/95` alpha 변형 작동 확인 — plan001 의 OKLCH 토큰 + Tailwind v4 가 자동 alpha 변형 지원. 미작동 시 inline `style={{ background: "color-mix(in srgb, var(--color-bg-elev) 95%, transparent)" }}`.
+`bg-bg-elev/95` alpha 변형 작동 확인 — plan001 의 OKLCH 토큰 + Tailwind v4 가 자동 alpha 변형 지원. 미작동 시 `globals.css` 의 `@theme` 블록 외부에 `.bg-header { background: color-mix(in srgb, var(--color-bg-elev) 95%, transparent); }` 커스텀 클래스를 추가해 사용한다. **inline `style={{ ... }}` 작성 금지** (ADR-F13 / CLAUDE.md OKLCH 토큰 규칙 — 토큰 외부 하드코딩 차단).
 
 ### 2. 로고 단색 + brand 아이콘
 
@@ -121,7 +121,7 @@ const [familySheetOpen, setFamilySheetOpen] = useState(false);
       <SheetTitle>가족 전환</SheetTitle>
     </SheetHeader>
     {/* FamilySelectorDropdown 의 list 부분만 inline — 또는 별도 FamilySelectorList 컴포넌트로 추출 */}
-    <FamilySelectorList onSelected={() => setFamilySheetOpen(false)} />
+    <FamilySelectorList onSelected={(_familyUuid) => setFamilySheetOpen(false)} />
   </SheetContent>
 </Sheet>
 ```
@@ -131,7 +131,8 @@ const [familySheetOpen, setFamilySheetOpen] = useState(false);
 ```ts
 // src/components/families/FamilySelectorList.tsx (신규)
 interface FamilySelectorListProps {
-  onSelected?: () => void;
+  /** 선택된 가족 UUID 를 호출자에게 명시적으로 전달 — 호출자가 분기 처리 가능 */
+  onSelected?: (familyUuid: string) => void;
 }
 ```
 
