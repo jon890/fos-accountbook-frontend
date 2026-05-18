@@ -6,8 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/client/utils";
 import { formatCurrency } from "@/lib/utils/format";
+import type { CategoryBreakdownItem } from "@/types/dashboard";
 import { AlertTriangle, PiggyBank, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { BudgetCategoryBars } from "./BudgetCategoryBars";
+import { BudgetCumulativeLine } from "./BudgetCumulativeLine";
 
 interface BudgetClientProps {
   budget: number;
@@ -15,6 +18,8 @@ interface BudgetClientProps {
   remainingBudget: number;
   year: number;
   month: number;
+  dailyExpenses: { date: string; income: number; expense: number }[];
+  categoryItems: CategoryBreakdownItem[];
 }
 
 export function BudgetClient({
@@ -23,6 +28,8 @@ export function BudgetClient({
   remainingBudget,
   year,
   month,
+  dailyExpenses,
+  categoryItems,
 }: BudgetClientProps) {
   const router = useRouter();
 
@@ -224,6 +231,22 @@ export function BudgetClient({
           </Card>
         </div>
       )}
+
+      {/* 라인 차트 */}
+      {hasBudget && (
+        <BudgetCumulativeLine
+          dailyExpenses={dailyExpenses}
+          budget={budget}
+          daysInMonth={daysInMonth}
+        />
+      )}
+
+      {/* 카테고리 top 5 */}
+      <BudgetCategoryBars
+        items={categoryItems}
+        budget={budget}
+        monthlyExpense={monthlyExpense}
+      />
 
       {/* 예산 수정 링크 */}
       {hasBudget && (
