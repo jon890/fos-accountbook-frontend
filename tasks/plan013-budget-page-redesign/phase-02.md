@@ -29,7 +29,7 @@ interface BudgetCumulativeLineProps {
 내부 로직:
 - 일별 누적 시퀀스 계산: `acc[i] = acc[i-1] + expense[i]`
 - 라인 데이터: `[ { day: 1, cumulative: 0 }, ..., { day: daysInMonth, cumulative: total } ]`
-- 예산 수평선: `ReferenceLine y={budget} stroke="brand-700" strokeDasharray="4 4"`
+- 예산 수평선: `ReferenceLine y={budget} stroke="var(--color-brand-700)" strokeDasharray="4 4"`
 - 라인: `stroke="var(--color-brand-500)"`, `strokeWidth={2.5}`, fill area gradient (옵션)
 - 초과 지점: 누적 ≥ 예산 시 빨간 dot
 

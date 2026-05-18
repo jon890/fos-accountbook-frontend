@@ -30,7 +30,7 @@ interface BudgetCategoryBarsProps {
 - top 5 만 추출: `items.sort((a,b) => b.totalAmount - a.totalAmount).slice(0, 5)`
 - 각 카테고리의 예산 대비 비율: `(totalAmount / budget) * 100`
 - bar 폭: `(totalAmount / max(items[0].totalAmount, budget * 0.5)) * 100%` — top 1 기준 100%
-- category-tone 매핑: `src/lib/client/category-tone.ts` (plan002 의 helper 재사용)
+- category-tone 매핑: `@/lib/utils/category-tone` 의 `getCategoryTone(name)` (plan002 helper 재사용)
 
 카드 wrapper:
 - `bg-bg-elev border-border rounded-2xl p-5 md:p-6`
@@ -124,7 +124,7 @@ grep -nE 'budgetPct|budget.*100' src/app/\(authenticated\)/budget/_components/Bu
 
 | 리스크 | 완화 |
 |---|---|
-| `categoryColor` 가 OKLCH 평면 값이 아닌 hex (legacy) | category-tone helper 가 어떤 입력이든 8 톤 중 매핑하도록 설계됨. plan002 머지된 helper 사용 — 본 phase 가 helper 자체 변경 안 함 |
+| 카테고리 이름이 `NAME_TO_KEY` 미매칭 (영어/기타 한글) | helper 가 fallback 으로 `etc` 톤 반환 — 시각은 회색 톤으로 안전, 의미는 손실. plan002 helper 자체 변경 안 함 |
 | budget=0 시 budgetPct 무한대 | budget > 0 분기로 컴포넌트 자체 미렌더 (page.tsx 측 처리) |
 | 모바일 320px 폭에서 % 라벨 + 금액 줄바꿈 | `truncate` + `flex-shrink-0` 적절히. 수동 smoke 에서 확인 |
 | top 5 너무 적음 (가족 카테고리 3개만) | items.length 만큼만 렌더 (slice 가 자동 처리). 빈 row 미생성 |

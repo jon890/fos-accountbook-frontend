@@ -49,7 +49,7 @@ const [stats, daily, breakdown] = await Promise.all([
 ```
 <div className="p-4 md:p-6 space-y-4 md:space-y-6">
   {/* 헤더 */}
-  <BudgetHeader year={month} />
+  <BudgetHeader year={year} month={month} />
 
   {/* Hero + 3-col 통계 단락 — phase 01 결과 (BudgetClient 내부 inline) */}
 
