@@ -50,6 +50,22 @@ git log origin/main --oneline --grep "plan{N}" | head -3
 
 merge commit 발견 시 이미 완료된 plan. 사용자에게 알리고 (a) 새 plan 번호 부여 또는 (b) 후속 작업 전용 follow-up 브랜치 결정 의뢰. 실사례: fos-blog plan006 이 status="completed" 였지만 머지 안 된 상태에서 plan007 진행 시도 → 신 워크플로에서는 PR 생성 자체가 build-with-teams 책임이라 이런 사고 자체 회피.
 
+### 5. 잔재 worktree / 브랜치 존재 확인 (필수 — fos-accountbook plan014 관측)
+
+이전 build-with-teams 실행이 중단되어 worktree + 브랜치 + commit 이 남아 있을 수 있음. worktree 생성 직전 확인:
+
+```bash
+# cwd: <repo root>
+git worktree list | grep "plan{N}" || true
+git branch -a | grep "feat/plan{N}\|plan/{N}-" || true
+```
+
+발견 시 commit 이력 (`git -C <worktree> log --oneline origin/main..HEAD`) + working tree 상태 (`git -C <worktree> status --short`) 를 확인 후 사용자에게 `AskUserQuestion` 으로 분기:
+- (a) **이어서 진행** — 기존 commit 유지, 남은 phase 부터 실행 (가장 흔한 케이스, 권장)
+- (b) **처음부터 재시작** — `git worktree remove --force` + `git branch -D` 후 신 worktree
+
+자의적 (a)/(b) 결정 금지. 이전 실행의 미완 작업이 보일 수 있어 사용자 의사 확인 필수.
+
 ## 핵심 원칙
 
 1. **docs-first**: docs 반영 + 커밋 → task 생성 → 실행. 순서 위반 금지
@@ -111,6 +127,14 @@ team-lead 가 "이전 세션이 그랬으니까 / 익숙한 패턴이라서" 같
 ### 정식 팀원 스폰 규칙 (필수)
 
 critic / executor / code-reviewer / docs-verifier는 반드시 **TeamCreate로 생성한 팀의 정식 멤버**로 스폰. 일회성 `Agent` 호출(team_name 없이) 금지.
+
+**기존 팀 재사용 시 멤버 이름 충돌 처리 (필수 — fos-accountbook plan014 관측)**: 이전 실행의 `critic` / `executor` / `docs-verifier` 멤버가 inactive 상태로 config.json 에 잔존하면, 새로 spawn 한 멤버에 자동으로 `-2` suffix 가 붙음 (`critic-2`, `executor-2` 등). 이 경우 **메인 세션의 inbox auto-deliver 가 작동 안 함** — sub-agent 의 SendMessage 회신이 `~/.claude/teams/{plan}/inboxes/team-lead.json` 에는 정상 쓰이지만 team-lead conversation turn 으로 라우팅 안 됨.
+
+**우회 두 가지**:
+1. (권장) spawn 전에 `TeamDelete` + `TeamCreate` 로 멤버 이름 충돌 회피 → suffix 없이 깨끗한 이름 + auto-deliver 정상
+2. (호환) suffix 가 붙은 상태로 진행 시 매 SendMessage 후 `jq '[.[] | select(.from == "<name>") and (.text | startswith("{") | not)] | sort_by(.timestamp) | .[-3:]' ~/.claude/teams/{plan}/inboxes/team-lead.json` 으로 직접 폴링. idle notification (JSON) 은 필터링하고 실제 회신만 추출.
+
+team-lead 는 sub-agent SendMessage 후 30 초 내 자동 라우팅 미수신 시 즉시 inbox 폴링으로 우회. 침묵은 사고.
 
 **왜?**
 - 일회성 Agent 호출은 팀 컨텍스트 밖에서 동작 — `SendMessage`로 반복 협업 불가
@@ -208,6 +232,15 @@ team-lead 처리 흐름:
 ```
 eslint-disable / @ts-ignore / @ts-nocheck / // @ts-expect-error 자체 추가 금지.
 규칙 위반 발견 시 SendMessage 로 보고 — 정책 변경은 사용자 결정 영역.
+```
+
+**executor 의 verification 보고 시 "프로덕션 코드" 한정 표현 금지 (필수 — fos-accountbook plan014 관측)**: executor 가 phase verify 결과를 "tsc --noEmit 프로덕션 코드 오류 0" 형태로 보고하면 테스트 파일의 tsc 에러 (mock fixture 필드 누락 등) 가 누락된 상태로 합격 처리 가능. team-lead 가 후속 통합 검증 단계에서 발견 → executor 재투입 비용 발생.
+
+executor 스폰 프롬프트에 다음 가드 추가:
+```
+verification 보고는 반드시 명령 전체 (`pnpm tsc --noEmit`) 의 결과를 보고할 것.
+"프로덕션 코드만" "테스트 제외" 같은 한정 표현 금지 — tsc 는 tsconfig 의 include 전체를 검사하므로 분리 보고는 사고 위험.
+test 파일의 mock fixture 도 tsc 검증 대상. 통과 못하면 보고에 명시 + team-lead 결정 의뢰.
 ```
 
 ## 모델 라우팅 (task 규모 기반)
@@ -478,6 +511,11 @@ git worktree add .claude/worktrees/plan{N} plan/{N}-{slug}   # -b 없음 — /pl
 cd .claude/worktrees/plan{N}
 pnpm install                # 의존성 설치
 pnpm db:generate            # Drizzle schema 변경이 있으면 타입 재생성 (선택)
+
+# .env.local 복사 (필수 — fos-accountbook plan014 관측)
+# worktree 는 git-tracked 파일만 가지므로 main repo 의 .env.local 이 누락된다.
+# pnpm build 의 환경변수 검증 (BACKEND_API_URL 등) 이 실패해 전체 검증 차단됨.
+[ -f ../../../.env.local ] && cp ../../../.env.local .env.local || echo "⚠️ main repo 에 .env.local 없음 — build 검증 불가, 사용자에게 안내"
 ```
 
 **worktree 정리**: 메인 워킹 디렉토리로 돌아가서 `git worktree remove .claude/worktrees/plan{N}`. 로컬 브랜치 (`plan/{N}-{slug}`) 는 PR 머지 후 cleanup 시 삭제 (즉시 삭제 금지 — 사용자가 follow-up commit 추가할 수 있음).
