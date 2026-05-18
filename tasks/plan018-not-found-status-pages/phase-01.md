@@ -23,7 +23,7 @@
 
 `src/components/error/StatusCard.tsx` (Server Component OK — interactive 없음):
 
-**StatusCard 는 Server Component 로 고정** (no `"use client"`) — 이벤트 핸들러 prop 안 받음. 직렬화 사고 + devMessage 클라이언트 번들 노출 회피.
+**StatusCard 는 Server Component 로 고정** (no `"use client"`) — 이벤트 핸들러 prop 안 받음. 직렬화 사고 + devMessage 클라이언트 번들 노출 회피. ADR-F22 의 RSC server/client 경계 정책 적용.
 
 ```ts
 import { Compass, Lock, AlertCircle } from "lucide-react";
