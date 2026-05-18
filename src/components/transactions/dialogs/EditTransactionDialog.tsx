@@ -27,10 +27,10 @@ import type { UpdateIncomeFormState, Income } from "@/types/income";
 import type { RecurringExpense } from "@/types/recurring-expense";
 import type { CategoryResponse } from "@/types/category";
 import type { TransactionType } from "@/types/transaction";
+import { recurringExpenseSchema } from "@/lib/schemas/recurring-expense";
 import { TrendingDown, TrendingUp, Repeat } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
 
 type TransactionUnion = Expense | Income | RecurringExpense;
 
@@ -53,13 +53,6 @@ const initialExpenseState: UpdateExpenseFormState = { message: "", errors: {}, s
 const initialIncomeState: UpdateIncomeFormState = { message: "", errors: {}, success: false };
 const initialFormState: FormState = { success: false, errors: {}, message: "" };
 
-const recurringClientSchema = z.object({
-  name: z.string().trim().min(1, "이름은 필수입니다"),
-  categoryUuid: z.string().uuid("카테고리를 선택해주세요"),
-  amount: z.number().positive("금액은 0보다 커야 합니다"),
-  dayOfMonth: z.number().int().min(1).max(28, "1~28일만 선택 가능합니다"),
-});
-
 function isRecurringExpense(t: TransactionUnion): t is RecurringExpense {
   return "dayOfMonth" in t;
 }
@@ -80,7 +73,7 @@ async function updateRecurringWrapper(_prev: FormState, fd: FormData): Promise<F
     amount: Number(fd.get("amount")),
     dayOfMonth: Number(fd.get("dayOfMonth")),
   };
-  const parsed = recurringClientSchema.safeParse(raw);
+  const parsed = recurringExpenseSchema.partial().safeParse(raw);
   if (!parsed.success) {
     const errors: Record<string, string[]> = {};
     for (const issue of parsed.error.issues) {

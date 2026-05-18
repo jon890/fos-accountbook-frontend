@@ -26,10 +26,10 @@ import type { CreateExpenseFormState } from "@/types/expense";
 import type { CreateIncomeFormState } from "@/types/income";
 import type { CategoryResponse } from "@/types/category";
 import type { TransactionType } from "@/types/transaction";
+import { recurringExpenseSchema } from "@/lib/schemas/recurring-expense";
 import { TrendingDown, TrendingUp, Repeat } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
 
 interface AddTransactionDialogProps {
   open: boolean;
@@ -50,15 +50,8 @@ const initialIncomeState: CreateIncomeFormState = { message: "", errors: {}, suc
 const initialFormState: FormState = { success: false, errors: {}, message: "" };
 
 // createRecurringExpenseAction(data: unknown) → ActionResult 를
-// useActionState 호환 (prevState, FormData) → FormState 로 변환하는 wrapper
-// TODO: phase-03 에서 update wrapper 도 동일 패턴으로 추가
-const recurringClientSchema = z.object({
-  name: z.string().trim().min(1, "이름은 필수입니다"),
-  categoryUuid: z.string().uuid("카테고리를 선택해주세요"),
-  amount: z.number().positive("금액은 0보다 커야 합니다"),
-  dayOfMonth: z.number().int().min(1).max(28, "1~28일만 선택 가능합니다"),
-});
-
+// useActionState 호환 (prevState, FormData) → FormState 로 변환하는 wrapper.
+// 검증 schema 는 server action 과 공용 (recurringExpenseSchema) — 즉시 피드백 + 시그니처 변환 목적
 async function createRecurringWrapper(_prev: FormState, fd: FormData): Promise<FormState> {
   const raw = {
     name: String(fd.get("name") ?? ""),
@@ -66,7 +59,7 @@ async function createRecurringWrapper(_prev: FormState, fd: FormData): Promise<F
     amount: Number(fd.get("amount")),
     dayOfMonth: Number(fd.get("dayOfMonth")),
   };
-  const parsed = recurringClientSchema.safeParse(raw);
+  const parsed = recurringExpenseSchema.safeParse(raw);
   if (!parsed.success) {
     const errors: Record<string, string[]> = {};
     for (const issue of parsed.error.issues) {
