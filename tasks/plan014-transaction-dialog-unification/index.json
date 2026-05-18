@@ -1,6 +1,6 @@
 {
   "name": "plan014-transaction-dialog-unification",
-  "description": "Add/Edit 다이얼로그 3 도메인 (지출/수입/고정지출) 통합. AddTransactionDialog + EditTransactionDialog 단일화 + 3 segmented 토글 (gradient-expense/income/budget) + TransactionFormFields 공용. 진입점 6 곳 갱신 + legacy 다이얼로그 4 파일 제거.",
+  "description": "Add/Edit 다이얼로그 3 도메인 (지출/수입/고정지출) 통합. AddTransactionDialog + EditTransactionDialog 단일화 + 3 segmented 토글 (gradient-expense/income/budget) + TransactionFormFields 공용. Add/Edit 진입점 갱신 + legacy 다이얼로그 6 파일 (Add 3 + Edit 3) 제거.",
   "status": "pending",
   "created_at": "2026-05-11",
   "total_phases": 4,
@@ -35,7 +35,7 @@
     {
       "number": 3,
       "file": "phase-03.md",
-      "title": "EditTransactionDialog 신규 + Edit 진입점 갱신 + legacy 2 파일 (EditIncomeDialog / EditRecurringExpenseSheet) 제거",
+      "title": "EditTransactionDialog 신규 + Edit 진입점 갱신 + legacy 3 파일 (EditExpenseDialog / EditIncomeDialog / EditRecurringExpenseSheet) 제거",
       "model": "sonnet",
       "status": "pending"
     },

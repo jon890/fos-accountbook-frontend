@@ -1,13 +1,11 @@
 import { getIncomesAction } from "@/actions/income/get-incomes-action";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/empty/EmptyState";
-import type { CategoryResponse } from "@/types/category";
 import { Inbox } from "lucide-react";
 import { IncomeListClient } from "./IncomeListClient";
 
 interface IncomeListProps {
   familyId: string;
-  categories: CategoryResponse[];
   categoryId?: string;
   startDate?: string;
   endDate?: string;
@@ -20,7 +18,6 @@ interface IncomeListProps {
 
 export async function IncomeList({
   familyId,
-  categories,
   categoryId,
   startDate,
   endDate,
@@ -77,7 +74,6 @@ export async function IncomeList({
     <IncomeListClient
       incomes={incomes}
       familyUuid={familyId}
-      categories={categories}
       totalElements={totalElements}
       totalPages={totalPages}
       currentPage={currentPage + 1} // UI는 1-based

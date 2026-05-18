@@ -13,20 +13,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { deleteRecurringExpenseAction } from "@/actions/recurring-expense";
 import type { RecurringExpense } from "@/types/recurring-expense";
-import type { CategoryResponse } from "@/types/category";
 import { CheckCircle, Circle, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { EditRecurringExpenseSheet } from "./EditRecurringExpenseSheet";
+import { EditTransactionDialog } from "@/components/transactions/dialogs/EditTransactionDialog";
 
 interface RecurringExpenseItemProps {
   recurringExpense: RecurringExpense;
-  categories: CategoryResponse[];
 }
 
 export function RecurringExpenseItem({
   recurringExpense,
-  categories,
 }: RecurringExpenseItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -161,12 +158,12 @@ export function RecurringExpenseItem({
         </div>
       </div>
 
-      {/* 수정 Sheet */}
-      <EditRecurringExpenseSheet
+      {/* 수정 다이얼로그 */}
+      <EditTransactionDialog
         open={isEditOpen}
         onOpenChange={setIsEditOpen}
-        recurringExpense={recurringExpense}
-        categories={categories}
+        type="recurring"
+        transaction={recurringExpense}
       />
 
       {/* 삭제 확인 AlertDialog */}
