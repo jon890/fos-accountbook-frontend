@@ -5,8 +5,7 @@ import { formatExpenseDate } from "@/lib/utils/format";
 import { useTimeZone } from "@/lib/client/timezone-context";
 import { Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { EditIncomeDialog } from "../dialogs/EditIncomeDialog";
-import type { CategoryResponse } from "@/types/category";
+import { EditTransactionDialog } from "@/components/transactions/dialogs/EditTransactionDialog";
 import { deleteIncomeAction } from "@/actions/income/delete-income-action";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -24,13 +23,11 @@ import {
 interface IncomeItemProps {
   income: Income;
   familyUuid: string;
-  categories: CategoryResponse[];
 }
 
 export function IncomeItem({
   income,
   familyUuid,
-  categories,
 }: IncomeItemProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -183,13 +180,13 @@ export function IncomeItem({
       </div>
 
       {/* 수정 다이얼로그 */}
-      <EditIncomeDialog
+      <EditTransactionDialog
         key={isEditDialogOpen ? income.uuid : "closed"}
         open={isEditDialogOpen}
         onOpenChange={setIsEditDialogOpen}
-        income={income}
+        type="income"
+        transaction={income}
         familyUuid={familyUuid}
-        categories={categories}
       />
 
       {/* 삭제 확인 다이얼로그 */}

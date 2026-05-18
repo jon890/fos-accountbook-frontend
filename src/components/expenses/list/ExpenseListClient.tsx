@@ -1,14 +1,12 @@
 "use client";
 
-import { getFamilyCategoriesAction } from "@/actions/category/get-categories-action";
 import { DateGroupSection } from "@/components/transactions/DateGroupSection";
 import { groupTransactionsWithTotal } from "@/services/transaction/transaction-service";
 import type { CategoryResponse } from "@/types/category";
 import type { Expense } from "@/types/expense";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 import { DeleteExpenseDialog } from "../dialogs/DeleteExpenseDialog";
-import { EditExpenseDialog } from "../dialogs/EditExpenseDialog";
+import { EditTransactionDialog } from "@/components/transactions/dialogs/EditTransactionDialog";
 import { ExpenseItem } from "./ExpenseItem";
 import type { ExpenseItemData } from "@/types/expense";
 
@@ -25,32 +23,8 @@ export function ExpenseListClient({
 }: ExpenseListClientProps) {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [deletingExpense, setDeletingExpense] = useState<Expense | null>(null);
-  const [categories, setCategories] = useState<CategoryResponse[]>(initialCategories);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
-  useEffect(() => {
-    if (editingExpense && categories.length === 0) {
-      loadCategories();
-    }
-  }, [editingExpense, categories]);
-
-  const loadCategories = async () => {
-    setIsLoadingCategories(true);
-    try {
-      const result = await getFamilyCategoriesAction();
-      if (result.success) {
-        setCategories(result.data);
-      } else {
-        toast.error(result.error.message);
-      }
-    } catch {
-      toast.error("카테고리를 불러오는데 실패했습니다");
-    } finally {
-      setIsLoadingCategories(false);
-    }
-  };
-
-  const categoryMap = new Map(categories.map((cat) => [cat.uuid, cat]));
+  const categoryMap = new Map(initialCategories.map((cat) => [cat.uuid, cat]));
   const groups = groupTransactionsWithTotal(expenses);
 
   return (
@@ -86,22 +60,15 @@ export function ExpenseListClient({
       </div>
 
       {editingExpense && (
-        <EditExpenseDialog
+        <EditTransactionDialog
           key={editingExpense.uuid}
           open={!!editingExpense}
           onOpenChange={(open) => {
             if (!open) setEditingExpense(null);
           }}
-          expense={{
-            uuid: editingExpense.uuid,
-            amount: String(editingExpense.amount),
-            description: editingExpense.description || undefined,
-            date: editingExpense.date,
-            categoryUuid: editingExpense.categoryUuid,
-          }}
+          type="expense"
+          transaction={editingExpense}
           familyUuid={familyUuid}
-          categories={categories}
-          isLoadingCategories={isLoadingCategories}
         />
       )}
 

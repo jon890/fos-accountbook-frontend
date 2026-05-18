@@ -3,14 +3,12 @@
 import { DateGroupSection } from "@/components/transactions/DateGroupSection";
 import { groupTransactionsWithTotal } from "@/services/transaction/transaction-service";
 import type { Income } from "@/types/income";
-import type { CategoryResponse } from "@/types/category";
 import { useRouter, useSearchParams } from "next/navigation";
 import { IncomeItem } from "./IncomeItem";
 
 interface IncomeListClientProps {
   incomes: Income[];
   familyUuid: string;
-  categories: CategoryResponse[];
   totalElements: number;
   totalPages: number;
   currentPage: number;
@@ -20,7 +18,6 @@ interface IncomeListClientProps {
 export function IncomeListClient({
   incomes,
   familyUuid,
-  categories,
   totalPages,
   currentPage,
 }: IncomeListClientProps) {
@@ -47,7 +44,6 @@ export function IncomeListClient({
                 key={income.uuid}
                 income={income}
                 familyUuid={familyUuid}
-                categories={categories}
               />
             )}
           />

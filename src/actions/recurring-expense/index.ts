@@ -22,16 +22,10 @@ import type {
   GetRecurringExpensesResponse,
 } from "@/types/recurring-expense";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
-
-const createRecurringExpenseSchema = z.object({
-  name: z.string().trim().min(1, "이름은 필수입니다"),
-  categoryUuid: z.string().uuid("카테고리를 선택해주세요"),
-  amount: z.number().positive("금액은 0보다 커야 합니다"),
-  dayOfMonth: z.number().int().min(1).max(28, "1~28일만 선택 가능합니다"),
-});
-
-const updateRecurringExpenseSchema = createRecurringExpenseSchema.partial();
+import {
+  recurringExpenseSchema as createRecurringExpenseSchema,
+  updateRecurringExpenseSchema,
+} from "@/lib/schemas/recurring-expense";
 
 export async function createRecurringExpenseAction(
   data: unknown

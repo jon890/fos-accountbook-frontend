@@ -34,12 +34,12 @@ interface EditTransactionDialogProps<T> {
 - 3 토글 표시 — 현재 type 만 활성, 나머지 `disabled className="opacity-40 cursor-not-allowed"` + aria-disabled
 - TransactionFormFields 사용 — initial 값 prefill (transaction 의 amount/category/date/name/dayOfMonth/description)
 
-### 2. 3 Update Action dispatch 분기
+### 2. 3 Update Action dispatch 분기 + recurring wrapper
 
 ```ts
-const [expenseState, expenseFormAction] = useActionState(updateExpenseAction, initialState);
-const [incomeState,  incomeFormAction]  = useActionState(updateIncomeAction,  initialState);
-const [recurringState, recurringFormAction] = useActionState(updateRecurringExpenseAction, initialState);
+const [expenseState, expenseFormAction] = useActionState(updateExpenseAction, initialFormState);
+const [incomeState,  incomeFormAction]  = useActionState(updateIncomeAction,  initialFormState);
+const [recurringState, recurringFormAction] = useActionState(updateRecurringWrapper, initialFormState);
 
 const formAction =
   type === "expense"   ? expenseFormAction :
@@ -48,6 +48,39 @@ const formAction =
 ```
 
 `<input type="hidden" name="uuid" value={transaction.uuid} />` 로 식별자 전달.
+
+**recurring wrapper** (phase-01 패턴과 동일, update 는 uuid 2 인자):
+```ts
+async function updateRecurringWrapper(_prev: FormState, fd: FormData): Promise<FormState> {
+  const uuid = String(fd.get("uuid") ?? "");
+  const raw = {
+    name: String(fd.get("name") ?? ""),
+    categoryUuid: String(fd.get("categoryUuid") ?? ""),
+    amount: Number(fd.get("amount")),
+    dayOfMonth: Number(fd.get("dayOfMonth")),
+  };
+  const parsed = recurringClientSchema.partial().safeParse(raw);
+  if (!parsed.success) { /* phase-01 wrapper 와 동일한 issue.path → errors 매핑 */ }
+  const result = await updateRecurringExpenseAction(uuid, parsed.data);
+  return result.success
+    ? { success: true, errors: {}, message: "고정지출이 수정되었습니다" }
+    : { success: false, errors: { _form: [result.error?.message ?? "수정 실패"] }, message: "" };
+}
+```
+
+### 2-1. transaction prop union narrowing
+
+`transaction: Expense | Income | RecurringExpense` union 으로 받되, type 별 필드 접근 시 narrowing helper 사용:
+
+```ts
+const isRecurring = (t: TransactionUnion): t is RecurringExpense => "dayOfMonth" in t;
+const isIncome = (t: TransactionUnion): t is Income => "incomeAt" in t || (!("dayOfMonth" in t) && type === "income");
+// 사용
+const initialDayOfMonth = isRecurring(transaction) ? transaction.dayOfMonth : 1;
+const initialName = isRecurring(transaction) ? transaction.name : "";
+```
+
+`as` 캐스팅 회피. discriminated union 으로 만들 수도 있지만 별도 type 필드 추가가 도메인 타입 침범이라 본 plan 은 in-operator type guard 권장.
 
 ### 3. Edit 진입점 갱신
 
@@ -97,7 +130,9 @@ grep -rln 'ExpenseFormFields' src/ --include='*.tsx' --include='*.ts' | grep -v 
 
 본 phase 에선 위치 이동 안 함 (변경 폭 최소화) — 후속 cleanup plan.
 
-### 6. 자동 verification
+Verification 명령은 별도 `## Verification` 섹션 참조.
+
+## Verification
 
 ```bash
 # cwd: /Users/nhn/personal/fos-accountbook

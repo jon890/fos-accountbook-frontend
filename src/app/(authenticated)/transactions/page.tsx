@@ -151,7 +151,6 @@ export default async function TransactionsPage({
         >
           <IncomeList
             familyId={familyUuid}
-            categories={categories}
             categoryId={resolvedSearchParams.categoryId}
             startDate={startDate}
             endDate={endDate}
@@ -175,7 +174,6 @@ export default async function TransactionsPage({
         >
           <RecurringExpenseListWrapper
             month={currentMonth}
-            categories={categories}
           />
         </Suspense>
       }
@@ -183,13 +181,7 @@ export default async function TransactionsPage({
   );
 }
 
-async function RecurringExpenseListWrapper({
-  month,
-  categories,
-}: {
-  month: string;
-  categories: CategoryResponse[];
-}) {
+async function RecurringExpenseListWrapper({ month }: { month: string }) {
   const result = await getRecurringExpensesAction(month);
 
   if (!result.success) {
@@ -202,5 +194,5 @@ async function RecurringExpenseListWrapper({
     );
   }
 
-  return <RecurringExpenseList data={result.data} categories={categories} />;
+  return <RecurringExpenseList data={result.data} />;
 }

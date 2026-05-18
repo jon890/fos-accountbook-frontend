@@ -147,7 +147,7 @@ jobs:
 ### 대상
 
 - `RecurringExpenseList`: 목록 렌더링 + 빈 상태 처리
-- `AddRecurringExpenseSheet`: 폼 입력 → submit → Action 호출
+- `AddTransactionDialog` / `EditTransactionDialog`: 3 type 토글 + 폼 입력 → submit → Action 호출 (plan014 에서 23 테스트 적용 완료 — 추가 시나리오는 향후)
 
 ### 도구
 

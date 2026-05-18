@@ -3,21 +3,16 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { GetRecurringExpensesResponse } from "@/types/recurring-expense";
-import type { CategoryResponse } from "@/types/category";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { AddRecurringExpenseSheet } from "./AddRecurringExpenseSheet";
+import { AddTransactionDialog } from "@/components/transactions/dialogs/AddTransactionDialog";
 import { RecurringExpenseItem } from "./RecurringExpenseItem";
 
 interface RecurringExpenseListProps {
   data: GetRecurringExpensesResponse;
-  categories: CategoryResponse[];
 }
 
-export function RecurringExpenseList({
-  data,
-  categories,
-}: RecurringExpenseListProps) {
+export function RecurringExpenseList({ data }: RecurringExpenseListProps) {
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   return (
@@ -47,7 +42,6 @@ export function RecurringExpenseList({
                 <RecurringExpenseItem
                   key={item.uuid}
                   recurringExpense={item}
-                  categories={categories}
                 />
               ))}
             </div>
@@ -64,11 +58,11 @@ export function RecurringExpenseList({
         고정지출 추가
       </Button>
 
-      {/* 추가 Sheet */}
-      <AddRecurringExpenseSheet
+      {/* 거래 추가 다이얼로그 */}
+      <AddTransactionDialog
         open={isAddOpen}
         onOpenChange={setIsAddOpen}
-        categories={categories}
+        defaultType="recurring"
       />
     </div>
   );
