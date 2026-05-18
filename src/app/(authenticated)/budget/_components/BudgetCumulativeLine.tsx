@@ -82,7 +82,7 @@ export function BudgetCumulativeLine({
 
   const renderDot = (props: { cx?: number; cy?: number; payload?: ChartEntry; index?: number }) => {
     const { cx, cy, payload } = props;
-    if (!payload?.exceeded) return <g key={`dot-${props.index}`} />;
+    if (cx == null || cy == null || !payload?.exceeded) return <g key={`dot-${props.index}`} />;
     return (
       <circle
         key={`dot-exceeded-${props.index}`}

@@ -58,7 +58,7 @@ export function BudgetCategoryBars({
                   className="text-sm font-bold"
                   style={{ color: tone.fg }}
                 >
-                  {item.icon || item.name[0]}
+                  {item.icon || item.name[0] || "?"}
                 </span>
               </div>
 

@@ -87,7 +87,7 @@ export function BudgetClient({
             <Button
               variant="default"
               onClick={() => router.push("/settings")}
-              className="bg-brand-500 text-white hover:opacity-90 transition-opacity"
+              className="gradient-budget text-white shadow-sm hover:opacity-90 transition-opacity"
             >
               <Settings className="w-4 h-4" />
               예산 설정하기
