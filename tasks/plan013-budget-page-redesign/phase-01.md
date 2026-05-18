@@ -24,7 +24,6 @@
 | `bg-card` | `bg-bg-elev` |
 | `bg-muted` | `bg-bg-muted` |
 | `text-destructive` | `text-expense` |
-| `border-border` | `border-border` (유지 — 토큰 이름 동일) |
 
 ### 2. Hero 카드 — Dashboard BudgetHeroCard 와 시각 일치
 

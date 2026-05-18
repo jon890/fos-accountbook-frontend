@@ -13,6 +13,11 @@ import { getDashboardStatsAction } from "@/actions/dashboard/get-dashboard-stats
 import { getMonthlyDailyStatsAction } from "@/actions/dashboard/get-monthly-daily-stats-action";
 import { getMonthlyCategoryBreakdownAction } from "@/actions/dashboard/get-monthly-category-breakdown-action";
 
+// year/month 는 stats 결과 의존 없이 server 시점 기준으로 미리 계산 (Promise.all 동시 호출 위해)
+const now = new Date();
+const year = now.getFullYear();
+const month = now.getMonth() + 1;
+
 const [stats, daily, breakdown] = await Promise.all([
   getDashboardStatsAction(),
   getMonthlyDailyStatsAction(year, month),
@@ -20,7 +25,10 @@ const [stats, daily, breakdown] = await Promise.all([
 ]);
 ```
 
-각 Action 결과를 `getActionDataOrDefault` 로 unwrap 후 `BudgetClient` 에 props 전달:
+각 Action 결과를 `getActionDataOrDefault` 로 unwrap 후 `BudgetClient` 에 props 전달.
+**중요 — 반환 형 차이**:
+- `getMonthlyDailyStatsAction` → `ActionResult<DailyTransactionSummary[]>` (배열 그대로, `items` 래퍼 없음)
+- `getMonthlyCategoryBreakdownAction` → `ActionResult<MonthlyCategoryBreakdown>` (`items` 필드 있음)
 
 ```tsx
 <BudgetClient
@@ -29,31 +37,27 @@ const [stats, daily, breakdown] = await Promise.all([
   remainingBudget={...}
   year={...}
   month={...}
-  dailyExpenses={daily.items}
-  categoryItems={breakdown.items}
+  dailyExpenses={daily}              // DailyTransactionSummary[] 그대로
+  categoryItems={breakdown.items}    // CategoryBreakdownItem[]
 />
 ```
 
-`BudgetClient.tsx` 의 props 타입 확장 + 내부에서 `BudgetCumulativeLine` / `BudgetCategoryBars` 컴포넌트 배치.
+`BudgetClient.tsx` 의 props 타입 확장 + 내부에서 `BudgetCumulativeLine` / `BudgetCategoryBars` 컴포넌트 배치. 통계 단락 (일 평균 / 남은 일수 / 권장 일 예산) 은 phase-01 결정대로 `BudgetClient` 내부 inline 으로 유지 (별도 `BudgetDailyStats` 컴포넌트 분리 금지 — phase-01 본문과 일관).
 
 ### 2. 레이아웃 구조
 
 ```
 <div className="p-4 md:p-6 space-y-4 md:space-y-6">
   {/* 헤더 */}
-  <BudgetHeader year={month} />
+  <BudgetHeader year={year} month={month} />
 
-  {/* Hero — phase 01 결과 */}
-  <BudgetHeroCard ... />
-
-  {/* 3-col 통계 — phase 01 결과 */}
-  <BudgetDailyStats dailyAverage daysRemaining recommended />
+  {/* Hero + 3-col 통계 단락 — phase 01 결과 (BudgetClient 내부 inline) */}
 
   {/* 라인 차트 — phase 02 (budget > 0 시만) */}
-  {hasBudget && <BudgetCumulativeLine dailyExpenses budget daysInMonth />}
+  {hasBudget && <BudgetCumulativeLine dailyExpenses={daily} budget={budget} daysInMonth={daysInMonth} />}
 
   {/* 카테고리 top 5 — phase 03 */}
-  <BudgetCategoryBars items budget monthlyExpense />
+  <BudgetCategoryBars items={breakdown.items} budget={budget} monthlyExpense={monthlyExpense} />
 
   {/* 설정 링크 */}
   <Link href="/settings" />

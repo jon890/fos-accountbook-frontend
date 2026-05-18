@@ -5,8 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/client/utils";
+import { formatCurrency } from "@/lib/utils/format";
+import type { CategoryBreakdownItem } from "@/types/dashboard";
 import { AlertTriangle, PiggyBank, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { BudgetCategoryBars } from "./BudgetCategoryBars";
+import { BudgetCumulativeLine } from "./BudgetCumulativeLine";
 
 interface BudgetClientProps {
   budget: number;
@@ -14,6 +18,8 @@ interface BudgetClientProps {
   remainingBudget: number;
   year: number;
   month: number;
+  dailyExpenses: { date: string; income: number; expense: number }[];
+  categoryItems: CategoryBreakdownItem[];
 }
 
 export function BudgetClient({
@@ -22,6 +28,8 @@ export function BudgetClient({
   remainingBudget,
   year,
   month,
+  dailyExpenses,
+  categoryItems,
 }: BudgetClientProps) {
   const router = useRouter();
 
@@ -36,15 +44,25 @@ export function BudgetClient({
     ? Math.max(Math.round((remainingBudget / budget) * 100), 0)
     : 0;
 
+  const today = new Date();
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const dayOfMonth = today.getDate();
+  const daysRemaining = Math.max(daysInMonth - dayOfMonth, 0);
+
+  const dailyAverage =
+    dayOfMonth > 0 ? Math.round(monthlyExpense / dayOfMonth) : 0;
+  const recommendedDailyBudget =
+    daysRemaining > 0
+      ? Math.max(Math.round(remainingBudget / daysRemaining), 0)
+      : 0;
+
   return (
     <div className="p-4 md:p-6 space-y-4 md:space-y-6">
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-foreground">
-            예산 관리
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
+          <h1 className="text-xl md:text-2xl font-bold text-fg">예산 관리</h1>
+          <p className="text-sm text-fg-muted mt-0.5">
             {year}년 {month}월
           </p>
         </div>
@@ -55,15 +73,15 @@ export function BudgetClient({
 
       {/* 예산 미설정 빈 상태 */}
       {!hasBudget && (
-        <Card className="border-dashed border-2 border-border bg-card">
+        <Card className="border-dashed border-2 border-border bg-bg-elev">
           <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="p-4 bg-muted rounded-full mb-4">
-              <PiggyBank className="w-8 h-8 text-muted-foreground" />
+            <div className="p-4 bg-brand-50 rounded-full mb-4">
+              <PiggyBank className="w-8 h-8 text-brand-500 opacity-85" />
             </div>
-            <p className="text-base font-medium text-foreground mb-1">
+            <p className="text-[17px] font-bold text-fg mb-1">
               예산이 설정되지 않았습니다
             </p>
-            <p className="text-sm text-muted-foreground mb-6">
+            <p className="text-[13px] text-fg-muted mb-6">
               월별 예산을 설정하면 지출을 효과적으로 관리할 수 있어요
             </p>
             <Button
@@ -99,14 +117,12 @@ export function BudgetClient({
               )}
             </div>
 
-            <p className="text-3xl md:text-4xl font-bold mb-1">
-              ₩
-              {isBudgetExceeded
-                ? Math.abs(remainingBudget).toLocaleString()
-                : remainingBudget.toLocaleString()}
+            <p className="num text-4xl md:text-5xl font-bold mb-1">
+              {isBudgetExceeded ? "-" : ""}
+              {formatCurrency(Math.abs(remainingBudget))}
             </p>
             <p className="text-xs mb-4 gradient-card-sublabel">
-              총 예산 ₩{budget.toLocaleString()}
+              총 예산 {formatCurrency(budget)} / {daysRemaining}일 남음
             </p>
 
             <div className="space-y-1.5">
@@ -123,22 +139,59 @@ export function BudgetClient({
         </Card>
       )}
 
+      {/* 3-col 통계 단락 */}
+      {hasBudget && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+          <Card className="bg-bg-elev border-border rounded-xl">
+            <CardContent className="p-4">
+              <p className="text-xs text-fg-muted mb-1">일 평균 지출</p>
+              <p className="num text-xl md:text-2xl font-bold text-fg">
+                {formatCurrency(dailyAverage)}
+              </p>
+              <p className="text-xs text-fg-muted mt-1">{dayOfMonth}일 기준</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-bg-elev border-border rounded-xl">
+            <CardContent className="p-4">
+              <p className="text-xs text-fg-muted mb-1">남은 일수</p>
+              <p className="num text-xl md:text-2xl font-bold text-fg">
+                {daysRemaining}일
+              </p>
+              <p className="text-xs text-fg-muted mt-1">{daysInMonth}일 중</p>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-bg-elev border-border rounded-xl">
+            <CardContent className="p-4">
+              <p className="text-xs text-fg-muted mb-1">권장 일 예산</p>
+              <p className="num text-xl md:text-2xl font-bold text-fg">
+                {formatCurrency(recommendedDailyBudget)}
+              </p>
+              <p className="text-xs text-fg-muted mt-1">
+                남은 예산 ÷ 남은 일수
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       {/* 세부 내역 */}
       {hasBudget && (
         <div className="grid grid-cols-2 gap-3 md:gap-4">
           {/* 이번 달 지출 */}
-          <Card className="bg-card border-border">
+          <Card className="bg-bg-elev border-border">
             <CardHeader className="pb-1 p-4">
-              <CardTitle className="text-xs text-muted-foreground font-medium">
+              <CardTitle className="text-xs text-fg-muted font-medium">
                 이번 달 지출
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 pt-0">
-              <p className="text-lg md:text-xl font-bold text-foreground">
-                ₩{monthlyExpense.toLocaleString()}
+              <p className="text-lg md:text-xl font-bold text-fg">
+                {formatCurrency(monthlyExpense)}
               </p>
               <div className="mt-2 space-y-1">
-                <div className="flex justify-between text-xs text-muted-foreground">
+                <div className="flex justify-between text-xs text-fg-muted">
                   <span>예산 대비</span>
                   <span>{usagePercent}%</span>
                 </div>
@@ -148,9 +201,9 @@ export function BudgetClient({
           </Card>
 
           {/* 남은 예산 */}
-          <Card className="bg-card border-border">
+          <Card className="bg-bg-elev border-border">
             <CardHeader className="pb-1 p-4">
-              <CardTitle className="text-xs text-muted-foreground font-medium">
+              <CardTitle className="text-xs text-fg-muted font-medium">
                 {isBudgetExceeded ? "초과 금액" : "남은 예산"}
               </CardTitle>
             </CardHeader>
@@ -158,16 +211,14 @@ export function BudgetClient({
               <p
                 className={cn(
                   "text-lg md:text-xl font-bold",
-                  isBudgetExceeded ? "text-destructive" : "text-foreground"
+                  isBudgetExceeded ? "text-expense" : "text-fg"
                 )}
               >
-                ₩
-                {isBudgetExceeded
-                  ? Math.abs(remainingBudget).toLocaleString()
-                  : remainingBudget.toLocaleString()}
+                {isBudgetExceeded ? "-" : ""}
+                {formatCurrency(Math.abs(remainingBudget))}
               </p>
               <div className="mt-2 space-y-1">
-                <div className="flex justify-between text-xs text-muted-foreground">
+                <div className="flex justify-between text-xs text-fg-muted">
                   <span>남은 비율</span>
                   <span>{isBudgetExceeded ? 0 : remainingPercent}%</span>
                 </div>
@@ -181,12 +232,24 @@ export function BudgetClient({
         </div>
       )}
 
-      {/* 예산 설정 링크 */}
+      {/* 라인 차트 */}
+      {hasBudget && (
+        <BudgetCumulativeLine
+          dailyExpenses={dailyExpenses}
+          budget={budget}
+          daysInMonth={daysInMonth}
+        />
+      )}
+
+      {/* 카테고리 top 5 */}
+      <BudgetCategoryBars items={categoryItems} budget={budget} />
+
+      {/* 예산 수정 링크 */}
       {hasBudget && (
         <Button
           variant="outline"
           onClick={() => router.push("/settings")}
-          className="w-full rounded-xl text-muted-foreground"
+          className="w-full rounded-xl text-fg-muted"
         >
           <Settings className="w-4 h-4" />
           예산 수정하기

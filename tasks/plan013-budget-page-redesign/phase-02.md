@@ -7,7 +7,8 @@
 ## Context (자기완결)
 
 - 데이터: `getMonthlyDailyStatsAction(year, month)` — analytics 페이지에서 이미 사용
-  - 응답: `{ items: { date: string; expense: number; income: number }[] }`
+  - 반환 형: `ActionResult<DailyTransactionSummary[]>` — 배열을 그대로 반환 (`items` 래퍼 없음)
+  - `DailyTransactionSummary = { date: string; income: number; expense: number }` (`src/services/dashboard/dashboard-service.ts` 의 export type)
 - recharts 이미 의존성 설치됨 (`src/components/dashboard/CategoryDistribution.tsx` 의 PieChart 참조)
 - 라인 차트는 budget 페이지 단독 — 재사용 컴포넌트 위치 `src/app/(authenticated)/budget/_components/`
 
@@ -19,8 +20,8 @@
 
 ```ts
 interface BudgetCumulativeLineProps {
-  dailyExpenses: { date: string; expense: number }[];   // 월 전체 일별 지출
-  budget: number;                                       // 월 예산
+  dailyExpenses: { date: string; income: number; expense: number }[];   // DailyTransactionSummary[] 형태 그대로
+  budget: number;                                                       // 월 예산
   daysInMonth: number;
 }
 ```
@@ -28,7 +29,7 @@ interface BudgetCumulativeLineProps {
 내부 로직:
 - 일별 누적 시퀀스 계산: `acc[i] = acc[i-1] + expense[i]`
 - 라인 데이터: `[ { day: 1, cumulative: 0 }, ..., { day: daysInMonth, cumulative: total } ]`
-- 예산 수평선: `ReferenceLine y={budget} stroke="brand-700" strokeDasharray="4 4"`
+- 예산 수평선: `ReferenceLine y={budget} stroke="var(--color-brand-700)" strokeDasharray="4 4"`
 - 라인: `stroke="var(--color-brand-500)"`, `strokeWidth={2.5}`, fill area gradient (옵션)
 - 초과 지점: 누적 ≥ 예산 시 빨간 dot
 
@@ -67,8 +68,8 @@ pnpm build
 
 test -f src/app/\(authenticated\)/budget/_components/BudgetCumulativeLine.tsx
 
-# "use client" 첫 줄
-head -1 src/app/\(authenticated\)/budget/_components/BudgetCumulativeLine.tsx | grep -q 'use client'
+# "use client" 첫 줄 (따옴표 포함)
+head -1 src/app/\(authenticated\)/budget/_components/BudgetCumulativeLine.tsx | grep -q '"use client"'
 
 # recharts import + ReferenceLine
 grep -nE 'from "recharts"' src/app/\(authenticated\)/budget/_components/BudgetCumulativeLine.tsx | wc -l   # >= 1
