@@ -6,7 +6,7 @@ import type { GetRecurringExpensesResponse } from "@/types/recurring-expense";
 import type { CategoryResponse } from "@/types/category";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { AddRecurringExpenseSheet } from "./AddRecurringExpenseSheet";
+import { AddTransactionDialog } from "@/components/transactions/dialogs/AddTransactionDialog";
 import { RecurringExpenseItem } from "./RecurringExpenseItem";
 
 interface RecurringExpenseListProps {
@@ -64,11 +64,11 @@ export function RecurringExpenseList({
         고정지출 추가
       </Button>
 
-      {/* 추가 Sheet */}
-      <AddRecurringExpenseSheet
+      {/* 거래 추가 다이얼로그 */}
+      <AddTransactionDialog
         open={isAddOpen}
         onOpenChange={setIsAddOpen}
-        categories={categories}
+        defaultType="recurring"
       />
     </div>
   );

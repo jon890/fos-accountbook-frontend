@@ -1,7 +1,6 @@
 "use client";
 
-import { AddExpenseDialog } from "@/components/expenses/dialogs/AddExpenseDialog";
-import { AddIncomeDialog } from "@/components/incomes/dialogs/AddIncomeDialog";
+import { AddTransactionDialog } from "@/components/transactions/dialogs/AddTransactionDialog";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Settings, UserPlus, TrendingUp } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -11,15 +10,17 @@ import { InviteFamilyDialog } from "./InviteFamilyDialog";
 export function QuickActions() {
   const router = useRouter();
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
-  const [addExpenseDialogOpen, setAddExpenseDialogOpen] = useState(false);
-  const [addIncomeDialogOpen, setAddIncomeDialogOpen] = useState(false);
+  const [dialogState, setDialogState] = useState<{
+    open: boolean;
+    type: "expense" | "income";
+  }>({ open: false, type: "expense" });
 
   const handleAddExpenseClick = () => {
-    setAddExpenseDialogOpen(true);
+    setDialogState({ open: true, type: "expense" });
   };
 
   const handleAddIncomeClick = () => {
-    setAddIncomeDialogOpen(true);
+    setDialogState({ open: true, type: "income" });
   };
 
   const handleCategoryClick = () => {
@@ -119,14 +120,10 @@ export function QuickActions() {
         onOpenChange={setInviteDialogOpen}
       />
 
-      <AddExpenseDialog
-        open={addExpenseDialogOpen}
-        onOpenChange={setAddExpenseDialogOpen}
-      />
-
-      <AddIncomeDialog
-        open={addIncomeDialogOpen}
-        onOpenChange={setAddIncomeDialogOpen}
+      <AddTransactionDialog
+        open={dialogState.open}
+        onOpenChange={(open) => setDialogState((s) => ({ ...s, open }))}
+        defaultType={dialogState.type}
       />
     </>
   );

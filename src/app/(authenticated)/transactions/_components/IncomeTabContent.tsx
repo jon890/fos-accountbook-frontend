@@ -3,29 +3,30 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { AddIncomeDialog } from "@/components/incomes/dialogs/AddIncomeDialog";
+import { AddTransactionDialog } from "@/components/transactions/dialogs/AddTransactionDialog";
 
 /**
  * Income Tab Content Component
  * Transactions 페이지의 수입 탭 전용 컴포넌트
- * familyUuid는 AddIncomeDialog가 카테고리 페칭 시 직접 획득
+ * 카테고리는 AddTransactionDialog가 내부에서 직접 fetch
  */
 export function IncomeTabContent() {
-  const [addIncomeDialogOpen, setAddIncomeDialogOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <>
       <Button
-        onClick={() => setAddIncomeDialogOpen(true)}
+        onClick={() => setIsOpen(true)}
         className="gradient-income hover:opacity-90 text-white"
       >
         <Plus className="w-4 h-4 mr-2" />
         수입 추가
       </Button>
 
-      <AddIncomeDialog
-        open={addIncomeDialogOpen}
-        onOpenChange={setAddIncomeDialogOpen}
+      <AddTransactionDialog
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        defaultType="income"
       />
     </>
   );

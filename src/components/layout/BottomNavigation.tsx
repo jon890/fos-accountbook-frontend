@@ -1,6 +1,6 @@
 "use client";
 
-import { AddExpenseDialog } from "@/components/expenses/dialogs/AddExpenseDialog";
+import { AddTransactionDialog } from "@/components/transactions/dialogs/AddTransactionDialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/client/utils";
 import type { LucideIcon } from "lucide-react";
@@ -101,10 +101,11 @@ export function BottomNavigation() {
         </div>
       </div>
 
-      {/* 지출 추가 다이얼로그 */}
-      <AddExpenseDialog
+      {/* 거래 추가 다이얼로그 */}
+      <AddTransactionDialog
         open={isExpenseDialogOpen}
         onOpenChange={setIsExpenseDialogOpen}
+        defaultType="expense"
       />
     </>
   );

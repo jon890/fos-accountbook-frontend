@@ -52,7 +52,7 @@ export function TransactionsPageClient({
           ) : activeTab === "incomes" ? (
             <IncomeTabContent />
           ) : (
-            <RecurringTabContent categories={categories} />
+            <RecurringTabContent />
           )}
         </div>
       </div>

@@ -3,14 +3,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { AddRecurringExpenseSheet } from "@/components/recurring-expense/AddRecurringExpenseSheet";
-import type { CategoryResponse } from "@/types/category";
+import { AddTransactionDialog } from "@/components/transactions/dialogs/AddTransactionDialog";
 
-interface RecurringTabContentProps {
-  categories: CategoryResponse[];
-}
-
-export function RecurringTabContent({ categories }: RecurringTabContentProps) {
+export function RecurringTabContent() {
   const [isAddOpen, setIsAddOpen] = useState(false);
 
   return (
@@ -23,10 +18,10 @@ export function RecurringTabContent({ categories }: RecurringTabContentProps) {
         고정지출 추가
       </Button>
 
-      <AddRecurringExpenseSheet
+      <AddTransactionDialog
         open={isAddOpen}
         onOpenChange={setIsAddOpen}
-        categories={categories}
+        defaultType="recurring"
       />
     </>
   );
