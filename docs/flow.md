@@ -354,6 +354,33 @@ helper: `services/transaction/transaction-service.ts` 의 `groupTransactionsWith
 
 ---
 
+## 14-1. Header / TopBar 구조 (plan019)
+
+`src/components/layout/Header.tsx` 가 `(authenticated)/layout.tsx` 의 sticky top bar — 전 인증 페이지에 일관 표시.
+
+```
+[Header sticky top-0 z-50 backdrop-blur-xl bg-bg-elev/95 border-b border-border]
+    ├─ 좌: 로고 (brand-500 Wallet 아이콘 + "우리집 가계부" text-fg 단색)
+    │      → /dashboard 링크
+    │
+    └─ 우 (md+ 전용 / 모바일 별도 진입점):
+            ├─ FamilySelectorDropdown (md+ 전용 표시, 모바일은 Avatar dropdown 안 진입)
+            ├─ NotificationBell (Popover trigger — plan017)
+            └─ Avatar dropdown
+                    ├─ 프로필 (이름 + 이메일)
+                    ├─ [모바일 전용] 가족 전환 → FamilySelector Sheet
+                    ├─ 설정 → /settings
+                    └─ 로그아웃 (text-expense — variant=destructive 폐기)
+```
+
+토큰 적용:
+- `bg-bg-elev/95` backdrop-blur (light/dark 자동)
+- `border-border` (하드 회색 폐기)
+- `ring-brand-100` Avatar (`ring-blue-100` 폐기)
+- `text-fg-muted` 보조 텍스트 (`text-muted-foreground` 폐기)
+
+---
+
 ## 14-2. 빈 상태 / 에러 / 로딩 (plan012)
 
 App Router 의 segment 경계에서 일관 표시:
