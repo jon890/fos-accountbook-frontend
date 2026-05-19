@@ -368,7 +368,7 @@ helper: `services/transaction/transaction-service.ts` 의 `groupTransactionsWith
             ├─ NotificationBell (Popover trigger — plan017)
             └─ Avatar dropdown
                     ├─ 프로필 (이름 + 이메일)
-                    ├─ [모바일 전용] 가족 전환 → FamilySelector Sheet
+                    ├─ [모바일 전용] 가족 전환 → Sheet bottom + FamilySelectorList
                     ├─ 설정 → /settings
                     └─ 로그아웃 (text-expense — variant=destructive 폐기)
 ```
@@ -378,6 +378,7 @@ helper: `services/transaction/transaction-service.ts` 의 `groupTransactionsWith
 - `border-border` (하드 회색 폐기)
 - `ring-brand-100` Avatar (`ring-blue-100` 폐기)
 - `text-fg-muted` 보조 텍스트 (`text-muted-foreground` 폐기)
+- `text-brand-fg` 로고 아이콘 + AvatarFallback (`text-white` 폐기, ADR-F23)
 
 ---
 
