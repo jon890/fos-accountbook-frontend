@@ -4,6 +4,7 @@ import { selectFamilyAction } from "@/actions/family/select-family-action";
 import { useSessionRefresh } from "@/lib/client/use-session-refresh";
 import type { Family } from "@/types/family";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface FamilySelectorListProps {
   families: Family[];
@@ -27,7 +28,7 @@ export function FamilySelectorList({
       router.refresh();
       onSelected?.(familyUuid);
     } else {
-      console.error("Failed to select family:", result.error.message);
+      toast.error("가족 전환에 실패했습니다.");
     }
   };
 

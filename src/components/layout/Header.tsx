@@ -21,6 +21,7 @@ import { signOutAction } from "@/actions/auth/signout-action";
 import { getFamiliesAction } from "@/actions/family/get-families-action";
 import { FamilySelectorList } from "@/components/families/FamilySelectorList";
 import type { Family } from "@/types/family";
+import { toast } from "sonner";
 
 interface HeaderProps {
   session: Session;
@@ -52,8 +53,12 @@ export function Header({ session, selectedFamilyUuid }: HeaderProps) {
 
   const handleOpenFamilySheet = async () => {
     const result = await getFamiliesAction();
-    if (result.success && result.data) setSheetFamilies(result.data);
-    setFamilySheetOpen(true);
+    if (result.success && result.data) {
+      setSheetFamilies(result.data);
+      setFamilySheetOpen(true);
+    } else {
+      toast.error("가족 목록을 불러오지 못했습니다.");
+    }
   };
 
   return (
