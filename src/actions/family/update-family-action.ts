@@ -11,7 +11,7 @@ import {
   type ActionResult,
 } from "@/lib/errors";
 import { requireAuth } from "@/lib/server/auth/auth-helpers";
-import { updateFamily } from "@/services/family/family-service";
+import { getFamilies, updateFamily } from "@/services/family/family-service";
 import type { Family, UpdateFamilyRequest } from "@/types/family";
 import { revalidatePath } from "next/cache";
 
@@ -28,6 +28,12 @@ export async function updateFamilyAction(
         familyUuid,
         "UUID는 필수입니다"
       );
+    }
+
+    // 권한 검증: 사용자가 해당 family 멤버인지 확인 (백엔드가 세션 토큰 기준으로 본인 가족만 반환)
+    const families = await getFamilies();
+    if (!families.some((f) => f.uuid === familyUuid)) {
+      throw ActionError.entityNotFound("가족", familyUuid);
     }
 
     const family = await updateFamily(familyUuid, data);

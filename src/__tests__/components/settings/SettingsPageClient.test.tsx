@@ -25,6 +25,10 @@ jest.mock("@/lib/client/use-session-refresh", () => ({
     refreshSession: jest.fn().mockResolvedValue(undefined),
   }),
 }));
+// useMediaQuery 훅 모킹 (BudgetEditDialog 에서 사용, window.matchMedia 없는 jsdom 환경)
+jest.mock("@/hooks/useMediaQuery", () => ({
+  useMediaQuery: jest.fn().mockReturnValue(true),
+}));
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(() => ({
@@ -118,6 +122,8 @@ describe("SettingsPageClient", () => {
         <SettingsPageClient
           families={mockFamilies}
           defaultFamilyUuid="family-2"
+          userName={null}
+          userEmail={null}
         />
       );
 
@@ -130,7 +136,7 @@ describe("SettingsPageClient", () => {
 
     it("defaultFamilyUuid가 null이면 아무것도 선택되지 않는다", () => {
       render(
-        <SettingsPageClient families={mockFamilies} defaultFamilyUuid={null} />
+        <SettingsPageClient families={mockFamilies} defaultFamilyUuid={null} userName={null} userEmail={null} />
       );
 
       // 모든 라디오 버튼이 선택되지 않은 상태인지 확인
@@ -145,6 +151,8 @@ describe("SettingsPageClient", () => {
         <SettingsPageClient
           families={mockFamilies}
           defaultFamilyUuid="family-1"
+          userName={null}
+          userEmail={null}
         />
       );
 
@@ -157,6 +165,8 @@ describe("SettingsPageClient", () => {
         <SettingsPageClient
           families={mockFamilies}
           defaultFamilyUuid="family-1"
+          userName={null}
+          userEmail={null}
         />
       );
 
@@ -178,6 +188,8 @@ describe("SettingsPageClient", () => {
         <SettingsPageClient
           families={mockFamilies}
           defaultFamilyUuid="family-1"
+          userName={null}
+          userEmail={null}
         />
       );
 
@@ -204,6 +216,8 @@ describe("SettingsPageClient", () => {
         <SettingsPageClient
           families={mockFamilies}
           defaultFamilyUuid="family-1"
+          userName={null}
+          userEmail={null}
         />
       );
 
@@ -216,7 +230,7 @@ describe("SettingsPageClient", () => {
 
     it("가족을 선택하지 않으면 저장 버튼이 비활성화된다", () => {
       render(
-        <SettingsPageClient families={mockFamilies} defaultFamilyUuid={null} />
+        <SettingsPageClient families={mockFamilies} defaultFamilyUuid={null} userName={null} userEmail={null} />
       );
 
       const saveButton = screen.getByRole("button", {
@@ -232,21 +246,25 @@ describe("SettingsPageClient", () => {
         <SettingsPageClient
           families={mockFamilies}
           defaultFamilyUuid="family-1"
+          userName={null}
+          userEmail={null}
         />
       );
 
-      expect(screen.getByText("월 예산: 1,000,000원")).toBeInTheDocument();
-      expect(screen.getByText("월 예산: 2,000,000원")).toBeInTheDocument();
+      expect(screen.getByText("월 예산: ₩1,000,000")).toBeInTheDocument();
+      expect(screen.getByText("월 예산: ₩2,000,000")).toBeInTheDocument();
       expect(screen.getByText("예산 미설정")).toBeInTheDocument();
     });
 
-    it("예산 수정 버튼을 클릭하면 입력 필드가 표시된다", async () => {
+    it("예산 수정 버튼을 클릭하면 BudgetEditDialog 가 열린다", async () => {
       const user = userEvent.setup();
 
       render(
         <SettingsPageClient
           families={mockFamilies}
           defaultFamilyUuid="family-1"
+          userName={null}
+          userEmail={null}
         />
       );
 
@@ -254,8 +272,8 @@ describe("SettingsPageClient", () => {
       const editButtons = screen.getAllByRole("button", { name: /수정/i });
       await user.click(editButtons[0]);
 
-      // 입력 필드가 표시되는지 확인
-      const input = screen.getByPlaceholderText("월 예산 입력");
+      // Dialog 안의 입력 필드 (type=number spinbutton) 가 표시되는지 확인
+      const input = screen.getByRole("spinbutton");
       expect(input).toBeInTheDocument();
       expect(input).toHaveValue(1000000);
     });
@@ -282,28 +300,23 @@ describe("SettingsPageClient", () => {
         <SettingsPageClient
           families={mockFamilies}
           defaultFamilyUuid="family-1"
+          userName={null}
+          userEmail={null}
         />
       );
 
-      // 수정 버튼 클릭
+      // 수정 버튼 클릭 → BudgetEditDialog 열림
       const editButtons = screen.getAllByRole("button", { name: /수정/i });
       await user.click(editButtons[0]);
 
-      // 예산 입력
-      const input = screen.getByPlaceholderText("월 예산 입력");
+      // Dialog 안의 입력 필드에 새 값 입력
+      const input = screen.getByRole("spinbutton");
       await user.clear(input);
       await user.type(input, "1500000");
 
-      // 저장 버튼 클릭 (Save 아이콘 버튼 찾기 - 취소 버튼 이후의 버튼)
-      const allIconButtons = screen.getAllByRole("button");
-      const saveButton = allIconButtons.find((btn) => {
-        const svg = btn.querySelector("svg.lucide-save");
-        return svg !== null;
-      });
-
-      if (saveButton) {
-        await user.click(saveButton);
-      }
+      // "저장" 버튼 클릭
+      const saveButton = screen.getByRole("button", { name: /^저장$/ });
+      await user.click(saveButton);
 
       // API 호출 확인
       await waitFor(() => {
@@ -321,6 +334,8 @@ describe("SettingsPageClient", () => {
         <SettingsPageClient
           families={mockFamilies}
           defaultFamilyUuid="family-1"
+          userName={null}
+          userEmail={null}
         />
       );
 
@@ -335,6 +350,8 @@ describe("SettingsPageClient", () => {
         <SettingsPageClient
           families={mockFamilies}
           defaultFamilyUuid="family-1"
+          userName={null}
+          userEmail={null}
         />
       );
 

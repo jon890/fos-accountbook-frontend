@@ -11,6 +11,11 @@ jest.mock("@/lib/server/api/client", () => ({
   serverApiPut: jest.fn(),
 }));
 
+jest.mock("@/services/family/family-service", () => ({
+  ...jest.requireActual("@/services/family/family-service"),
+  getFamilies: jest.fn().mockResolvedValue([{ uuid: "family-123" }]),
+}));
+
 jest.mock("next/cache", () => ({
   revalidatePath: jest.fn(),
 }));

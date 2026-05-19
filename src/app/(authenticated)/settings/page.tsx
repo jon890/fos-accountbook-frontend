@@ -1,7 +1,8 @@
 import { getFamiliesAction } from "@/actions/family/get-families-action";
 import { getUserProfileAction } from "@/actions/user/get-user-profile-action";
-import { SettingsPageClient } from "./_components/SettingsPageClient";
+import { auth } from "@/lib/server/auth";
 import { requireActionSuccess } from "@/lib/server/action-result-handler";
+import { SettingsPageClient } from "./_components/SettingsPageClient";
 
 // 쿠키를 사용하므로 동적 렌더링 필요
 export const dynamic = "force-dynamic";
@@ -19,10 +20,15 @@ export default async function SettingsPage() {
     fallbackRedirect: "/families/create",
   });
 
+  // 3. 세션에서 사용자 이름/이메일 조회
+  const session = await auth();
+
   return (
     <SettingsPageClient
       families={families}
       defaultFamilyUuid={profile.defaultFamilyUuid}
+      userName={session?.user?.name ?? null}
+      userEmail={session?.user?.email ?? null}
     />
   );
 }
