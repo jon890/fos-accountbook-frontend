@@ -137,7 +137,7 @@ export function BudgetEditDialog({
         <Button
           onClick={handleSave}
           disabled={isSaving}
-          className="bg-brand-500 hover:bg-brand-600 text-white"
+          className="bg-brand-500 hover:bg-brand-600 text-brand-fg"
         >
           {isSaving ? "저장 중..." : "저장"}
         </Button>
