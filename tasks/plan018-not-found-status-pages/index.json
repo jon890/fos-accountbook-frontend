@@ -1,8 +1,9 @@
 {
   "name": "plan018-not-found-status-pages",
   "description": "404 not-found.tsx + 403 forbidden.tsx + 500 error.tsx 톤 차별화. StatusCard 공용 helper (status → brand/warning/expense + Compass/Lock/AlertCircle + 메시지 매핑). Next.js 16 표준 컨벤션 따름.",
-  "status": "pending",
+  "status": "completed",
   "created_at": "2026-05-11",
+  "completed_at": "2026-05-19",
   "total_phases": 2,
   "related_docs": [
     "docs/flow.md"
@@ -21,14 +22,14 @@
       "file": "phase-01.md",
       "title": "StatusCard 공용 helper + not-found.tsx + forbidden.tsx + error.tsx 갱신",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 2,
       "file": "phase-02.md",
       "title": "통합 검증 + 8단계 체크리스트 + completed 마킹",
       "model": "haiku",
-      "status": "pending"
+      "status": "completed"
     }
   ],
   "planning_checklist": {

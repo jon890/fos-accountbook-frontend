@@ -399,8 +399,8 @@ App Router 의 segment 경계에서 일관 표시:
 
 | status | 톤 | 아이콘 | 메시지 | CTA |
 |---|---|---|---|---|
-| 404 | brand (bg-brand-50 + text-brand-700) | Compass | "찾을 수 없어요" | "홈으로" → `/` |
-| 403 | warning (bg-warning/10 + text-warning) | Lock | "권한이 없어요" | "홈으로" → `/` (+ 보조: "로그인 다시 시도" → `/auth/signin`) |
+| 404 | brand (bg-brand-50 + text-brand-500) | Compass | "찾을 수 없어요" | public: "홈으로" → `/` / authenticated: "대시보드로" → `/dashboard` |
+| 403 | warning (bg-warning/10 + text-warning) | Lock | "권한이 없어요" | "홈으로" → `/dashboard` (+ 보조: "로그인 다시 시도" → `/auth/signin`) |
 | 500 | expense (bg-expense/10 + text-expense) | AlertCircle | "문제가 발생했어요" | "다시 시도" → reset() + "홈으로" |
 
 라우팅:

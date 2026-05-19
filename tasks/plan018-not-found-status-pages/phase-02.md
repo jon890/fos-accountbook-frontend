@@ -9,8 +9,8 @@
 ### 1. 통합 빌드/린트/테스트
 
 ```bash
-# cwd: /Users/nhn/personal/fos-accountbook
-# branch: plan/018-not-found-status-pages
+# cwd: /Users/nhn/personal/fos-accountbook/.claude/worktrees/plan018
+# branch: feat/plan018-not-found-status-pages
 
 pnpm lint
 pnpm tsc --noEmit
@@ -46,8 +46,12 @@ grep -nE 'bg-brand-50|bg-warning/|bg-expense/' src/components/error/StatusCard.t
 # 3 아이콘 import
 grep -nE 'Compass|Lock|AlertCircle' src/components/error/StatusCard.tsx | wc -l   # >= 3
 
-# ErrorBoundaryCard 잔재 0
+# ErrorBoundaryCard 파일 + import 잔재 0
+! test -f src/components/error/ErrorBoundaryCard.tsx
 ! grep -rn 'ErrorBoundaryCard' src/ --include='*.tsx' --include='*.ts'
+
+# next.config.ts authInterrupts 활성화
+grep -n 'authInterrupts' next.config.ts
 ```
 
 ### 5. 수동 smoke (사용자)

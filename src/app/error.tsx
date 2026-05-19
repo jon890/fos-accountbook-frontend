@@ -1,13 +1,21 @@
 "use client";
+import { StatusCard } from "@/components/error/StatusCard";
+import { ErrorResetButton } from "@/components/error/ErrorResetButton";
 
-import { ErrorBoundaryCard } from "@/components/error/ErrorBoundaryCard";
-
-export default function RootError({
+export default function Error({
   error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  return <ErrorBoundaryCard error={error} reset={reset} />;
+  return (
+    <StatusCard
+      kind="error"
+      secondaryCta={{ label: "홈으로", href: "/" }}
+      devMessage={`${error.message}\ndigest=${error.digest ?? "-"}`}
+    >
+      <ErrorResetButton reset={reset} label="다시 시도" />
+    </StatusCard>
+  );
 }
