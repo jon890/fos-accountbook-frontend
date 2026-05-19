@@ -9,9 +9,52 @@
 - 현재 inline edit (L188-266): `editingBudget` state + `budgetValues` Record + Input + Save/X 버튼 3 토글. 모바일 좁음
 - plan014 `AddTransactionDialog` 패턴: `useMediaQuery("(min-width: 768px)")` → Dialog vs Sheet 선택. `src/components/transactions/dialogs/AddTransactionDialog.tsx` 참고
 - 빠른 입력 칩 패턴: plan014 `AmountInput` 의 +1k/+5k/+10k 패턴 — 본 plan 은 +10만/+50만/+100만 (예산 규모)
-- 기존 Server Action: `updateFamilyAction(familyUuid, { name, monthlyBudget })` — 변경 없음
+- 기존 Server Action: `updateFamilyAction(familyUuid, { name, monthlyBudget })` — 권한 검증 강화 필요 (아래 0번)
 
 ## 작업 항목
+
+### 0. `updateFamilyAction` 권한 검증 강화 (사전 보강)
+
+**배경**: 현재 `updateFamilyAction(familyUuid, data)` 은 `requireAuth()` 만 수행 → 클라이언트가 본인이 속하지 않은 다른 가족의 UUID 를 주입하면 그 가족 정보 수정 가능 (권한 상승). CLAUDE.md "금지사항" 의 권한 식별자 정책 위반. BudgetEditDialog 가 familyUuid 를 prop 으로 받아 호출하는 구조라 backend-trust 강화가 선행되어야 안전.
+
+`src/services/family/family-service.ts` 의 `selectFamily` 패턴 (`getFamilies() + includes`) 을 재사용:
+
+```ts
+// src/actions/family/update-family-action.ts
+import { getFamilies } from "@/services/family/family-service";
+
+export async function updateFamilyAction(
+  familyUuid: string,
+  data: UpdateFamilyRequest
+): Promise<ActionResult<Family>> {
+  try {
+    await requireAuth();
+
+    if (!familyUuid) {
+      throw ActionError.invalidInput("가족 UUID", familyUuid, "UUID는 필수입니다");
+    }
+
+    // 권한 검증: 사용자가 해당 family 멤버인지 확인 (백엔드가 세션 token 기준으로 본인 가족만 반환)
+    const families = await getFamilies();
+    if (!families.some((f) => f.uuid === familyUuid)) {
+      throw ActionError.entityNotFound("가족", familyUuid);
+    }
+
+    const family = await updateFamily(familyUuid, data);
+    revalidatePath("/");
+    revalidatePath("/settings");
+    revalidatePath(`/families/${familyUuid}`);
+    return successResult(family);
+  } catch (error) {
+    return handleActionError(error, "가족 정보 수정에 실패했습니다");
+  }
+}
+```
+
+자동 verification (`src/actions/family/update-family-action.ts`):
+```bash
+grep -n 'getFamilies\|entityNotFound' src/actions/family/update-family-action.ts | wc -l   # >= 2
+```
 
 ### 1. `src/components/settings/BudgetEditDialog.tsx` 신설
 
@@ -283,6 +326,7 @@ grep -nE '\+10만|\+50만|\+100만' src/components/settings/BudgetEditDialog.tsx
 
 | 파일 | 상태 |
 |---|---|
+| `src/actions/family/update-family-action.ts` | 권한 검증 강화 (getFamilies + includes) |
 | `src/components/settings/BudgetEditDialog.tsx` | 신규 (responsive Sheet/Dialog) |
 | `src/app/(authenticated)/settings/_components/SettingsPageClient.tsx` | inline edit 제거 + Dialog 트리거 |
 
