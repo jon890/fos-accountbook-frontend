@@ -15,35 +15,42 @@ interface NotificationItemProps {
   onRead?: (notificationUuid: string) => void;
 }
 
-// 알림 타입별 아이콘
+// 2단계 톤 매핑
+type NotificationTone = "warning" | "expense" | "brand";
+
+const getNotificationTone = (type: NotificationType): NotificationTone => {
+  if (type === "BUDGET_100_EXCEEDED") return "expense";
+  if (type === "BUDGET_50_EXCEEDED" || type === "BUDGET_80_EXCEEDED") return "warning";
+  return "brand";
+};
+
+const TONE_BG: Record<NotificationTone, string> = {
+  warning: "bg-warning/10",
+  expense: "bg-expense/10",
+  brand:   "bg-brand-50",
+};
+
+const TONE_FG: Record<NotificationTone, string> = {
+  warning: "text-warning",
+  expense: "text-expense",
+  brand:   "text-brand-700",
+};
+
 const getNotificationIcon = (type: NotificationType) => {
+  const tone = getNotificationTone(type);
+  const fgClass = TONE_FG[tone];
   switch (type) {
     case "BUDGET_50_EXCEEDED":
-      return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
+      return <AlertTriangle className={`w-5 h-5 ${fgClass}`} />;
     case "BUDGET_80_EXCEEDED":
-      return <AlertCircle className="w-5 h-5 text-orange-500" />;
+      return <AlertCircle className={`w-5 h-5 ${fgClass}`} />;
     case "BUDGET_100_EXCEEDED":
-      return <XCircle className="w-5 h-5 text-red-500" />;
+      return <XCircle className={`w-5 h-5 ${fgClass}`} />;
     default:
-      return <AlertCircle className="w-5 h-5 text-blue-500" />;
+      return <AlertCircle className={`w-5 h-5 ${fgClass}`} />;
   }
 };
 
-// 알림 타입별 배경색
-const getNotificationBgColor = (type: NotificationType) => {
-  switch (type) {
-    case "BUDGET_50_EXCEEDED":
-      return "bg-yellow-50 border-yellow-200";
-    case "BUDGET_80_EXCEEDED":
-      return "bg-orange-50 border-orange-200";
-    case "BUDGET_100_EXCEEDED":
-      return "bg-red-50 border-red-200";
-    default:
-      return "bg-blue-50 border-blue-200";
-  }
-};
-
-// 시간 포맷팅
 const formatDate = (dateString: string, timezone: string) => {
   const date = new Date(dateString);
   const now = new Date();
@@ -89,8 +96,8 @@ export function NotificationItem({
     <button
       onClick={handleClick}
       className={cn(
-        "w-full p-4 text-left transition-colors hover:bg-gray-50",
-        !notification.isRead && "bg-blue-50/50"
+        "w-full p-4 text-left transition-colors hover:bg-bg-muted",
+        !notification.isRead && "bg-brand-50/50"
       )}
     >
       <div className="flex gap-3">
@@ -98,7 +105,8 @@ export function NotificationItem({
         <div
           className={cn(
             "flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border",
-            getNotificationBgColor(notification.type)
+            TONE_BG[getNotificationTone(notification.type)],
+            "border-transparent"
           )}
         >
           {getNotificationIcon(notification.type)}
@@ -110,26 +118,24 @@ export function NotificationItem({
             <h4
               className={cn(
                 "text-sm font-semibold truncate",
-                !notification.isRead && "text-gray-900",
-                notification.isRead && "text-gray-600"
+                !notification.isRead ? "text-fg" : "text-fg-muted"
               )}
             >
               {notification.title}
             </h4>
             {!notification.isRead && (
-              <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-1" />
+              <div className="flex-shrink-0 w-2 h-2 bg-brand-500 rounded-full mt-1" />
             )}
           </div>
           <p
             className={cn(
               "text-xs mb-2 line-clamp-2",
-              !notification.isRead && "text-gray-700",
-              notification.isRead && "text-gray-500"
+              !notification.isRead ? "text-fg-muted" : "text-fg-subtle"
             )}
           >
             {notification.message}
           </p>
-          <time className="text-xs text-gray-400">
+          <time className="text-xs text-fg-subtle">
             {formatDate(notification.createdAt, timezone)}
           </time>
         </div>
