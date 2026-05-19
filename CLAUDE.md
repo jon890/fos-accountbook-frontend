@@ -43,6 +43,7 @@ Claude Code가 항상 따라야 할 규칙과 참조 문서 포인터.
 | Server Action 입력 검증 | ADR-F06 — Zod 런타임 검증 필수 |
 | Shadcn / Tailwind v4 스타일 | ADR-F07 — 시맨틱 그라디언트 클래스, 하드코딩 금지 |
 | 색 토큰 작성 (brand/semantic/surface) | ADR-F13 — OKLCH 평면 값. hex/rgb/hsl 금지 |
+| 강조 배경 위 텍스트 색 (Badge / 강조 라벨) | ADR-F23 — `text-expense-fg` 같은 시맨틱 foreground 토큰 사용. `text-white` / `text-black` 금지 |
 | 폰트 추가 / 수치 표기 | ADR-F14 — Pretendard Variable + Inter (`.num` / tabular-nums) |
 | dark mode 셀렉터 | ADR-F15 — `[data-theme="dark"]` 만. `.dark` 신규 사용 금지 |
 | 카테고리 분포·월 집계 stat 추가 | ADR-F16 — Server Action 측 집계. backend endpoint 신설 전 임계 트리거 확인 |

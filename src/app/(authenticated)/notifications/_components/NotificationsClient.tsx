@@ -62,7 +62,7 @@ export function NotificationsClient({
     <div className="p-4 md:p-6 max-w-2xl mx-auto">
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-[22px] font-bold text-fg">알림</h1>
+        <h1 className="text-2xl font-bold text-fg">알림</h1>
         {unreadCount > 0 && (
           <Button
             variant="ghost"

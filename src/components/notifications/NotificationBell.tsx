@@ -64,7 +64,7 @@ export function NotificationBell({ familyUuid }: NotificationBellProps) {
           <Bell className="w-4 h-4 md:w-5 md:h-5" />
           {unreadCount > 0 && (
             <Badge
-              className="absolute -top-1 -right-1 h-4 w-4 md:h-5 md:w-5 p-0 flex items-center justify-center text-[10px] md:text-xs bg-expense text-white border-0"
+              className="absolute -top-1 -right-1 h-4 w-4 md:h-5 md:w-5 p-0 flex items-center justify-center text-[10px] md:text-xs bg-expense text-expense-fg border-0"
             >
               {unreadCount > 99 ? "99+" : unreadCount}
             </Badge>

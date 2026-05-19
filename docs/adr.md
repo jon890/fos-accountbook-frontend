@@ -352,3 +352,16 @@
 - **트레이드오프**: Server Component + Client 래퍼 분리는 파일 수 증가 (`ErrorResetButton.tsx` 같은 1-호출 래퍼). 단 보안 + 직렬화 안전성 이득이 크고, 패턴이 일관되면 후속 영역 (예: Sentry wiring) 에서 동일 구조 재사용 가능.
 - **적용 범위**: `src/components/error/StatusCard.tsx` (Server) + `src/components/error/ErrorResetButton.tsx` (Client) + `src/app/{,(authenticated)/}error.tsx` + `src/app/global-error.tsx`. 향후 server-side dev 분기를 포함하는 모든 컴포넌트에 동일 원칙 적용 (예: Sentry digest 카드, debug overlay).
 
+---
+
+## ADR-F23: semantic foreground 토큰 (`--color-{semantic}-fg`) 으로 강조 배경 위 텍스트 색 명시 (2026-05-19)
+
+- **결정**: `bg-expense` / `bg-income` / `bg-warning` 같은 채도 높은 시맨틱 배경 위에 텍스트를 얹을 때는 `text-white` / `text-black` 하드코딩 대신 **시맨틱 foreground 토큰** (`--color-expense-fg` 등) 을 사용한다. light/dark 양쪽에서 동일하게 강조 배경과 대비되는 near-white 값 (`oklch(0.985 0.003 230)`) 으로 정의 — surface `--color-fg` (light=어두움, dark=밝음) 와 분리.
+- **맥락**: plan017 NotificationBell 의 `bg-expense text-white` Badge 가 ADR-F13 (OKLCH 토큰 강제, hex/rgb/hsl/named color 금지) 의 정신과 충돌. 단순 교체로 `text-bg` 같은 surface foreground 를 쓰면 dark mode 에서 `--color-bg` 가 어두운 색이 되어 빨간 expense 배경 위에서 가독성이 더 나빠짐. 강조 배경은 light/dark 무관하게 채도 유지가 의도이므로 foreground 도 모드 독립적 near-white 가 자연스럽다.
+- **대안 기각**:
+  - `text-white` 유지: ADR-F13 의 "globals.css `@theme` 외부에서 hex/rgb/hsl/named 색 금지" 원칙 위반. 디자인 토큰 단일 소스 깨짐.
+  - `text-bg` (surface foreground): light/dark 가 반전되는 토큰이라 강조 배경 위 가독성 일관성 깨짐 (dark mode 에서 어두운 색 → expense 빨강 위 contrast 약화).
+  - 인라인 `style={{ color: "white" }}`: ADR-F13 위반 + CLAUDE.md "인라인 style 최소화" 위반.
+- **트레이드오프**: 토큰 수 증가 (현재 expense-fg 만 신설, income-fg / warning-fg 는 필요 시 후속 추가). 단 ADR-F13 의 정합성 + dark mode 가독성 일관성 이득이 큼.
+- **적용 범위**: `src/app/globals.css` (`--color-expense-fg` 정의) + `src/components/notifications/NotificationBell.tsx` (`text-expense-fg`). 향후 강조 배경 위 텍스트가 필요한 모든 위치 (Badge / Toast destructive variant / 그래프 강조 라벨 등) 에 동일 원칙 적용.
+
