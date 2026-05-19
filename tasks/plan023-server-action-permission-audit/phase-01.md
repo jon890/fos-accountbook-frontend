@@ -18,6 +18,7 @@
 ```ts
 import { ActionError } from "@/lib/errors";
 import { getFamilies } from "@/services/family/family-service";
+import type { Family } from "@/types/family";
 
 /**
  * Multi-family 패턴 권한 검증 (ADR-F25 패턴 B).
@@ -27,7 +28,7 @@ import { getFamilies } from "@/services/family/family-service";
  * settings 처럼 본인 속한 여러 가족 중 하나를 다루는 Action 전용.
  */
 export async function assertFamilyAccess(familyUuid: string): Promise<void> {
-  const families = await getFamilies();
+  const families: Family[] = await getFamilies();
   if (!families.some((f) => f.uuid === familyUuid)) {
     throw ActionError.entityNotFound("가족", familyUuid);
   }
