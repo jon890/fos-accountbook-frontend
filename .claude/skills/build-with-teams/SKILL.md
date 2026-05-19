@@ -156,6 +156,27 @@ Agent({
 - `run_in_background: true`로 idle 대기 가능
 - 이후 통신은 **모두 `SendMessage({to: "critic", message: "..."})`로만** 진행
 
+**스폰 직후 검증 (필수, 매 Agent 호출마다 — fos-accountbook plan021 실제 사고)**:
+
+`name` 파라미터를 빠뜨려도 Agent 호출은 silent 하게 성공한다 — 응답 메시지가 정식 멤버 케이스와 거의 동일해 시각 구분 불가.
+일회성 호출이면 sub-agent 가 응답 직후 종료되어 SendMessage 가 빈 mailbox 로 향한다.
+정식 멤버 등록 여부는 반드시 응답 형식 + `team config.json` 으로 직접 확인한다.
+
+응답 형식 차이로 1차 식별:
+- ✅ 정식 멤버: `agent_id: critic@plan{N}` + `name: critic` + `team_name: plan{N}` 노출 + "running and will receive instructions via mailbox" 문구
+- ❌ 일회성 백그라운드: `agentId: <16자 UUID>` 만 노출, 이름·팀 정보 없음 + "working in the background ... completion notification" 문구
+
+후자가 보이면 **즉시 재스폰** (`name` 파라미터 추가). 전자라도 다음 명령으로 한 번 더 확인:
+
+```bash
+# cwd 무관 (절대경로)
+python3 -c "import json; m=json.load(open('$HOME/.claude/teams/plan{N}/config.json'))['members']; print('\n'.join(f\"{x['name']}@{x['agentType']}\" for x in m))"
+# 기대: team-lead 외에 critic / executor / code-reviewer / docs-verifier 가 모두 표시
+# 안 보이면 직전 Agent 호출에서 name 누락 — 재스폰
+```
+
+실사례 — fos-accountbook plan021 에서 첫 4개 spawn 시 `name` 빠뜨려 모두 일회성 호출로 처리됨. critic 에 평가 요청 SendMessage 보내도 mailbox 에 쌓이기만 하고 응답 없음. 재spawn 후 정상 진행. dooray-cli / fos-blog 에서는 SKILL.md 의 본 검증 섹션 덕에 누락 미발생.
+
 ### 팀원 프롬프트/메시지는 worktree 절대경로 (필수)
 
 sub-agent는 main 워킹 디렉터리에서 실행될 수 있다. 상대경로나 `tasks/{plan}/...` 형태로 지시하면 worktree 브랜치에 커밋된 최신 파일이 아니라 main의 구버전 또는 미존재 파일을 읽어 오판 사고가 발생한다.
