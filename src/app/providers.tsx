@@ -12,13 +12,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <Toaster
           position="top-center"
           expand={true}
-          richColors
           closeButton
           toastOptions={{
             classNames: {
-              toast: "bg-popover border border-border shadow-lg",
-              title: "text-popover-foreground font-medium",
-              description: "text-muted-foreground",
+              toast: "bg-bg-elev border border-border shadow-lg text-fg",
+              title: "text-fg font-medium",
+              description: "text-fg-muted",
+              actionButton: "bg-brand-500 text-white",
+              cancelButton: "bg-bg-muted text-fg-muted",
             },
             style: {
               zIndex: 100,
