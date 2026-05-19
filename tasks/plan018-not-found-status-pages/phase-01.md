@@ -182,14 +182,14 @@ export default function AuthenticatedForbidden() {
 
 ### 4. 기존 error.tsx 3개 갱신 + ErrorBoundaryCard 강제 삭제
 
-**4-1. `src/app/error.tsx` / `src/app/global-error.tsx` / `src/app/(authenticated)/error.tsx`** — 기존 ErrorBoundaryCard 호출을 StatusCard + ErrorResetButton 으로 교체. 예시:
+**4-1. `src/app/error.tsx`** — `"use client"` 유지, ErrorBoundaryCard 를 StatusCard + ErrorResetButton 으로 교체:
 
 ```tsx
 "use client";
 import { StatusCard } from "@/components/error/StatusCard";
 import { ErrorResetButton } from "@/components/error/ErrorResetButton";
 
-export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <StatusCard
       kind="error"
@@ -202,7 +202,51 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
 }
 ```
 
-`error.tsx` 는 `"use client"` 필수 (Next.js 규약). StatusCard 본체는 Server Component 로 렌더되어 `devMessage` 의 `process.env.NODE_ENV` 분기가 서버에서 평가됨 → production 빌드에서 dev JSX 트리 제외 → `error.message` 문자열 클라이언트 번들 미노출.
+**4-2. `src/app/(authenticated)/error.tsx`** — 동일 패턴, secondaryCta href 만 `/dashboard` 로:
+
+```tsx
+"use client";
+import { StatusCard } from "@/components/error/StatusCard";
+import { ErrorResetButton } from "@/components/error/ErrorResetButton";
+
+export default function AuthenticatedError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  return (
+    <StatusCard
+      kind="error"
+      secondaryCta={{ label: "대시보드로", href: "/dashboard" }}
+      devMessage={`${error.message}\ndigest=${error.digest ?? "-"}`}
+    >
+      <ErrorResetButton reset={reset} label="다시 시도" />
+    </StatusCard>
+  );
+}
+```
+
+**4-3. `src/app/global-error.tsx`** — **`<html lang="ko"><body>...</body></html>` 래퍼 보존 필수** (Next.js 규약: root layout 마운트 실패 시 fallback 이라 자체 root 마크업 필요):
+
+```tsx
+"use client";
+import { StatusCard } from "@/components/error/StatusCard";
+import { ErrorResetButton } from "@/components/error/ErrorResetButton";
+
+export default function GlobalError({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+  return (
+    <html lang="ko">
+      <body>
+        <StatusCard
+          kind="error"
+          secondaryCta={{ label: "홈으로", href: "/" }}
+          devMessage={`${error.message}\ndigest=${error.digest ?? "-"}`}
+        >
+          <ErrorResetButton reset={reset} label="다시 시도" />
+        </StatusCard>
+      </body>
+    </html>
+  );
+}
+```
+
+`error.tsx` 들은 `"use client"` 필수 (Next.js 규약). StatusCard 본체는 Server Component 로 렌더되어 `devMessage` 의 `process.env.NODE_ENV` 분기가 서버에서 평가됨 → production 빌드에서 dev JSX 트리 제외 → `error.message` 문자열 클라이언트 번들 미노출.
 
 **4-2. `src/components/error/ErrorBoundaryCard.tsx` 파일 삭제 (필수, 선택 아님)** — StatusCard + ErrorResetButton 이 완전 대체. `rm` 또는 git 으로 삭제. import 잔재 0 확인.
 
@@ -246,6 +290,10 @@ grep -c 'process.env.NODE_ENV' src/components/error/StatusCard.tsx   # >= 1
 
 # error.tsx 들 모두 StatusCard 사용
 grep -l 'StatusCard' src/app/error.tsx src/app/global-error.tsx src/app/\(authenticated\)/error.tsx | wc -l   # == 3
+
+# global-error.tsx 의 <html>/<body> 래퍼 보존 (root layout fallback 안전망)
+grep -n '<html' src/app/global-error.tsx
+grep -n '<body' src/app/global-error.tsx
 
 # 3 톤 매핑 + 3 아이콘 import
 grep -cE 'bg-brand-50|bg-warning/|bg-expense/' src/components/error/StatusCard.tsx   # >= 3
