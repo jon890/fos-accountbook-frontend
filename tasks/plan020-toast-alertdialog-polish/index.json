@@ -1,7 +1,7 @@
 {
   "name": "plan020-toast-alertdialog-polish",
   "description": "sonner Toaster + Radix AlertDialog 의 색 토큰을 plan001 OKLCH 시스템 (ADR-F24) 으로 통일. richColors OFF + brand/expense/warning 직접 매핑. AlertDialog overlay=bg-fg/60, content=bg-bg-elev. 파괴적 호출처 4 곳에 destructive variant 명시.",
-  "status": "pending",
+  "status": "completed",
   "created_at": "2026-05-19",
   "total_phases": 3,
   "related_docs": [
@@ -21,21 +21,21 @@
       "file": "phase-01.md",
       "title": "sonner Toaster richColors OFF + 타입별 토큰 매핑 + providers.tsx classNames 갱신",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 2,
       "file": "phase-02.md",
       "title": "AlertDialog overlay/content/description 토큰 갱신 + 파괴적 호출처 4 곳 destructive variant 명시",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 3,
       "file": "phase-03.md",
       "title": "통합 검증 + 8단계 체크리스트 + index.json status=completed 마킹 commit",
       "model": "haiku",
-      "status": "pending"
+      "status": "completed"
     }
   ],
   "planning_checklist": {
