@@ -5,6 +5,36 @@
 
 ---
 
+## ADR Index
+
+- [ADR-F01](#adr-f01) — Next.js App Router 선택
+- [ADR-F02](#adr-f02) — Server Components 우선 전략
+- [ADR-F03](#adr-f03) — NextAuth v5 JWT 전략
+- [ADR-F04](#adr-f04) — Actions/Services 계층 분리
+- [ADR-F05](#adr-f05) — ky HTTP 클라이언트
+- [ADR-F06](#adr-f06) — Zod 런타임 검증
+- [ADR-F07](#adr-f07) — Shadcn + Tailwind CSS v4
+- [ADR-F08](#adr-f08) — alert() 대신 sonner 토스트
+- [ADR-F09](#adr-f09) — MSW vs jest.mock — 테스트 방식
+- [ADR-F10](#adr-f10) — 반복 지출 상태 관리 — Server Action 방식 유지
+- [ADR-F11](#adr-f11) — CI 코드 리뷰 워크플로 설계
+- [ADR-F12](#adr-f12) — Page에서 serverApiGet 직접 호출 금지
+- [ADR-F13](#adr-f13) — OKLCH 색 시스템 채택
+- [ADR-F14](#adr-f14) — Pretendard Variable 폰트 도입
+- [ADR-F15](#adr-f15) — next-themes attribute='data-theme'
+- [ADR-F16](#adr-f16) — 카테고리 월 분포는 Server Action 측 집계
+- [ADR-F17](#adr-f17) — URL searchParams ↔ Client state 동기화는 draft 패턴
+- [ADR-F18](#adr-f18) — react-day-picker → @daypicker/react 패키지 이전
+- [ADR-F19](#adr-f19) — TypeScript 5.9 → 6.0 메이저 이전 + breaking 대응 패턴
+- [ADR-F20](#adr-f20) — 인증 안 한 사용자의 `/` 진입은 Landing 표시
+- [ADR-F21](#adr-f21) — Add/Edit Transaction 다이얼로그 단일화
+- [ADR-F22](#adr-f22) — 민감 정보를 다루는 컴포넌트는 Server Component 로 유지 + Client 핸들러는 children 슬롯
+- [ADR-F23](#adr-f23) — semantic foreground 토큰 (`--color-{semantic}-fg`) 으로 강조 배경 위 텍스트 색 명시
+
+---
+
+<a id="adr-f01"></a>
+
 ## ADR-F01: Next.js App Router 선택
 
 **결정**: Pages Router 대신 App Router 사용 (Next.js 16)
@@ -19,6 +49,8 @@
 
 ---
 
+<a id="adr-f02"></a>
+
 ## ADR-F02: Server Components 우선 전략
 
 **결정**: 클라이언트 상태가 필요한 경우에만 `"use client"` 추가
@@ -32,6 +64,8 @@
 **결과**: 모든 `page.tsx`는 Server Component. 인터랙션이 필요한 부분만 `*Client.tsx`로 분리
 
 ---
+
+<a id="adr-f03"></a>
 
 ## ADR-F03: NextAuth v5 JWT 전략
 
@@ -52,6 +86,8 @@
 
 ---
 
+<a id="adr-f04"></a>
+
 ## ADR-F04: Actions/Services 계층 분리
 
 **결정**: `actions/`(인증·검증)와 `services/`(API 호출·로직) 엄격 분리
@@ -68,6 +104,8 @@
 - `services/`: API 호출, 데이터 변환, 쿼리 빌딩만 담당. `"use server"` 사용 금지
 
 ---
+
+<a id="adr-f05"></a>
 
 ## ADR-F05: ky HTTP 클라이언트 (2026-05-09 v2 갱신)
 
@@ -96,6 +134,8 @@
 
 ---
 
+<a id="adr-f06"></a>
+
 ## ADR-F06: Zod 런타임 검증
 
 **결정**: 모든 Server Action 입력값을 Zod로 검증
@@ -107,6 +147,8 @@
 - 에러 메시지가 필드 단위로 구조화 → UI 폼 에러 표시 직결
 
 ---
+
+<a id="adr-f07"></a>
 
 ## ADR-F07: Shadcn + Tailwind CSS v4
 
@@ -122,6 +164,8 @@
 
 ---
 
+<a id="adr-f08"></a>
+
 ## ADR-F08: alert() 대신 sonner 토스트
 
 **결정**: `alert()`, `confirm()`, `prompt()` 전면 금지, sonner 사용
@@ -132,6 +176,8 @@
 - sonner는 스택형 토스트, 자동 dismiss, 커스텀 스타일 지원
 
 ---
+
+<a id="adr-f09"></a>
 
 ## ADR-F09: MSW vs jest.mock — 테스트 방식
 
@@ -147,6 +193,8 @@
 
 ---
 
+<a id="adr-f10"></a>
+
 ## ADR-F10: 반복 지출 상태 관리 — Server Action 방식 유지
 
 **결정**: 폴링·WebSocket 도입 없이 기존 Server Action + revalidatePath 방식 유지
@@ -160,6 +208,8 @@
 **결과**: 자동 생성된 지출은 다음 날 대시보드 방문 시 반영됨. 실시간 알림은 기존 NotificationBell로 대체
 
 ---
+
+<a id="adr-f11"></a>
 
 ## ADR-F11: CI 코드 리뷰 워크플로 설계 (2026-04-04, 2026-05-09 개정)
 
@@ -195,6 +245,8 @@
 
 ---
 
+<a id="adr-f12"></a>
+
 ## ADR-F12: Page에서 serverApiGet 직접 호출 금지 (2026-04-05)
 
 **결정**: Page(Server Component)에서 `serverApiGet`을 직접 호출하지 않고, 반드시 Action을 통해 데이터를 조회한다.
@@ -215,6 +267,8 @@
 
 ---
 
+<a id="adr-f13"></a>
+
 ## ADR-F13: OKLCH 색 시스템 채택 (2026-05-08)
 
 - **결정**: 모든 디자인 토큰을 OKLCH 색 공간으로 정의한다 (HSL 채널 패턴 폐기). brand 50~900, semantic(income/expense/warning), neutral 0~950, surface(bg/fg/border 등) 모두 `oklch(L C H)` 평면 값.
@@ -228,6 +282,8 @@
 
 ---
 
+<a id="adr-f14"></a>
+
 ## ADR-F14: Pretendard Variable 폰트 도입 (2026-05-08)
 
 - **결정**: 메인 sans 폰트를 Geist 에서 **Pretendard Variable** 로 교체. 수치 폰트는 **Inter** 도입 (tabular-nums + `.num` 유틸리티). next/font `localFont` 자체 호스팅 (woff2).
@@ -239,6 +295,8 @@
 - **적용 범위**: `src/app/layout.tsx` + `src/app/globals.css` (`--font-sans`, `--font-num`).
 
 ---
+
+<a id="adr-f15"></a>
 
 ## ADR-F15: next-themes attribute='data-theme' (2026-05-08)
 
@@ -252,6 +310,8 @@
 
 ---
 
+<a id="adr-f16"></a>
+
 ## ADR-F16: 카테고리 월 분포는 Server Action 측 집계 (2026-05-08)
 
 - **결정**: 대시보드의 카테고리별 월 합계는 backend 신규 endpoint 없이 기존 `GET /expenses?month=YYYY-MM` 응답을 `services/dashboard/dashboard-service.ts` 의 `getMonthlyCategoryBreakdown(familyUuid, year, month)` 에서 집계한다.
@@ -261,6 +321,8 @@
   - 기존 `getDashboardStats` 응답에 카테고리 합계 끼워넣기: stats DTO 비대해지고 다른 호출처가 불필요 데이터 수신.
 - **임계 트리거** (재논의 조건): 가구당 월 평균 거래수 500건 초과 또는 dashboard 진입 TTI 700ms 초과 측정 시 backend endpoint 분리 검토.
 - **적용 범위**: `services/dashboard/dashboard-service.ts`, `actions/dashboard/get-monthly-category-breakdown-action.ts`, `services/analytics/analytics-service.ts` (plan006 — `getMonthlyCategoryBreakdown` 을 service→service 재사용해 월별 추이/전월 delta 클라 집계. backend issue [#126](https://github.com/jon890/fos-accountbook-backend/issues/126) 로 endpoint 분리 트랙 병행).
+
+<a id="adr-f17"></a>
 
 ## ADR-F17: URL searchParams ↔ Client state 동기화는 draft 패턴 (2026-05-11)
 
@@ -287,6 +349,8 @@
 
 ---
 
+<a id="adr-f18"></a>
+
 ## ADR-F18: react-day-picker → @daypicker/react 패키지 이전 (2026-05-11)
 
 - **결정**: `react-day-picker` v9 → v10 메이저 업그레이드 + 패키지명을 공식 권장 신 namespace 인 `@daypicker/react` 로 이전. v10 의 폐기 props/event handler 일괄 교체.
@@ -303,6 +367,8 @@
 - **적용 범위**: `package.json`, `src/components/ui/calendar.tsx`, `src/components/dashboard/CalendarView.tsx`.
 
 ---
+
+<a id="adr-f19"></a>
 
 ## ADR-F19: TypeScript 5.9 → 6.0 메이저 이전 + breaking 대응 패턴 (2026-05-11)
 
@@ -322,6 +388,8 @@
   - 향후 ts7+ 이전 시 본 ADR 참조점.
 - **적용 범위**: `package.json`, `tsconfig.json`, src/ 전체 (해당 파일만 fix).
 
+<a id="adr-f20"></a>
+
 ## ADR-F20: 인증 안 한 사용자의 `/` 진입은 Landing 표시 (2026-05-11)
 
 - **결정**: `/` 라우트를 public 으로 변경. 인증 안 한 사용자는 Landing (Hero + Features 3 + CTA), 인증 사용자는 `/dashboard` 자동 redirect. `src/app/page.tsx` 가 page-level `auth()` 호출 후 세션 분기 처리. proxy.ts (ADR-F19) 는 전역 auth proxy 라 별도 matcher 수정 불필요.
@@ -332,6 +400,8 @@
 - **트레이드오프**: protected route 직접 URL 진입 (예: `/dashboard` 의 deep link 공유) 시 Landing 으로 한 단계 더 거쳐야 함. `(authenticated)/layout.tsx` 의 unauth redirect 대상도 Landing 으로 통일.
 - **적용 범위**: `src/app/page.tsx`, `src/app/(authenticated)/layout.tsx`.
 
+<a id="adr-f21"></a>
+
 ## ADR-F21: Add/Edit Transaction 다이얼로그 단일화 (2026-05-11)
 
 - **결정**: 지출/수입/고정지출 3 도메인의 Add 다이얼로그를 단일 `AddTransactionDialog` + 3 segmented 토글 (gradient-expense / gradient-income / gradient-budget) 로 통합. Edit 도 동일 패턴 (`EditTransactionDialog`, type 잠금). 위치: `src/components/transactions/dialogs/`.
@@ -341,6 +411,8 @@
   - "Add+ 페이지" 신설 (전용 라우트): 모달 흐름이 자연스러운 작업을 페이지로 격상 → 단순 추가가 무거워짐. recurring 처럼 가끔 쓰는 영역에서 매번 라우팅 비용.
 - **트레이드오프**: 단일 컴포넌트가 3 type conditional 필드 분기 — form complexity ↑ but UX 일관성 ↑. type 전환 시 type-specific 필드 (date vs dayOfMonth+name) 가 mount/unmount 되며 입력 잔존 정책은 "이전 type 의 amount/category/description 은 유지, type-specific 필드만 초기화" 로 명시.
 - **적용 범위**: `src/components/transactions/dialogs/{Add,Edit}TransactionDialog.tsx`, `src/components/transactions/forms/TransactionFormFields.tsx`, 진입점 갱신, legacy 다이얼로그 6 파일 제거 (Add/EditExpenseDialog, Add/EditIncomeDialog, Add/EditRecurringExpenseSheet).
+
+<a id="adr-f22"></a>
 
 ## ADR-F22: 민감 정보를 다루는 컴포넌트는 Server Component 로 유지 + Client 핸들러는 children 슬롯 (2026-05-18)
 
@@ -353,6 +425,8 @@
 - **적용 범위**: `src/components/error/StatusCard.tsx` (Server) + `src/components/error/ErrorResetButton.tsx` (Client) + `src/app/{,(authenticated)/}error.tsx` + `src/app/global-error.tsx`. 향후 server-side dev 분기를 포함하는 모든 컴포넌트에 동일 원칙 적용 (예: Sentry digest 카드, debug overlay).
 
 ---
+
+<a id="adr-f23"></a>
 
 ## ADR-F23: semantic foreground 토큰 (`--color-{semantic}-fg`) 으로 강조 배경 위 텍스트 색 명시 (2026-05-19)
 
