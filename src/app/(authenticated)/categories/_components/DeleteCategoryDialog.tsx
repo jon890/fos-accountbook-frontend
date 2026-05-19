@@ -10,6 +10,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/client/utils";
 
 interface DeleteCategoryDialogProps {
   open: boolean;
@@ -42,7 +44,7 @@ export function DeleteCategoryDialog({
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isDeleting}
-            className="bg-red-500 hover:bg-red-600"
+            className={cn(buttonVariants({ variant: "destructive" }))}
           >
             {isDeleting ? "삭제 중..." : "삭제"}
           </AlertDialogAction>

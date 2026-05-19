@@ -10,7 +10,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/client/utils";
 import { deleteRecurringExpenseAction } from "@/actions/recurring-expense";
 import type { RecurringExpense } from "@/types/recurring-expense";
 import { CheckCircle, Circle, Pencil, Trash2 } from "lucide-react";
@@ -183,7 +184,7 @@ export function RecurringExpenseItem({
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
-              className="bg-destructive hover:bg-destructive/90"
+              className={cn(buttonVariants({ variant: "destructive" }))}
             >
               {isDeleting ? "종료 중..." : "종료"}
             </AlertDialogAction>

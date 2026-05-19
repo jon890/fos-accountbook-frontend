@@ -15,6 +15,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/client/utils";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -82,7 +84,7 @@ export function DeleteExpenseDialog({
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isDeleting}
-            className="bg-red-600 hover:bg-red-700"
+            className={cn(buttonVariants({ variant: "destructive" }))}
           >
             {isDeleting ? "삭제 중..." : "삭제"}
           </AlertDialogAction>
