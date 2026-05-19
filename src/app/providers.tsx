@@ -18,7 +18,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
               toast: "bg-bg-elev border border-border shadow-lg text-fg",
               title: "text-fg font-medium",
               description: "text-fg-muted",
-              actionButton: "bg-brand-500 text-white",
+              actionButton: "bg-brand-500 text-primary-foreground",
               cancelButton: "bg-bg-muted text-fg-muted",
             },
             style: {
