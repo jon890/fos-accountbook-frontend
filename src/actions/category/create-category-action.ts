@@ -51,10 +51,18 @@ export async function createCategoryAction(
     }
     const validData = validationResult.data;
 
-    const selectedFamilyUuid = familyUuid || (await getSelectedFamilyUuid());
-    if (!selectedFamilyUuid) {
+    const sessionFamilyUuid = await getSelectedFamilyUuid();
+    if (!sessionFamilyUuid) {
       throw ActionError.familyNotSelected();
     }
+    if (familyUuid && familyUuid !== sessionFamilyUuid) {
+      throw ActionError.invalidInput(
+        "familyUuid",
+        familyUuid,
+        "권한이 없습니다"
+      );
+    }
+    const selectedFamilyUuid = sessionFamilyUuid;
 
     const category = await createCategory(selectedFamilyUuid, validData);
 

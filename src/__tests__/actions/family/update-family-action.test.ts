@@ -5,6 +5,7 @@
 // Mock 설정 - import 전에 선언
 jest.mock("@/lib/server/auth/auth-helpers", () => ({
   requireAuth: jest.fn().mockResolvedValue({ user: { id: "test-user" } }),
+  assertFamilyAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock("@/lib/server/api/client", () => ({

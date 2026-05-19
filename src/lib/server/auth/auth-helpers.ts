@@ -5,6 +5,7 @@
 
 import { ActionError } from "@/lib/errors";
 import { getCachedSession } from "@/lib/server/cache";
+import { getFamilies } from "@/services/family/family-service";
 import type { Session } from "next-auth";
 import { redirect } from "next/navigation";
 
@@ -63,4 +64,18 @@ export async function requireAuthOrRedirect(
 export async function getSelectedFamilyUuid(): Promise<string | null> {
   const session = await getCachedSession();
   return session?.user?.profile?.defaultFamilyUuid ?? null;
+}
+
+/**
+ * Multi-family 패턴 권한 검증 (ADR-F25 패턴 B).
+ * 사용자가 해당 family 의 member 인지 확인. 미소속 시 entityNotFound throw.
+ *
+ * Single-family Action 은 `getSelectedFamilyUuid()` 비교로 충분 — 본 helper 는
+ * settings 처럼 본인 속한 여러 가족 중 하나를 다루는 Action 전용.
+ */
+export async function assertFamilyAccess(familyUuid: string): Promise<void> {
+  const families = await getFamilies();
+  if (!families.some((f) => f.uuid === familyUuid)) {
+    throw ActionError.entityNotFound("가족", familyUuid);
+  }
 }
