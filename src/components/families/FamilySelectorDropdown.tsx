@@ -87,7 +87,7 @@ export function FamilySelectorDropdown() {
 
   if (loading) {
     return (
-      <div className="w-32 md:w-40 h-8 md:h-9 bg-gray-100 animate-pulse rounded-md"></div>
+      <div className="w-32 md:w-40 h-8 md:h-9 bg-bg-muted animate-pulse rounded-md"></div>
     );
   }
 

@@ -32,6 +32,14 @@ jest.mock("@/components/families/FamilySelectorDropdown", () => ({
   ),
 }));
 
+jest.mock("@/components/families/FamilySelectorList", () => ({
+  FamilySelectorList: () => <div data-testid="family-selector-list" />,
+}));
+
+jest.mock("@/actions/family/get-families-action", () => ({
+  getFamiliesAction: jest.fn(() => Promise.resolve({ success: true, data: [] })),
+}));
+
 jest.mock("@/components/notifications/NotificationBell", () => ({
   NotificationBell: ({ familyUuid }: { familyUuid: string }) => (
     <div data-testid="notification-bell">Notification {familyUuid}</div>

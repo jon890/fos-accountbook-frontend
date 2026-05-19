@@ -1,8 +1,9 @@
 {
   "name": "plan019-header-redesign",
-  "description": "Header.tsx 시각 통일 + 모바일 가족 전환 진입점 추가. legacy 토큰 (bg-white/80, border-gray-200/50, from-gray-900 to-gray-700 텍스트 그라디언트, gradient-primary, ring-blue-100, text-muted-foreground, variant=destructive) 제거 + Avatar dropdown 에 '가족 전환' 항목 (모바일 전용).",
-  "status": "pending",
+  "description": "Header.tsx 시각 통일 + 모바일 가족 전환 진입점 추가. legacy 토큰 (bg-white/80, border-gray-200/50, from-gray-900 to-gray-700 텍스트 그라디언트, gradient-primary, ring-blue-100, text-muted-foreground, variant=destructive, bg-gray-100 skeleton) 제거 + --color-brand-fg 토큰 신설 (ADR-F23 준수) + FamilySelectorList 추출 (책임: selectFamilyAction + refreshSession + router.refresh) + Avatar dropdown 에 '가족 전환' 항목 (모바일 전용 Sheet 진입점).",
+  "status": "completed",
   "created_at": "2026-05-11",
+  "completed_at": "2026-05-19",
   "total_phases": 2,
   "related_docs": [
     "docs/flow.md"
@@ -21,16 +22,16 @@
     {
       "number": 1,
       "file": "phase-01.md",
-      "title": "Header 토큰 일관화 + 로고 단색 + dropdown '가족 전환' (모바일 Sheet)",
+      "title": "Header 토큰 일관화 + brand-fg 신설 + FamilySelectorList 추출 + 모바일 가족 전환 Sheet",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 2,
       "file": "phase-02.md",
       "title": "통합 검증 + 8단계 체크리스트 + completed 마킹",
       "model": "haiku",
-      "status": "pending"
+      "status": "completed"
     }
   ],
   "planning_checklist": {

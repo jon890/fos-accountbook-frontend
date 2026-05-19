@@ -9,8 +9,7 @@
 ### 1. 통합 빌드/린트/테스트
 
 ```bash
-# cwd: /Users/nhn/personal/fos-accountbook
-# branch: plan/019-header-redesign
+# cwd: /Users/nhn/personal/fos-accountbook/.claude/worktrees/plan019
 
 pnpm lint
 pnpm tsc --noEmit
@@ -18,22 +17,25 @@ pnpm test --passWithNoTests
 pnpm build
 ```
 
-기존 `src/__tests__/components/layout/Header.test.tsx` 가 새 구조에서 통과하는지 확인. 깨지면 본 phase 내에서 갱신 (또는 phase 01 에 포함). 깨진 expectation:
-- text 그라디언트 → 단색 text 변경
-- variant=destructive 클래스 → text-expense
-- 모바일 가족 전환 항목 신규 — 모바일 viewport 시뮬레이션 필요
+테스트는 phase-01 에서 mock 갱신 완료된 상태. 본 phase 는 통과 확인만.
 
-### 2. legacy 잔재 0 최종
+### 2. legacy 잔재 0 + ADR-F23 최종
 
 ```bash
-# Header 영역 + FamilySelector 영역 legacy 토큰 0
-! grep -rnE 'bg-white/|border-gray-|from-gray-|to-gray-|gradient-primary|ring-blue-|text-muted-foreground' \
+# Header + FamilySelector 영역 legacy 토큰 0 (bg-gray-100 포함)
+! grep -rnE 'bg-white/|border-gray-|from-gray-|to-gray-|gradient-primary|ring-blue-|text-muted-foreground|bg-gray-100' \
   src/components/layout/Header.tsx \
   src/components/families/FamilySelectorDropdown.tsx \
   src/components/families/FamilySelectorList.tsx 2>/dev/null
 
 # variant="destructive" 0
 ! grep -rn 'variant="destructive"' src/components/layout/Header.tsx
+
+# ADR-F23 — text-white/text-black 0
+! grep -nE 'text-white|text-black' src/components/layout/Header.tsx src/components/families/FamilySelectorList.tsx
+
+# globals.css 의 brand-fg 토큰 정의
+grep -n 'color-brand-fg' src/app/globals.css
 ```
 
 ### 3. 8단계 체크리스트 명시 확인
@@ -60,12 +62,9 @@ jq '.planning_checklist | to_entries | map(select(.value == "" or .value == null
 
 phase + 최상위 status → `"completed"` + `completed_at`.
 
-### 6. 최종 커밋
+### 6. 최종 커밋 (team-lead 가 통합 검증 후 처리 — executor 는 commit 금지)
 
-```bash
-git add tasks/plan019-header-redesign/index.json
-git commit -m "chore(plan019): mark completed"
-```
+team-lead 가 phase-02 검증 결과 + index.json 갱신 + 통합 commit 1건으로 처리한다.
 
 ## Out of Scope
 
