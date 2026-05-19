@@ -22,7 +22,7 @@ pnpm build
 
 ```bash
 # Invite 영역 전체에서 legacy 토큰 0
-! grep -rnE 'app-background|text-gray-|text-blue-600|text-orange-600|bg-gray-50|bg-muted\b|shadow-2xl|shadow-xl' \
+! grep -rnE 'app-background|text-gray-|text-blue-600|text-orange-600|bg-gray-50|(^|[^-])bg-muted\b|shadow-2xl|shadow-xl|shadow-lg\b' \
   src/app/\(authenticated\)/invite/
 
 # 하드코딩 hex 0
