@@ -33,7 +33,7 @@ grep -lE 'assertFamilyAccess' src/actions/**/*.ts | sort
 
 # Entity ownership 패턴 (C): entity 조회 후 some 검증
 echo "=== Pattern C (Entity ownership) ==="
-grep -lE 'getActiveInvitations|some\(.*\)' src/actions/invitation/*.ts | sort
+grep -lE 'getActiveInvitations|\.some\(\(.+\) => .+\.uuid ===' src/actions/invitation/*.ts | sort
 
 # 누락 후보: requireAuth 만 있고 familyUuid 도 받는 Action
 echo "=== 누락 후보 (수동 점검 필요) ==="

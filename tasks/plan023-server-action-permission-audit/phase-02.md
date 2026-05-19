@@ -60,7 +60,7 @@ const selectedFamilyUuid = sessionFamilyUuid;
 
 세션 가족 UUID 를 단일 진실 소스로. prop 은 옵션 (호환성 유지) 이지만 세션과 불일치 시 reject.
 
-호출처 영향: 기존 호출처에서 `familyUuid` 가 항상 세션과 일치하면 동작 변경 없음. 불일치 케이스가 있다면 호출처에서 prop 제거 또는 일치하는 값 전달 (구현 시 grep 으로 호출처 확인 + 필요 시 정리).
+호출처 영향: `src/app/(authenticated)/categories/page.tsx` 가 `getSelectedFamilyAction()` 의 server-side 결과를 `CategoryPageClient → AddCategoryDialog → createCategoryAction` 으로 전달 (정상 사용 시 항상 session 과 일치). devtools 로 다른 가족 UUID 를 prop 주입하는 케이스만 차단됨. 호출처 코드 변경 불필요 — `familyUuid` prop 유지.
 
 ### 2. `deleteInvitationAction` entity ownership (패턴 C)
 
@@ -75,7 +75,10 @@ import {
   successResult,
   type ActionResult,
 } from "@/lib/errors";
-import { requireAuth } from "@/lib/server/auth/auth-helpers";
+import {
+  getSelectedFamilyUuid,
+  requireAuth,
+} from "@/lib/server/auth/auth-helpers";
 import {
   deleteInvitation,
   getActiveInvitations,
@@ -88,8 +91,13 @@ export async function deleteInvitationAction(
   try {
     await requireAuth();
 
+    const familyUuid = await getSelectedFamilyUuid();
+    if (!familyUuid) {
+      throw ActionError.familyNotSelected();
+    }
+
     // Entity ownership: 본인 가족의 active invitation 목록에 포함되는지 확인
-    const active = await getActiveInvitations();
+    const active = await getActiveInvitations(familyUuid);
     if (!active.some((inv) => inv.uuid === invitationUuid)) {
       throw ActionError.entityNotFound("초대 링크", invitationUuid);
     }
@@ -103,9 +111,9 @@ export async function deleteInvitationAction(
 }
 ```
 
-`getActiveInvitations` 는 백엔드가 세션 기준 본인 가족의 invitation 만 반환 (이미 신뢰 경계) → list 에 있다는 사실이 권한 증거. 다른 가족 invitation UUID 주입 시 `entityNotFound`.
+`getActiveInvitations(familyUuid: string)` 는 백엔드가 세션 + 가족 기준 본인 가족의 invitation 만 반환 (이미 신뢰 경계) → list 에 있다는 사실이 권한 증거. 다른 가족 invitation UUID 주입 시 `entityNotFound`. 시그니처 확인 (`src/services/invitation/invitation-service.ts:47`) — familyUuid 필수 인자.
 
-`getActiveInvitations` 의 반환 타입에 `uuid` 필드가 없으면 `getInvitationsByFamily(familyUuid)` 같은 대안 helper 검토 — 구현 시 service signature 확인.
+`InvitationInfo` 타입에 `uuid` 필드 존재 (`src/types/invitation*.ts` 확인 완료).
 
 ### 3. 자동 verification
 
@@ -152,6 +160,6 @@ grep -nE 'getActiveInvitations|entityNotFound.*invitation|some.*invitationUuid' 
 
 | 리스크 | 완화 |
 |---|---|
-| `getActiveInvitations` 반환 타입에 `uuid` 필드 없음 | 구현 시 type 확인 후 필요 시 InvitationInfoData 구조 활용. 대안: `getInvitationInfo(token)` (token 기반) 은 부적합 (uuid 입력) |
-| category/create 호출처가 다른 가족 UUID 를 의도적으로 전달하는 케이스 (admin 시나리오) | 현재 그런 호출처 없음 (`grep -rn 'createCategoryAction' src` 확인). 향후 admin 기능 추가 시 별도 권한 도입 |
+| `getActiveInvitations` 시그니처 (`familyUuid: string` 필수) | 확인 완료 — service:47. action 내부에서 `getSelectedFamilyUuid()` 호출 후 인자 전달. `InvitationInfo.uuid` 필드 존재 확인 완료 |
+| category/create 호출처가 다른 가족 UUID 를 의도적으로 전달하는 케이스 (admin 시나리오) | 호출처 (page.tsx → CategoryPageClient → AddCategoryDialog) 가 모두 server-side `getSelectedFamilyAction()` 결과만 전달 — 정상 사용 시 일치. 향후 admin 기능 추가 시 별도 권한 도입 |
 | `getActiveInvitations()` 추가 페치로 invitation 삭제 latency ↑ | invitation 삭제는 빈번 작업 아님 (가끔). cost 무시 가능 |
