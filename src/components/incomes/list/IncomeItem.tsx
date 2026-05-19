@@ -8,7 +8,8 @@ import { useState } from "react";
 import { EditTransactionDialog } from "@/components/transactions/dialogs/EditTransactionDialog";
 import { deleteIncomeAction } from "@/actions/income/delete-income-action";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/client/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -207,7 +208,7 @@ export function IncomeItem({
                 if (success) setIsDeleteDialogOpen(false);
               }}
               disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className={cn(buttonVariants({ variant: "destructive" }))}
             >
               {isDeleting ? "삭제 중..." : "삭제"}
             </AlertDialogAction>
