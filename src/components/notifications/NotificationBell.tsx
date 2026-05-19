@@ -59,13 +59,12 @@ export function NotificationBell({ familyUuid }: NotificationBellProps) {
         <Button
           variant="ghost"
           size="sm"
-          className="relative text-gray-600 hover:text-gray-900 h-8 w-8 md:h-9 md:w-9 p-0"
+          className="relative text-fg-muted hover:text-fg h-8 w-8 md:h-9 md:w-9 p-0"
         >
           <Bell className="w-4 h-4 md:w-5 md:h-5" />
           {unreadCount > 0 && (
             <Badge
-              variant="destructive"
-              className="absolute -top-1 -right-1 h-4 w-4 md:h-5 md:w-5 p-0 flex items-center justify-center text-[10px] md:text-xs"
+              className="absolute -top-1 -right-1 h-4 w-4 md:h-5 md:w-5 p-0 flex items-center justify-center text-[10px] md:text-xs bg-expense text-white border-0"
             >
               {unreadCount > 99 ? "99+" : unreadCount}
             </Badge>
@@ -77,6 +76,7 @@ export function NotificationBell({ familyUuid }: NotificationBellProps) {
           familyUuid={familyUuid}
           onNotificationRead={handleNotificationRead}
           onAllRead={handleAllRead}
+          onLinkClick={() => setIsOpen(false)}
         />
       </PopoverContent>
     </Popover>
