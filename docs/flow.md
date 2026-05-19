@@ -432,6 +432,29 @@ Dashboard BudgetHeroCard 의 확장 전용 페이지. 분석은 /analytics, 예�
 
 ---
 
+## 14-4. Toast / AlertDialog 시각 시스템 (plan020)
+
+sonner Toaster + Radix AlertDialog 의 색 토큰을 plan001 OKLCH 시스템 (ADR-F24) 으로 통일.
+
+```
+Toast 타입 매핑 (richColors OFF — 토큰 직접):
+    success  → brand-500 (Teal h=188)
+    error    → expense
+    warning  → warning
+    info     → brand-400
+
+AlertDialog:
+    overlay   → bg-fg/60 (light=검은 톤, dark=흰 톤 자동)
+    content   → bg-bg-elev + border-border
+    title     → text-fg
+    description → text-fg-muted
+    Action    기본=brand / 파괴적 호출처는 variant="destructive" (= expense)
+```
+
+파괴적 AlertDialog 호출처 (4): `DeleteExpenseDialog` / `IncomeItem` 삭제 / `RecurringExpenseItem` 삭제 / `DeleteCategoryDialog`. 각 `<AlertDialogAction>` 에 destructive variant 명시.
+
+---
+
 ## 14. 대시보드 고정비 카드
 
 ```
