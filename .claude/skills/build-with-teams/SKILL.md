@@ -419,24 +419,33 @@ executor 완료 후 team-lead → docs-verifier 에게 검증 요청. self-shutd
 
 1. team-lead 가 변경사항 검토
 2. 통합 검증: `pnpm lint && pnpm type-check && pnpm test -- --run && pnpm build`
-3. **CI 실패 시 분기 절차 (필수)** — 변경 파일 vs 실패 원인 파일을 매칭해 책임을 분류하고 사용자 결정을 받는다. 자의적으로 plan PR 안에 외부 잔존 깨짐 fix 를 흡수하지 말 것 (scope creep + 회고 어려움).
+3. **commit 직전 staging 정합 점검 (필수 — fos-accountbook plan018 관측)** — team-lead 가 코드 + docs 를 동시 편집할 때 `git add` 에서 docs 파일을 빠뜨리고 commit message 에는 docs 변경을 명시하는 사고. message 만 보면 정상 commit 처럼 보이지만 실제 diff 에는 docs 가 없어 PR 머지 후에야 발견.
+
+   ```bash
+   # commit 직전 staging 파일 목록 vs message 정합 점검
+   git diff --cached --name-only
+   # 이 출력이 commit message 가 언급하는 모든 파일을 커버하는지 1회 검수
+   ```
+
+   누락 발견 시: 같은 commit 에 `git add` 후 amend 또는 follow-up commit. message 만 수정하는 행동 금지. worktree 가 force-remove 된 후 발견하면 follow-up worktree (`git worktree add ... feat/...`) 재생성 후 별도 commit + push.
+4. **CI 실패 시 분기 절차 (필수)** — 변경 파일 vs 실패 원인 파일을 매칭해 책임을 분류하고 사용자 결정을 받는다. 자의적으로 plan PR 안에 외부 잔존 깨짐 fix 를 흡수하지 말 것 (scope creep + 회고 어려움).
    - **plan 범위 내 (executor 결과물 책임)**: lint/type/build 실패가 본 plan 변경 파일에서 발생 → executor 재투입(또는 team-lead 직접 fix). 사용자 결정 불필요
    - **plan 범위 외 (main 잔존 깨짐)**: 실패 원인이 본 plan 변경 외 파일 → `git diff origin/main -- <파일>` 결과 비어있음 = main 자체 깨진 상태. 사용자에게 처리 옵션 제시 후 결정:
      - **A**: plan PR 에 fix 흡수 (빠르지만 scope creep)
      - **B**: 별도 hotfix PR 분리 → 머지 후 plan PR rebase (책임 분리, 시간 소요)
      - **C**: 그대로 PR 생성 + description 에 의존 명시 (사용자가 hotfix PR 머지 후 rebase)
    - 결정 후 진행. 결정 이력은 PR description 의 "Build" 섹션에 명시
-4. **`tasks/{task-name}/index.json` status="completed" 마킹은 plan 브랜치 안에서**:
+5. **`tasks/{task-name}/index.json` status="completed" 마킹은 plan 브랜치 안에서**:
    - 이상적: 마지막 phase 작업 항목에 포함 (단계 3 의 phase 설계 단계에서 명시) → 별도 commit 불필요
    - 차선: plan 브랜치 안에서 별도 `chore(tasks): mark {plan} completed` commit
    - **main 직접 커밋/푸시 금지** — 이중 진실원 + push 충돌 위험
-5. **push + PR 생성/갱신**:
+6. **push + PR 생성/갱신**:
    - 사전 검증 3 (오픈 PR 점검) 결과에 따라 분기:
      - **신규 실행 (오픈 PR 없음)** → `git push` 후 `gh pr create --base main --head plan/{N}-{slug}` 신규 생성. 제목 형식: `feat(scope): {plan 핵심}` 또는 `fix(scope): ...`. body 에 task spec 요약 + 결과물 commits + Test plan 포함
      - **이어서 실행 (오픈 PR 있음, 사용자 옵션 (a) 선택)** → 같은 브랜치 push (commits 추가됨) + `gh pr edit <N> --title "..." --body "..."` 로 제목/body 갱신. PR 번호는 사전 검증 3 에서 확인한 값
    - CI 실패가 plan 외부에 있으면 description 에 의존 PR 번호 + 머지 순서 명시
-6. **즉시 팀 shutdown** (SendMessage `shutdown_request`) + worktree 정리 + team-lead 누적 노하우 보고
-7. 사용자가 GitHub 에서 PR 머지 → completed 상태 자동 main 반영. main 후속 작업 0개
+7. **즉시 팀 shutdown** (SendMessage `shutdown_request`) + worktree 정리 + team-lead 누적 노하우 보고
+8. 사용자가 GitHub 에서 PR 머지 → completed 상태 자동 main 반영. main 후속 작업 0개
 
 ## worktree 기반 격리 실행 (필수)
 
