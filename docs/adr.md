@@ -37,15 +37,10 @@
 
 ## ADR-F01: Next.js App Router 선택
 
-**결정**: Pages Router 대신 App Router 사용 (Next.js 16)
-
-**이유**:
-
-- Server Components 기본 지원 → 데이터 페칭 단순화, 번들 크기 감소
-- Route Groups(`(authenticated)`)로 인증 레이아웃 분리 가능
-- Server Actions로 API Route 없이 폼 처리 가능
-
-**트레이드오프**: Next.js 16 일부 API가 beta 상태 → 문서 변경 빈도 높음
+- **결정**: Pages Router 대신 App Router 사용 (Next.js 16).
+- **맥락**: Server Components 기본 지원으로 데이터 페칭 단순화 + 번들 크기 감소. Route Groups (`(authenticated)`) 로 인증 레이아웃 분리 가능. Server Actions 로 API Route 없이 폼 처리 가능.
+- **대안 기각**: (생략 — 신규 프로젝트의 일반적 표준 선택)
+- **트레이드오프**: Next.js 16 일부 API 가 beta 상태 → 문서 변경 빈도 높음.
 
 ---
 
@@ -53,15 +48,9 @@
 
 ## ADR-F02: Server Components 우선 전략
 
-**결정**: 클라이언트 상태가 필요한 경우에만 `"use client"` 추가
-
-**이유**:
-
-- 데이터 페칭을 서버에서 처리 → 백엔드 토큰을 클라이언트에 노출하지 않음
-- 초기 HTML에 데이터 포함 → 로딩 플리커 없음
-- `"use client"` 경계를 말단 컴포넌트로 밀어내 번들 최소화
-
-**결과**: 모든 `page.tsx`는 Server Component. 인터랙션이 필요한 부분만 `*Client.tsx`로 분리
+- **결정**: 클라이언트 상태가 필요한 경우에만 `"use client"` 추가. 모든 `page.tsx` 는 Server Component, 인터랙션이 필요한 부분만 `*Client.tsx` 로 분리.
+- **맥락**: 데이터 페칭을 서버에서 처리 → 백엔드 토큰을 클라이언트에 노출하지 않음. 초기 HTML 에 데이터 포함 → 로딩 플리커 없음. `"use client"` 경계를 말단 컴포넌트로 밀어내 번들 최소화.
+- **대안 기각**: (생략 — Next.js App Router 의 권장 패턴 일치)
 
 ---
 
@@ -107,7 +96,7 @@
 
 <a id="adr-f05"></a>
 
-## ADR-F05: ky HTTP 클라이언트 (2026-05-09 v2 갱신)
+## ADR-F05: ky HTTP 클라이언트 (v2 갱신)
 
 **결정**: axios 대신 ky 사용. **2026-05-09**: ky 1.x → 2.x 업그레이드 (plan004).
 
@@ -211,7 +200,7 @@
 
 <a id="adr-f11"></a>
 
-## ADR-F11: CI 코드 리뷰 워크플로 설계 (2026-04-04, 2026-05-09 개정)
+## ADR-F11: CI 코드 리뷰 워크플로 설계 (개정)
 
 **결정**: Claude Code Action 기반 자동 코드 리뷰 워크플로를 아래 방침으로 운영. fos-blog 정착 패턴과 동일화 (2026-05-09 개정).
 
@@ -247,8 +236,7 @@
 
 <a id="adr-f12"></a>
 
-## ADR-F12: Page에서 serverApiGet 직접 호출 금지 (2026-04-05)
-
+## ADR-F12: Page에서 serverApiGet 직접 호출 금지
 **결정**: Page(Server Component)에서 `serverApiGet`을 직접 호출하지 않고, 반드시 Action을 통해 데이터를 조회한다.
 
 **이유**:
@@ -269,8 +257,7 @@
 
 <a id="adr-f13"></a>
 
-## ADR-F13: OKLCH 색 시스템 채택 (2026-05-08)
-
+## ADR-F13: OKLCH 색 시스템 채택
 - **결정**: 모든 디자인 토큰을 OKLCH 색 공간으로 정의한다 (HSL 채널 패턴 폐기). brand 50~900, semantic(income/expense/warning), neutral 0~950, surface(bg/fg/border 등) 모두 `oklch(L C H)` 평면 값.
 - **맥락**: Teal fintech 리디자인(`tokens.js` / `styleguide.css` handoff)에서 brand=Teal h=188 + semantic 분리 + dark mode 토큰을 한 번에 정의해야 함. HSL 은 어두운 색 명도가 hue 따라 다르게 인지됨 → 토큰 스케일이 시각적으로 균일하지 않음.
 - **대안 기각**:
@@ -284,8 +271,7 @@
 
 <a id="adr-f14"></a>
 
-## ADR-F14: Pretendard Variable 폰트 도입 (2026-05-08)
-
+## ADR-F14: Pretendard Variable 폰트 도입
 - **결정**: 메인 sans 폰트를 Geist 에서 **Pretendard Variable** 로 교체. 수치 폰트는 **Inter** 도입 (tabular-nums + `.num` 유틸리티). next/font `localFont` 자체 호스팅 (woff2).
 - **맥락**: 가족 단위 가계부 UI 는 한글 비중 100%. Geist 는 라틴 우선 — 한글은 system fallback 으로 떨어져 한 화면에 두 폰트가 섞임. Pretendard 는 한국 fintech 표준에 가까운 한글 가독성.
 - **대안 기각**:
@@ -298,8 +284,7 @@
 
 <a id="adr-f15"></a>
 
-## ADR-F15: next-themes attribute='data-theme' (2026-05-08)
-
+## ADR-F15: next-themes attribute='data-theme'
 - **결정**: `next-themes` 의 `attribute` 옵션을 기본 `class` 에서 `data-theme` 으로 전환. dark 토큰 적용 셀렉터는 `[data-theme="dark"]`.
 - **맥락**: Handoff 토큰 컨벤션이 `[data-theme="dark"]` 로 정의됨. 또한 기존 `.dark` 셀렉터는 유틸리티 클래스 (`dark:bg-...`) 와 grep 시 동시에 잡혀 토큰-only 변경 추적이 어려움.
 - **대안 기각**:
@@ -312,8 +297,7 @@
 
 <a id="adr-f16"></a>
 
-## ADR-F16: 카테고리 월 분포는 Server Action 측 집계 (2026-05-08)
-
+## ADR-F16: 카테고리 월 분포는 Server Action 측 집계
 - **결정**: 대시보드의 카테고리별 월 합계는 backend 신규 endpoint 없이 기존 `GET /expenses?month=YYYY-MM` 응답을 `services/dashboard/dashboard-service.ts` 의 `getMonthlyCategoryBreakdown(familyUuid, year, month)` 에서 집계한다.
 - **맥락**: handoff dashboard 의 "카테고리 분포" 가 핵심 강조 요소. backend 에 신규 endpoint 신설 시 frontend plan002 이 backend 일정에 묶임. 1가구 월 거래 100~300건 추정 → 응답 사이즈 50~150KB 수준, Server Action 집계로 충분.
 - **대안 기각**:
@@ -324,8 +308,7 @@
 
 <a id="adr-f17"></a>
 
-## ADR-F17: URL searchParams ↔ Client state 동기화는 draft 패턴 (2026-05-11)
-
+## ADR-F17: URL searchParams ↔ Client state 동기화는 draft 패턴
 - **결정**: URL searchParams 를 입력 폼 (input/select) 의 초기값으로 쓰면서 외부 URL 변경 (브라우저 뒤로/앞으로, 다른 컴포넌트의 router.replace) 에도 추종해야 할 때, **useEffect 안 setState 가 아닌 derived value 패턴** 을 사용한다.
 
   ```tsx
@@ -351,8 +334,7 @@
 
 <a id="adr-f18"></a>
 
-## ADR-F18: react-day-picker → @daypicker/react 패키지 이전 (2026-05-11)
-
+## ADR-F18: react-day-picker → @daypicker/react 패키지 이전
 - **결정**: `react-day-picker` v9 → v10 메이저 업그레이드 + 패키지명을 공식 권장 신 namespace 인 `@daypicker/react` 로 이전. v10 의 폐기 props/event handler 일괄 교체.
 - **맥락**: PR #222 (Dependabot) 가 단순 dep bump 만 제안 — 폐기 API 제거된 v10 에서 코드 마이그레이션 누락 시 빌드/런타임 회귀. 또 v10 공식 권장이 신 namespace `@daypicker/react` 로 이동 (장기 수명 + non-Gregorian calendar 들도 `@daypicker/*` 스코프). frontend 사용처는 단 2 파일 (`src/components/ui/calendar.tsx` shadcn wrapper + `src/components/dashboard/CalendarView.tsx`) 로 작아 한 PR 에 dep+코드 통합 적합.
 - **대안 기각**:
@@ -370,8 +352,7 @@
 
 <a id="adr-f19"></a>
 
-## ADR-F19: TypeScript 5.9 → 6.0 메이저 이전 + breaking 대응 패턴 (2026-05-11)
-
+## ADR-F19: TypeScript 5.9 → 6.0 메이저 이전 + breaking 대응 패턴
 - **결정**: TypeScript 컴파일러를 `^5` 에서 `^6` 메이저로 이전. release note 의 stricter inference / lib.d.ts 변경 / decorator 표준 채택 등으로 발생하는 type 에러를 plan008 의 각 phase 에서 카테고리별 패턴 적용으로 일괄 수정.
 - **맥락**: PR #179 (Dependabot) 가 단순 dep bump 만 제안 — typescript 메이저는 전체 `.ts/.tsx` 컴파일에 영향이라 tsc 실측 후 에러 카테고리 식별 필수. ky/react-day-picker (단일 파일) 대비 영향 면적 큼. 미루면 보안/성능 개선 누적 손실 + msw·jest·eslint-config-next 등 peer dep 가 ts6 로 먼저 옮겨가면 빌드 분리 위험.
 - **대안 기각**:
@@ -390,8 +371,7 @@
 
 <a id="adr-f20"></a>
 
-## ADR-F20: 인증 안 한 사용자의 `/` 진입은 Landing 표시 (2026-05-11)
-
+## ADR-F20: 인증 안 한 사용자의 `/` 진입은 Landing 표시
 - **결정**: `/` 라우트를 public 으로 변경. 인증 안 한 사용자는 Landing (Hero + Features 3 + CTA), 인증 사용자는 `/dashboard` 자동 redirect. `src/app/page.tsx` 가 page-level `auth()` 호출 후 세션 분기 처리. proxy.ts (ADR-F19) 는 전역 auth proxy 라 별도 matcher 수정 불필요.
 - **맥락**: 기존 동작은 인증 안 한 모든 진입 = `/auth/signin` 강제 redirect. login 페이지가 사실상 첫 화면이라 "어떤 서비스인지" 가 부재 — 신규 사용자가 가입 가치를 판단할 정보 없음. 부부 가계부 라는 도메인 특성상 가치 제안 (가족·카테고리·분석) 을 먼저 보여줄 entry 가 필요.
 - **대안 기각**:
@@ -402,8 +382,7 @@
 
 <a id="adr-f21"></a>
 
-## ADR-F21: Add/Edit Transaction 다이얼로그 단일화 (2026-05-11)
-
+## ADR-F21: Add/Edit Transaction 다이얼로그 단일화
 - **결정**: 지출/수입/고정지출 3 도메인의 Add 다이얼로그를 단일 `AddTransactionDialog` + 3 segmented 토글 (gradient-expense / gradient-income / gradient-budget) 로 통합. Edit 도 동일 패턴 (`EditTransactionDialog`, type 잠금). 위치: `src/components/transactions/dialogs/`.
 - **맥락**: 같은 "추가" 진입점이 6 곳 (Dashboard QuickActions / BottomNav FAB / Transactions 의 지출·수입·고정지출 탭 / Settings 고정지출) 인데 호출하는 다이얼로그가 셋 (AddExpenseDialog / AddIncomeDialog / AddRecurringExpenseSheet) 으로 분기. 시각·반응형 (Sheet 방향 right vs bottom)·field 구성·legacy 토큰 (`text-destructive`, `text-gray-500`, `text-muted-foreground`) 모두 불일치 → 사용자 인지 부담 + 유지보수 비용.
 - **대안 기각**:
@@ -414,8 +393,7 @@
 
 <a id="adr-f22"></a>
 
-## ADR-F22: 민감 정보를 다루는 컴포넌트는 Server Component 로 유지 + Client 핸들러는 children 슬롯 (2026-05-18)
-
+## ADR-F22: 민감 정보를 다루는 컴포넌트는 Server Component 로 유지 + Client 핸들러는 children 슬롯
 - **결정**: `error.tsx` / `not-found.tsx` 같은 에러 경계 카드 (`StatusCard`) 는 **Server Component 로 고정**. 클라이언트 핸들러 (`reset()` 등) 가 필요한 영역은 별도 `"use client"` 래퍼 (`ErrorResetButton`) 를 만들어 Server Component 의 `children` 슬롯에 주입. `process.env.NODE_ENV` 분기를 포함한 dev-only 메시지 (`error.message`, stack trace, digest 등) 도 Server Component 본문에서 평가하여 production 트리에서 dev JSX 자체가 제외되도록 한다.
 - **맥락**: Next.js App Router 에서 `error.tsx` 는 `"use client"` 필수 (Error boundary 규약). 직관적으로는 `error.tsx` 안의 모든 컴포넌트가 Client 가 되지만, Server Component 를 `children` 으로 받으면 그 본체는 서버에서 렌더된다. 이를 활용하면 (a) `error.message` 같은 민감 정보의 `process.env.NODE_ENV` 분기를 서버측에서 평가해 production 클라이언트 번들에 dev 텍스트 누출 차단, (b) `onClick` 같은 직렬화 불가 prop 을 Server Component 인터페이스에서 제거. PR #248 코드 리뷰에서 두 사고 가능성이 동시 지적됨.
 - **대안 기각**:
@@ -428,8 +406,7 @@
 
 <a id="adr-f23"></a>
 
-## ADR-F23: semantic foreground 토큰 (`--color-{semantic}-fg`) 으로 강조 배경 위 텍스트 색 명시 (2026-05-19)
-
+## ADR-F23: semantic foreground 토큰 (`--color-{semantic}-fg`) 으로 강조 배경 위 텍스트 색 명시
 - **결정**: `bg-expense` / `bg-income` / `bg-warning` 같은 채도 높은 시맨틱 배경 위에 텍스트를 얹을 때는 `text-white` / `text-black` 하드코딩 대신 **시맨틱 foreground 토큰** (`--color-expense-fg` 등) 을 사용한다. light/dark 양쪽에서 동일하게 강조 배경과 대비되는 near-white 값 (`oklch(0.985 0.003 230)`) 으로 정의 — surface `--color-fg` (light=어두움, dark=밝음) 와 분리.
 - **맥락**: plan017 NotificationBell 의 `bg-expense text-white` Badge 가 ADR-F13 (OKLCH 토큰 강제, hex/rgb/hsl/named color 금지) 의 정신과 충돌. 단순 교체로 `text-bg` 같은 surface foreground 를 쓰면 dark mode 에서 `--color-bg` 가 어두운 색이 되어 빨간 expense 배경 위에서 가독성이 더 나빠짐. 강조 배경은 light/dark 무관하게 채도 유지가 의도이므로 foreground 도 모드 독립적 near-white 가 자연스럽다.
 - **대안 기각**:

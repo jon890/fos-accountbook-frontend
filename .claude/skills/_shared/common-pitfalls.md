@@ -159,7 +159,7 @@ team-lead 가 idle 알림 2회 연속 + 평가 메시지 0 → 즉시 강제 재
 ## 2-2. 팀원 자발적 실행
 
 **증상**: idle 대기 지시 무시하고 team-lead 의 SendMessage 전에 자발 실행 / 검증 시작.
-**왜**: critic 게이트 시점 정합성 망가짐.
+**왜**: critic 점검 시점 정합성 망가짐.
 
 스폰 프롬프트에:
 ```
@@ -191,7 +191,7 @@ team-lead 는 executor 작업 중 `git -C {main-repo} status` 주기 점검. dir
 ## 2-5. executor scope 확장 자체 판단
 
 **증상**: phase 도중 task 범위 외 (pre-existing 에러 / 발견한 bug / ADR 위반 자체 변경) 를 자체 추가. 또는 `eslint-disable` / `@ts-ignore` 자체 추가.
-**왜**: critic 게이트 우회 → 사후 평가 사이클 추가 + task 본문 / 성공 기준 어긋남.
+**왜**: critic 점검 우회 → 사후 평가 사이클 추가 + task 본문 / 성공 기준 어긋남.
 
 executor 프롬프트에:
 ```

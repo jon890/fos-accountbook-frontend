@@ -176,7 +176,7 @@ grep -rnE '매트릭스|트리아지|베이스라인|스파이크|게이트|사�
 
 ```bash
 # cwd: <repo root>
-ls docs/*.md docs/pages/*.md .claude/skills/*/SKILL.md .claude/skills/_shared/*.md
+ls docs/*.md CLAUDE.md .claude/skills/*/SKILL.md .claude/skills/_shared/*.md
 ```
 
 ### 2. 각 문서에 7축 점검 수행
@@ -186,7 +186,6 @@ ls docs/*.md docs/pages/*.md .claude/skills/*/SKILL.md .claude/skills/_shared/*.
 - **data-schema.md**: A (스키마 정합) + D (ADR과 중복) + F + G
 - **code-architecture.md**: A (디렉터리 실재) + B (코드 스니펫) + D (CLAUDE.md와 중복) + F + G
 - **prd.md**: D (flow.md와 중복) + C (기획 의도가 "왜") + F + G
-- **docs/pages/*.md**: A (실제 page.tsx 와 흐름 / 컴포넌트 / Data 표 정합) + D (prd 와 중복) + F + G
 - **CLAUDE.md**: "상황별 ADR 필수 참조" 표의 ADR 번호가 실제 존재하는지 + F + G
 - **`.claude/skills/*/SKILL.md`**: B (과대화) + C (추론성) + D (다른 스킬과 중복) + 자명성 변형 (아래) + F + G
 

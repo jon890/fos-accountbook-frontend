@@ -129,7 +129,6 @@ task 파일을 **사용자에게 제출하기 전**에 반드시 [`common-pitfal
 | DB 테이블 / 관계 / 제약 | `data-schema.md` | ADR 은 결정 근거만 |
 | 디렉터리 / 레이어 / API 전략 | `code-architecture.md` | ADR 은 결정 근거만 |
 | 기술 결정 근거 (왜) | `adr.md` | 다른 docs 는 ADR 번호 링크 |
-| 페이지별 PRD | `docs/pages/{page}.md` | flow 는 흐름만 |
 
 ### 8단계: 최종 문서 생성
 
@@ -156,7 +155,7 @@ task 파일을 **사용자에게 제출하기 전**에 반드시 [`common-pitfal
 
 8단계가 끝나면 **항상 아래 순서를 그대로 수행** — 사용자의 별도 지시를 기다리지 않는다.
 
-1. **docs 반영 완료 확인** — `docs/adr.md` / `docs/flow.md` / `docs/data-schema.md` / `docs/code-architecture.md` / `docs/pages/{page}.md` / `CLAUDE.md` 중 해당하는 문서에 이번 결정이 모두 기록됐는지 점검
+1. **docs 반영 완료 확인** — `docs/adr.md` / `docs/flow.md` / `docs/data-schema.md` / `docs/code-architecture.md` / `CLAUDE.md` 중 해당하는 문서에 이번 결정이 모두 기록됐는지 점검
 2. **task 파일 생성** — `tasks/plan{N}-{kebab-slug}/` 디렉터리 + `index.json` + phase 파일들 작성. 상세 규칙은 [`task-create.md`](./task-create.md) 참조 (index.json 스키마 / model 라우팅 / phase 작성 체크리스트 / 마지막 2 phase 표준). CLAUDE.md "Task 작업 규칙" 도 준수 — 원자적 단일 책임, phase 당 작업 5개 이하, 자기완결 프롬프트, **마지막 phase 에 index.json status="completed" 마킹 명시**
 3. **`common-pitfalls.md` 의 P1~P9 + 패턴 소진 체크리스트 사전 해소** — task 제출 전 self-check
 4. **plan 브랜치 생성** — `git switch -c plan/{N}-{kebab-slug} origin/main`. 매 plan 마다 origin/main 기준 신규 브랜치 (이전 plan 브랜치 위에 쌓지 않는다)

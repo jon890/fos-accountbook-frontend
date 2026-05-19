@@ -406,7 +406,7 @@ executor 완료 후 team-lead → docs-verifier 에게 검증 요청. self-shutd
 4. docs 업데이트 필요 여부
 5. 의사결정 의도 보존 여부
 6. **문서 부패 검증 (필수)**: 코드에서 제거/변경된 기능이 docs 에 아직 남아 있는지
-   - 제거된 함수/컴포넌트가 `docs/flow.md`, `docs/code-architecture.md`, `docs/pages/*.md` 에 언급되는지
+   - 제거된 함수/컴포넌트가 `docs/flow.md`, `docs/code-architecture.md` 에 언급되는지
    - 변경된 UI 흐름이 docs 다이어그램과 불일치하는지
    - `grep -rn "제거된키워드" docs/` 로 dead reference 검출
 
@@ -573,7 +573,6 @@ executor 가 phase 실패 보고 시:
 | build-with-teams 프로세스 결함 | sub-agent 협업 / 점검 / worktree 절차 자체에서 사고 발생 | 이 SKILL.md | 해당 섹션 (예: "팀원 자발적 실행 방지", "executor cwd 격리") 끝에 1-2줄 |
 | 도메인 의사결정 | "왜 X 를 선택했는가" 가 코드만 봐서는 추론 불가 + ADR 작성 전 자체 점검 절차 통과 | `docs/adr.md` | `## ADR-XXX` (결정 / 맥락 / 대안 기각 구조) |
 | AI 에이전트 컨텍스트 | 프로젝트 전반 코딩 규칙 / 스택 / 레이어 / 금지사항 변경 | `CLAUDE.md` / `<dir>/AGENTS.md` | 기존 섹션 갱신 또는 신규 1-2줄 |
-| 페이지별 상세 | 특정 page.tsx 의 흐름 / 컴포넌트 / Data 변경 | `docs/pages/{page}.md` | Components / Data / Layout 표 갱신 |
 | 일회용 메모 (다음 plan 동안만 유효) | 재발 가능성 낮지만 잠시 잊지 않을 정보 | (누적 금지 — 사용자 보고로 끝) | — |
 
 ### 누적 가치 판단 기준
