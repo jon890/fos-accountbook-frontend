@@ -61,10 +61,15 @@ test -f src/components/settings/BudgetEditDialog.tsx
 ! grep -n 'editingBudget\|budgetValues' \
   src/app/\(authenticated\)/settings/_components/SettingsPageClient.tsx
 
-# 정보 중복 해소: 기본 가족 카드의 "구성원 N명 · 지출 N건" 제거
-! grep -n '구성원.*명 · 지출' \
-  src/app/\(authenticated\)/settings/_components/SettingsPageClient.tsx | \
-  head -1 || echo "OK: 중복 제거됨 또는 1곳만 (내 가족 목록 카드)"
+# 정보 중복 해소: "구성원 N명 · 지출 N건" 표기는 내 가족 목록 카드에만 1회 등장
+# (기본 가족 카드에서는 제거되고 "월 예산 ₩" / "월 예산 미설정" 으로 대체)
+COUNT=$(grep -cE '구성원 \{?[^}]*\}?명 · 지출' \
+  src/app/\(authenticated\)/settings/_components/SettingsPageClient.tsx)
+test "$COUNT" = "1" || { echo "FAIL: '구성원 N명 · 지출' 등장 $COUNT 회 (기대: 1, 내 가족 목록 카드만)"; exit 1; }
+
+# 기본 가족 카드에 신규 마커 (월 예산 ₩ 또는 월 예산 미설정) 존재
+grep -nE '월 예산 ₩|월 예산 미설정' \
+  src/app/\(authenticated\)/settings/_components/SettingsPageClient.tsx | wc -l   # >= 1
 
 # 내 가족 목록 카드는 카테고리 통계 유지
 grep -n '카테고리.*개' \

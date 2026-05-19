@@ -65,7 +65,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { useMediaQuery } from "@/hooks/use-media-query";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { updateFamilyAction } from "@/actions/family/update-family-action";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -216,7 +216,7 @@ export function BudgetEditDialog({
 }
 ```
 
-`useMediaQuery` 훅 경로는 기존 plan014 사용처 (`src/hooks/use-media-query.ts` 또는 `@/hooks/use-media-query`) 따름. 없으면 `AddTransactionDialog.tsx` 의 import 확인 후 동일 경로.
+`useMediaQuery` 훅은 `@/hooks/useMediaQuery` (camelCase, `src/hooks/useMediaQuery.ts`). plan014 `AddTransactionDialog.tsx` L23 동일 경로 사용.
 
 ### 2. `SettingsPageClient.tsx` — inline edit 제거 + Dialog 트리거
 
@@ -340,7 +340,7 @@ grep -nE '\+10만|\+50만|\+100만' src/components/settings/BudgetEditDialog.tsx
 
 | 리스크 | 완화 |
 |---|---|
-| `useMediaQuery` 훅 경로 / signature 가 plan014 와 다름 | plan014 의 `AddTransactionDialog.tsx` import 확인 후 동일 경로 사용. 없으면 hooks 디렉터리 통째로 grep |
+| `useMediaQuery` 훅 경로 (`@/hooks/useMediaQuery` camelCase) 오타 가능 | plan014 `AddTransactionDialog.tsx` L23 과 동일 — 위 본문 코드 정정됨. ts 빌드로 검증 |
 | Dialog `open` 토글 시 동일 컴포넌트 mount → currentBudget reset 안 됨 | useEffect 로 open 변화 시 setValue(currentBudget) 명시 (위 코드 반영됨) |
 | Sheet bottom 가 모바일 키보드와 겹침 | iOS Safari 키보드 위로 Sheet 본문 자동 push — shadcn Sheet 기본 동작. 미작동 시 `h-auto` → `max-h-[80vh] overflow-y-auto` 폴백 |
 | 빠른 입력 칩 누적 시 매우 큰 수 발생 | input type=number max 옵션 없이 자유 입력. updateFamilyAction 의 backend 검증에 위임 (현재 검증 범위는 Family 도메인 결정) |
