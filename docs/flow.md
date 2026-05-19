@@ -468,7 +468,7 @@ AlertDialog:
                 ├─ SettingsHero (Teal gradient)
                 │   ├─ 사용자 이름 + email
                 │   ├─ 현재 기본 가족명
-                │   └─ 월 예산 / 이번 달 지출 요약 (Dashboard 톤)
+                │   └─ 월 예산
                 │
                 ├─ [기본 가족 설정 카드] — radio 선택 + "현재 기본" 배지만
                 │   └─ Save → setDefaultFamilyAction
