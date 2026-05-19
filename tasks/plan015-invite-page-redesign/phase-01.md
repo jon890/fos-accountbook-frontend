@@ -18,6 +18,14 @@
 
 ## 작업 항목
 
+### 0. import 보강
+
+`cn` 유틸이 기존 import 에 없음 — 작업 항목 3 의 className 분기에서 필요. 다음 import 추가:
+
+```ts
+import { cn } from "@/lib/utils";
+```
+
 ### 1. 배경 + 카드 wrapper 교체
 
 ```tsx
@@ -152,7 +160,7 @@ pnpm tsc --noEmit
 pnpm build
 
 # legacy 토큰 잔재 0
-! grep -nE 'app-background|text-gray-|text-blue-600|text-orange-600|bg-gray-50|bg-muted\b|shadow-2xl|shadow-xl' \
+! grep -nE 'app-background|text-gray-|text-blue-600|text-orange-600|bg-gray-50|bg-muted\b|shadow-2xl|shadow-xl|shadow-lg\b' \
   src/app/\(authenticated\)/invite/\[token\]/_components/InvitePageClient.tsx
 
 # 신 토큰 사용
