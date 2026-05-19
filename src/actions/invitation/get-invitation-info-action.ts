@@ -1,7 +1,3 @@
-/**
- * 초대 정보 조회 (토큰으로) Server Action
- */
-
 "use server";
 
 import {
@@ -13,6 +9,7 @@ import {
   getInvitationInfo,
   type InvitationInfoData,
 } from "@/services/invitation/invitation-service";
+import { InvitationTokenSchema } from "./_schemas";
 
 export type { InvitationInfoData };
 
@@ -22,7 +19,8 @@ export async function getInvitationInfoAction(
   token: string
 ): Promise<ActionResult<InvitationInfoData>> {
   try {
-    const info = await getInvitationInfo(token);
+    const { token: validToken } = InvitationTokenSchema.parse({ token });
+    const info = await getInvitationInfo(validToken);
     return successResult(info);
   } catch (error) {
     return handleActionError(error, "초대 정보를 가져오는데 실패했습니다");

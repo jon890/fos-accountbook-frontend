@@ -160,7 +160,7 @@ pnpm tsc --noEmit
 pnpm build
 
 # legacy 토큰 잔재 0
-! grep -nE 'app-background|text-gray-|text-blue-600|text-orange-600|bg-gray-50|bg-muted\b|shadow-2xl|shadow-xl|shadow-lg\b' \
+! grep -nE 'app-background|text-gray-|text-blue-600|text-orange-600|bg-gray-50|(^|[^-])bg-muted\b|shadow-2xl|shadow-xl|shadow-lg\b' \
   src/app/\(authenticated\)/invite/\[token\]/_components/InvitePageClient.tsx
 
 # 신 토큰 사용
