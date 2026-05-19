@@ -456,6 +456,42 @@ AlertDialog:
 
 ---
 
+## 15. /settings 페이지 구조 (plan021)
+
+```
+[/settings (server)]
+    ├─ getUserProfileAction() → { defaultFamilyUuid, name, email }
+    └─ getFamiliesAction() → Family[]
+        │
+        └─ SettingsPageClient (use client)
+                │
+                ├─ SettingsHero (Teal gradient)
+                │   ├─ 사용자 이름 + email
+                │   ├─ 현재 기본 가족명
+                │   └─ 월 예산 / 이번 달 지출 요약 (Dashboard 톤)
+                │
+                ├─ [기본 가족 설정 카드] — radio 선택 + "현재 기본" 배지만
+                │   └─ Save → setDefaultFamilyAction
+                │
+                ├─ [가족별 예산 카드]
+                │   └─ 각 row "수정" 클릭 → BudgetEditDialog (responsive)
+                │           ├─ mobile: Sheet bottom
+                │           └─ md+:    Dialog centered
+                │       Amount input + 빠른 입력 칩 (+10만/+50만/+100만)
+                │       저장 → updateFamilyAction({ monthlyBudget })
+                │
+                └─ [내 가족 목록 카드] — 멤버/카테고리/지출 통계
+                        └─ "관리" → /families/{uuid}
+```
+
+핵심 변경:
+- `gradient-primary` (plan019 폐기 토큰) → `bg-brand-500` 단색
+- DollarSign → Wallet (한국 원화 페이지 일관성)
+- inline budget edit (Edit2/Save/X 3 버튼) → BudgetEditDialog (plan014 responsive 패턴 재사용)
+- 기본 가족 카드 ↔ 내 가족 목록 카드 정보 분리 (radio vs 통계)
+
+---
+
 ## 14. 대시보드 고정비 카드
 
 ```
