@@ -1,6 +1,6 @@
 "use client";
-
-import { ErrorBoundaryCard } from "@/components/error/ErrorBoundaryCard";
+import { StatusCard } from "@/components/error/StatusCard";
+import { ErrorResetButton } from "@/components/error/ErrorResetButton";
 
 export default function GlobalError({
   error,
@@ -12,7 +12,13 @@ export default function GlobalError({
   return (
     <html lang="ko">
       <body>
-        <ErrorBoundaryCard error={error} reset={reset} />
+        <StatusCard
+          kind="error"
+          secondaryCta={{ label: "홈으로", href: "/" }}
+          devMessage={`${error.message}\ndigest=${error.digest ?? "-"}`}
+        >
+          <ErrorResetButton reset={reset} label="다시 시도" />
+        </StatusCard>
       </body>
     </html>
   );
