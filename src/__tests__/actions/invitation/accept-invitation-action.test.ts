@@ -22,6 +22,7 @@ jest.mock("next/cache");
 import { acceptInvitationAction } from "@/actions/invitation/accept-invitation-action";
 import { requireAuth } from "@/lib/server/auth/auth-helpers";
 import { acceptInvitation } from "@/services/invitation/invitation-service";
+import type { Session } from "next-auth";
 import { revalidatePath } from "next/cache";
 
 const mockRequireAuth = requireAuth as jest.MockedFunction<typeof requireAuth>;
@@ -34,10 +35,17 @@ const mockRevalidatePath = revalidatePath as jest.MockedFunction<
 
 const VALID_UUID = "550e8400-e29b-41d4-a716-446655440000";
 
+const mockSession: Session = {
+  user: {
+    userUuid: "user-1",
+  },
+  expires: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+};
+
 describe("acceptInvitationAction", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRequireAuth.mockResolvedValue({} as never);
+    mockRequireAuth.mockResolvedValue(mockSession);
   });
 
   describe("잘못된 토큰 형식", () => {

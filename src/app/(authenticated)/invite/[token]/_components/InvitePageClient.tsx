@@ -20,7 +20,8 @@ import { cn } from "@/lib/client/utils";
 interface InvitePageClientProps {
   token: string;
   familyName: string;
-  expiresAt: Date;
+  // RSC→Client 직렬화 경계에서 string 으로 도착할 수 있어 union 으로 받는다
+  expiresAt: Date | string;
 }
 
 export function InvitePageClient({
@@ -33,7 +34,8 @@ export function InvitePageClient({
 
   const hoursUntilExpire =
     (new Date(expiresAt).getTime() - Date.now()) / (1000 * 60 * 60);
-  const isExpiringSoon = hoursUntilExpire <= 24;
+  const isAlreadyExpired = hoursUntilExpire <= 0;
+  const isExpiringSoon = !isAlreadyExpired && hoursUntilExpire <= 24;
 
   const handleAccept = async () => {
     setIsAccepting(true);
