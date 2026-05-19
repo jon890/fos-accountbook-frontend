@@ -94,7 +94,7 @@ team-lead 가 plan 의 `index.json` + phase 파일을 읽고 규모를 판정한
 
 team-lead 가 "이전 세션이 그랬으니까 / 익숙한 패턴이라서" 같은 자의적 판단 금지. **매 호출마다 새로 질문**한다 (사용자가 "앞으로도 X 로" 라고 명시했으면 그 결정을 따르되, 그 결정도 메모리/세션 시작 시 한번 더 confirm 가능).
 
-**왜 이 게이트가 필요한가** — plan026 (PR #120) 에서 자의적으로 모드 C 선택 → critic / code-reviewer / docs-verifier 게이트 모두 skip → 사후 검수로 보강하는 비용 발생. 시작 시점 1번 질문이 사후 보강 비용보다 훨씬 저렴.
+**왜 이 게이트가 필요한가** — plan026 (PR #120) 에서 자의적으로 모드 C 선택 → critic / code-reviewer / docs-verifier 점검 모두 skip → 사후 검수로 보강하는 비용 발생. 시작 시점 1번 질문이 사후 보강 비용보다 훨씬 저렴.
 
 ## 분기점 단독 결정 금지 (필수 — 일반 가드)
 
@@ -212,14 +212,14 @@ team-lead 는 executor 작업 도중 `git -C {main-repo} status` 로 main repo w
 
 ### executor scope 확장 보고 의무 (필수)
 
-executor 가 phase 작업 도중 task 범위 외 코드 수정(예: pre-existing TS 에러 픽스, 우연히 발견한 bug 수정, ADR 위반 발견 후 자체 설계 변경)을 자체 판단으로 추가하는 사고가 관측됨. critic 사후 ACCEPT 가능하더라도 게이트 우회.
+executor 가 phase 작업 도중 task 범위 외 코드 수정(예: pre-existing TS 에러 픽스, 우연히 발견한 bug 수정, ADR 위반 발견 후 자체 설계 변경)을 자체 판단으로 추가하는 사고가 관측됨. critic 사후 ACCEPT 가능하더라도 점검 우회.
 
 executor 스폰 프롬프트에 다음 가드를 **반드시 포함**:
 
 ```
 task 범위 외 코드 수정(pre-existing 에러, 발견한 bug, ADR 위반 자체 변경)은 자체 판단 금지.
 필요 시 SendMessage 로 team-lead 에 보고: "task 범위 외 X 발견, Y 수정 필요. 본 phase 포함 / 별도 plan 분리 결정 부탁".
-team-lead 의 명시적 승인 후에만 추가. 게이트 우회 시 critic 사후 평가 사이클이 추가되고 task 본문·성공 기준이 어긋난다.
+team-lead 의 명시적 승인 후에만 추가. 점검 우회 시 critic 사후 평가 사이클이 추가되고 task 본문·성공 기준이 어긋난다.
 ```
 
 team-lead 처리 흐름:
@@ -275,9 +275,9 @@ executor / code-reviewer 는 모든 규모에서 sonnet 고정. 사용자가 명
 
 ## 재시도 한도 (필수)
 
-무한 루프 방지를 위해 각 게이트에 한도 적용. 한도 초과 시 자동으로 `PHASE_BLOCKED` 처리하여 사용자(team-lead)에게 결정 위임.
+무한 루프 방지를 위해 각 점검 단계에 한도 적용. 한도 초과 시 자동으로 `PHASE_BLOCKED` 처리하여 사용자(team-lead)에게 결정 위임.
 
-| 게이트 | 한도 | 초과 시 동작 |
+| 점검 단계 | 한도 | 초과 시 동작 |
 |---|---|---|
 | **critic REVISE** | 3회 | `PHASE_BLOCKED: critic REVISE 한도 초과 — team-lead 결정 필요` |
 | **code-reviewer FIX_NEEDED** | 2회 | `PHASE_BLOCKED: code-reviewer FIX 한도 초과 — 수동 검토 필요` |
@@ -341,7 +341,7 @@ critic 평가 관점:
 4. Phase 크기가 5개 이하인가?
 5. 성공 기준이 충분한가?
 6. **실제 코드와 일치하는가?** (파일 존재, 함수명, 줄 수 검증)
-7. **`common-pitfalls.md` 의 모든 패턴이 사전 소진되었는가?**
+7. **`common-pitfalls.md` 의 모든 패턴이 사전 해소되었는가?**
 
 판정:
 - **APPROVE** → 6단계로

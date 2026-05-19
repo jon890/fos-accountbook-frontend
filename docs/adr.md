@@ -271,7 +271,7 @@
   const [draft, setDraft] = useState<string | null>(null);
   const value = draft ?? searchParams.get("q") ?? "";
   // 사용자 입력: setDraft(newValue)
-  // URL apply 후: setDraft(null) — URL 단일 진실원 복귀
+  // URL apply 후: setDraft(null) — URL 단일 소스 복귀
   ```
 
 - **맥락**: React 19 의 `react-hooks/cascading-render` 규칙이 `useEffect` 안 `setState` 직접 호출을 차단. URL 변경을 감지해서 input state 를 다시 set 하는 직관적 코드가 lint 오류 + 잠재적 cascading render 위험. 사용자 입력 (draft) 과 URL (current) 의 두 진실원을 단일 derived value 로 합쳐 effect 제거.
