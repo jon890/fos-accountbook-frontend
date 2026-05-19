@@ -1,6 +1,6 @@
 ---
 name: docs-check
-description: 문서 점검 스킬. docs/ 전체를 5축(부패·과대화·추론성·중복·자명성)으로 검증하고 정리 제안 리포트를 생성. ADR은 "기술 의사결정만 / 최종 상태만 / 코드로 자명하지 않은 것만" 유지. build-with-teams 완료 후 주기적으로 실행 권장.
+description: 문서 점검 스킬. docs/ 전체를 7축(부패·과대화·추론성·중복·자명성·형식 패턴·한국어 표현)으로 검증하고 정리 제안 리포트를 생성. ADR은 "기술 의사결정만 / 최종 상태만 / 코드로 자명하지 않은 것만" 유지. build-with-teams 완료 후 주기적으로 실행 권장.
 ---
 
 # docs-check
@@ -19,8 +19,10 @@ AI 에이전트는 코드만큼 docs를 신뢰한다. 그러나 docs가 다음 �
 - **추론 불가**: "무엇을"만 있고 "왜"가 빠짐
 - **중복**: 같은 내용이 여러 docs에 반복 → 한쪽만 수정되어 불일치
 - **자명**: 코드/설정만 봐도 알 수 있는 내용이 ADR에 기록 → 시그널 대비 노이즈 증가
+- **형식 패턴 위반**: 한 줄에 여러 문장 / 슬래시 인라인 / 괄호 중첩 / 다중 속성 압축 → 사람·LLM 모두 가독성 손실
+- **외래어 음차**: "매트릭스 / 트리아지 / 게이트" 같은 표현이 한국어 자연어 흐름을 깨고 의미 추론 비용 증가
 
-## 검증 5축
+## 검증 7축
 
 ### A. 부패 (Decay)
 
@@ -97,25 +99,99 @@ ADR이 "왜"를 담고 있는가. "결정 / 맥락 / 대안 기각" 구조가 �
 
 세 질문에 YES가 대부분이면 폐기 대상.
 
+### F. 형식 패턴 (Style Patterns) — CLAUDE.md "docs / ADR 작성 형식" 6가지 패턴
+
+대상: `docs/*.md` / `CLAUDE.md` / `tasks/**/*.md` / `README.md` / `.claude/skills/*/SKILL.md`.
+
+CLAUDE.md "docs / ADR 작성 형식" 섹션의 6가지 패턴을 기계 검사한다.
+가독성과 LLM 컨텍스트 비용 양쪽을 동시에 손상시키는 패턴.
+
+**검출 대상**:
+
+1. **semantic line break 위반** — 한 단락 안에 2 문장 이상 같은 줄에 이어쓰기
+2. **enumerated inline** — `① ... ② ... ③`, `1) ... 2) ... 3)`, 슬래시 3개 이상 연쇄 (`A / B / C / D`)
+3. **괄호 중첩 2겹 이상** — `(... (...) ...)`
+4. **`=` / `→` 동치·인과 압축이 한 단락 2회 이상**
+5. **80자 초과 + 백틱 3개 이상 또는 괄호 다수** 한 문장
+6. **한 bullet 다중 속성 압축** — 한 bullet 안에 마침표·콤마·`+`·슬래시로 무엇/어떻게/예외/조건/근거 중 2개 이상 압축
+
+**자동 검출 명령**:
+
+```bash
+# cwd: <repo root>
+
+# F1. 한 줄에 두 문장 (한국어 마침표 2회 + 줄 끝 아님)
+grep -nE '[다요죠][\.。].+[다요죠][\.。]' docs/**/*.md CLAUDE.md .claude/skills/*/SKILL.md 2>/dev/null
+
+# F2. enumerated inline — 원형 숫자
+grep -rnE '①.*②|1\).*2\).*3\)' docs/ CLAUDE.md .claude/skills/ 2>/dev/null
+
+# F3. 괄호 중첩 — `(...(...)...)` 한 줄 안에
+grep -nE '\([^)]*\([^)]*\)[^)]*\)' docs/**/*.md CLAUDE.md 2>/dev/null
+
+# F4-5. 라인 길이 + 백틱 다수 (러프한 휴리스틱)
+awk 'length > 150 && gsub(/`/, "&") >= 6' docs/**/*.md CLAUDE.md 2>/dev/null
+```
+
+자동 검출은 false positive 가 많으므로 사람 판단으로 최종 검증. 매치 수만 보고 "관찰 필요 영역" 으로 분류.
+
+### G. 한국어 표현 정책 — CLAUDE.md "한국어 표현 정책" 금지 외래어
+
+대상은 F 와 동일.
+
+CLAUDE.md "한국어 표현 정책" 의 금지 표현이 docs 본문에 남아 있는지 검사.
+**자동 grep 으로 정확히 검출 가능** (false positive 낮음 → 검출 즉시 교체 권장).
+
+**금지 → 권장 대체 표 (CLAUDE.md 와 단일 소스)**:
+
+| 금지 | 권장 대체 |
+|---|---|
+| 매트릭스 | 표 / 영향 표 / 분류 표 |
+| 트리아지 | 분류 / 우선순위 분류 |
+| 베이스라인 | 기준선 / 기준값 |
+| 스파이크 | 사전 조사 / API 검증 |
+| 게이트 | 점검 / 사전 점검 / 통과 조건 |
+| 사전 소진 | 사전 해소 |
+| 단일 진실원 | 단일 소스 |
+| 변질 의심 | 변질 우려 |
+| 패턴 답습 | 동일 패턴 적용 / 그대로 적용 |
+
+**자동 검출 명령**:
+
+```bash
+# cwd: <repo root>
+grep -rnE '매트릭스|트리아지|베이스라인|스파이크|게이트|사전 소진|단일 진실원|변질 의심|패턴 답습' \
+  docs/ CLAUDE.md .claude/skills/ tasks/ README.md 2>/dev/null
+```
+
+**예외 (검출되어도 유지)**:
+- 인용 / 설명 맥락에서 "금지 표현은 X" 처럼 메타 언급 — CLAUDE.md 자체의 정책 표가 대표 예시
+- 코드/식별자 자체 (변수명 / 라이브러리 이름) 가 영어 음차일 때
+
+리포트에서는 매치 라인 + 컨텍스트 한 줄을 보여주고 사용자가 케이스별 판단.
+
 ## 실행 절차
 
 ### 1. 대상 파일 수집
 
 ```bash
 # cwd: <repo root>
-ls docs/*.md docs/pages/*.md .claude/skills/*/SKILL.md .claude/skills/_shared/*.md
+ls docs/*.md CLAUDE.md .claude/skills/*/SKILL.md .claude/skills/_shared/*.md
 ```
 
-### 2. 각 문서에 5축 점검 수행
+### 2. 각 문서에 7축 점검 수행
 
-- **adr.md**: E(자명성) 최우선 + B(bloat) + C(추론성) + A(제거 ADR의 dead reference)
-- **flow.md**: A (언급 컴포넌트 존재 여부) + D (prd.md와 중복) + B (UI 목업·API 경로 나열)
-- **data-schema.md**: A (스키마 정합) + D (ADR과 중복)
-- **code-architecture.md**: A (디렉터리 실재) + B (코드 스니펫) + D (CLAUDE.md와 중복)
-- **prd.md**: D (flow.md와 중복) + C (기획 의도가 "왜")
-- **docs/pages/*.md**: A (실제 page.tsx 와 흐름 / 컴포넌트 / Data 표 정합) + D (prd 와 중복)
-- **CLAUDE.md**: "상황별 ADR 필수 참조" 표의 ADR 번호가 실제 존재하는지
-- **`.claude/skills/*/SKILL.md`**: B (과대화) + C (추론성) + D (다른 스킬과 중복) + 자명성 변형 (아래)
+- **adr.md**: E(자명성) 최우선 + B(bloat) + C(추론성) + A(제거 ADR의 dead reference) + F + G
+- **flow.md**: A (언급 컴포넌트 존재 여부) + D (prd.md와 중복) + B (UI 목업·API 경로 나열) + F + G
+- **data-schema.md**: A (스키마 정합) + D (ADR과 중복) + F + G
+- **code-architecture.md**: A (디렉터리 실재) + B (코드 스니펫) + D (CLAUDE.md와 중복) + F + G
+- **prd.md**: D (flow.md와 중복) + C (기획 의도가 "왜") + F + G
+- **CLAUDE.md**: "상황별 ADR 필수 참조" 표의 ADR 번호가 실제 존재하는지 + F + G
+- **`.claude/skills/*/SKILL.md`**: B (과대화) + C (추론성) + D (다른 스킬과 중복) + 자명성 변형 (아래) + F + G
+
+F (형식 패턴) 와 G (한국어 표현) 는 위 모든 파일에 동일 적용.
+G 는 자동 grep 결과를 거의 그대로 신뢰 (false positive 낮음).
+F 는 자동 grep 매치 후 사람 판단으로 최종 분류.
 
 ### 2-1. 스킬 SKILL.md 의 5축 적용 (특수 규칙 — webtoon-maker-v1 이식)
 
@@ -154,7 +230,7 @@ ls docs/*.md docs/pages/*.md .claude/skills/*/SKILL.md .claude/skills/_shared/*.
 
 ### Summary
 - 검사 파일: N개
-- 발견: 부패 X / 과대화 Y / 추론성 Z / 중복 W / 자명성 V
+- 발견: 부패 X / 과대화 Y / 추론성 Z / 중복 W / 자명성 V / 형식 U / 한국어 T
 
 ### Critical (즉시 수정 권장)
 {축별 목록}
