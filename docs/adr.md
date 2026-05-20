@@ -413,8 +413,13 @@
   - `text-white` 유지: ADR-F13 의 "globals.css `@theme` 외부에서 hex/rgb/hsl/named 색 금지" 원칙 위반. 디자인 토큰 단일 소스 깨짐.
   - `text-bg` (surface foreground): light/dark 가 반전되는 토큰이라 강조 배경 위 가독성 일관성 깨짐 (dark mode 에서 어두운 색 → expense 빨강 위 contrast 약화).
   - 인라인 `style={{ color: "white" }}`: ADR-F13 위반 + CLAUDE.md "인라인 style 최소화" 위반.
-- **트레이드오프**: 토큰 수 증가 (현재 brand-fg / expense-fg 신설, income-fg / warning-fg 는 필요 시 후속 추가). 단 ADR-F13 의 정합성 + dark mode 가독성 일관성 이득이 큼.
-- **적용 범위**: `src/app/globals.css` (`--color-brand-fg` / `--color-expense-fg` 정의) + `src/components/notifications/NotificationBell.tsx` (`text-expense-fg`) + `src/components/layout/Header.tsx` (`text-brand-fg` — 로고 아이콘 + AvatarFallback) + `src/app/providers.tsx` (`text-brand-fg` — sonner actionButton). 향후 강조 배경 위 텍스트가 필요한 모든 위치 (Badge / Toast destructive variant / 그래프 강조 라벨 등) 에 동일 원칙 적용.
+- **트레이드오프**: 토큰 수 증가 (brand-fg / expense-fg / income-fg / warning-fg 4 종). 단 ADR-F13 의 정합성 + dark mode 가독성 일관성 이득이 큼.
+- **적용 범위 (plan022 완전 정착)**: `src/app/globals.css` 4 토큰 정의 + 51 호출처 일괄 마이그레이션. **매핑 룰**:
+  - `gradient-budget` / `gradient-family` / `gradient-primary` / `gradient-category` / `bg-brand-*` 위 → `text-brand-fg`
+  - `gradient-expense` / `bg-expense` / `bg-destructive` 위 → `text-expense-fg`
+  - `gradient-income` / `bg-income` 위 → `text-income-fg`
+  - `bg-warning` 위 → `text-warning-fg`
+  - gradient/배경이 surface (bg-bg-elev 등) 인 경우는 본 ADR 비대상 — 일반 `text-fg` 사용
 
 ---
 
