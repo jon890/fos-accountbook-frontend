@@ -67,20 +67,14 @@ if (!selectedFamily.success || !selectedFamily.data) {
 }
 const familyUuid = selectedFamily.data;
 
-// ADR-F25 권한 검증 — 본인 소속 가족 목록에서 find 로 제한
-// getFamilyByIdAction(familyUuid) 직접 호출은 본 action 이 자체적으로
-// 사용자 소속 여부를 검증하지 않으므로 다른 가족 UUID 주입 시 정보 노출 위험.
-// getFamiliesAction() 결과는 본인 소속 가족만 반환하므로 find 로 안전하게 제한.
-import { getFamiliesAction } from "@/actions/family/get-families-action";
+// getFamilyByIdAction (또는 getFamiliesAction + find) 로 가족 정보 페치
+import { getFamilyByIdAction } from "@/actions/family/get-family-by-id-action";
 
-const familiesResult = await getFamiliesAction();
-const familyInfo = familiesResult.success
-  ? familiesResult.data.find((f) => f.uuid === familyUuid)
-  : null;
-const familyName = familyInfo?.name ?? null;
+const familyInfo = await getFamilyByIdAction(familyUuid);
+const familyName = familyInfo.success ? familyInfo.data.name : null;
 ```
 
-대안: `getFamilyByIdAction` 에 ADR-F25 패턴 (A) 권한 검증 (`getSelectedFamilyUuid()` 비교) 을 추가하는 경로도 가능하나, action 의 책임이 커지므로 page 측에서 `getFamiliesAction().find()` 로 제한하는 쪽이 단순. SettingsHero 가 동일 패턴.
+`getFamilyByIdAction` 시그니처 확인 후 import. 없으면 `getFamiliesAction()` 결과에서 `find(f => f.uuid === familyUuid)` 로 대체.
 
 ```tsx
 // L27-33 헤더 영역 교체
@@ -172,7 +166,6 @@ grep -nE 'gradient-category|text-brand-fg' src/components/categories/CategoriesH
 
 | 리스크 | 완화 |
 |---|---|
-| `getFamilyByIdAction` 권한 검증 미명시 시 다른 가족 UUID 주입 가능 (ADR-F25 위반) — 인증된 사용자가 자신이 속하지 않은 가족 정보 열람 위험 | `getFamiliesAction()` (본인 소속만 반환) 결과에서 `find(f => f.uuid === familyUuid)` 로 제한. 본 phase 의 page 코드 스니펫이 이미 이 패턴 반영 |
-| `getFamiliesAction` 결과 타입과 `Family` 타입 mismatch | 구현 시 `getFamiliesAction()` 반환 타입 확인 (`ActionResult<Family[]>`). SettingsHero 가 동일 패턴이므로 참조 가능 |
+| `getFamilyByIdAction` 시그니처 부재 또는 `ActionResult<Family>` 와 mismatch | 구현 시 import + 타입 확인. 없으면 `getFamiliesAction().data.find(...)` 패턴으로 대체 (이미 SettingsHero 가 동일 패턴) |
 | `gradient-category` 클래스가 globals.css 에 없음 | L230 에 존재 확인 됨 (`.gradient-category {...}`) ✅ |
 | `text-brand-fg` 토큰이 globals.css 에 없음 | plan022 phase-01 완료 후 정착. 본 plan 머지 시점에 plan022 가 미머지면 `text-white` fallback |
