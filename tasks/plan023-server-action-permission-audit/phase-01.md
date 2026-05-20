@@ -6,8 +6,9 @@
 
 ## Context (자기완결)
 
-- 현재 `src/actions/family/update-family-action.ts` (43 줄): `requireAuth()` 만 수행 → 권한 상승 위험 (PR #271 리뷰 지적)
-- `src/lib/server/auth/auth-helpers.ts` (L1~75 추정): `requireAuth` / `requireAuthOrRedirect` / `getSelectedFamilyUuid` exports
+- 현재 `src/actions/family/update-family-action.ts` (49 줄): plan021 phase-02 의 후속 작업으로 이미 inline `families.some((f) => f.uuid === familyUuid)` 검증이 적용된 상태 (L34-38).
+- 본 phase 의 실제 작업: **inline 검증을 `assertFamilyAccess(familyUuid)` helper 로 추출** — 다른 Multi-family Action 에서도 재사용 가능하게 표준화 (ADR-F25 패턴 B).
+- `src/lib/server/auth/auth-helpers.ts`: `requireAuth` / `requireAuthOrRedirect` / `getSelectedFamilyUuid` exports
 - `src/services/family/family-service.ts:21-23` 의 `getFamilies()` 가 백엔드 세션 token 기준으로 본인 가족만 반환 (이미 신뢰 경계). list 안에 familyUuid 가 있으면 권한 증거
 - `selectFamily` (L36-43) 의 검증 패턴이 모델 — `families.some(f => f.uuid === familyUuid)` + throw `ActionError.entityNotFound`
 
@@ -37,37 +38,41 @@ export async function assertFamilyAccess(familyUuid: string): Promise<void> {
 
 import 위치는 기존 파일의 import 블록 끝. export 도 기존 패턴 따름.
 
-### 2. `src/actions/family/update-family-action.ts` 갱신
+### 2. `src/actions/family/update-family-action.ts` 갱신 — inline 검증을 helper 호출로 교체
 
+변경 전 (현재 L13 + L34-38):
 ```ts
-import { requireAuth, assertFamilyAccess } from "@/lib/server/auth/auth-helpers";
-// 기존 import 유지
+import { requireAuth } from "@/lib/server/auth/auth-helpers";
+import { getFamilies, updateFamily } from "@/services/family/family-service";
+// ...
+await requireAuth();
 
-export async function updateFamilyAction(
-  familyUuid: string,
-  data: UpdateFamilyRequest
-): Promise<ActionResult<Family>> {
-  try {
-    await requireAuth();
+if (!familyUuid) {
+  throw ActionError.invalidInput("가족 UUID", familyUuid, "UUID는 필수입니다");
+}
 
-    if (!familyUuid) {
-      throw ActionError.invalidInput("가족 UUID", familyUuid, "UUID는 필수입니다");
-    }
-
-    await assertFamilyAccess(familyUuid);   // ← 추가
-
-    const family = await updateFamily(familyUuid, data);
-    revalidatePath("/");
-    revalidatePath("/settings");
-    revalidatePath(`/families/${familyUuid}`);
-    return successResult(family);
-  } catch (error) {
-    return handleActionError(error, "가족 정보 수정에 실패했습니다");
-  }
+// 권한 검증: 사용자가 해당 family 멤버인지 확인 (백엔드가 세션 토큰 기준으로 본인 가족만 반환)
+const families = await getFamilies();
+if (!families.some((f) => f.uuid === familyUuid)) {
+  throw ActionError.entityNotFound("가족", familyUuid);
 }
 ```
 
-기존 동작 보존 — `requireAuth` 유지, `familyUuid` null check 유지, revalidate 경로 동일. 검증 1줄만 추가.
+변경 후:
+```ts
+import { requireAuth, assertFamilyAccess } from "@/lib/server/auth/auth-helpers";
+import { updateFamily } from "@/services/family/family-service";   // getFamilies import 제거
+// ...
+await requireAuth();
+
+if (!familyUuid) {
+  throw ActionError.invalidInput("가족 UUID", familyUuid, "UUID는 필수입니다");
+}
+
+await assertFamilyAccess(familyUuid);   // ← inline 검증을 helper 호출로 교체
+```
+
+기존 동작 보존 — `requireAuth` 유지, `familyUuid` null check 유지, revalidate 경로 동일. `getFamilies` 직접 import 제거 (helper 내부로 이동).
 
 ### 3. 자동 verification
 
@@ -85,6 +90,9 @@ grep -n 'export async function assertFamilyAccess' \
 
 # updateFamilyAction 적용
 grep -n 'assertFamilyAccess' src/actions/family/update-family-action.ts | wc -l   # >= 1
+
+# update-family-action 의 inline 검증 (getFamilies 직접 호출) 제거 확인
+! grep -n 'getFamilies' src/actions/family/update-family-action.ts
 ```
 
 수동 smoke:

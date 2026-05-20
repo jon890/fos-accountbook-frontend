@@ -1,7 +1,7 @@
 {
   "name": "plan023-server-action-permission-audit",
   "description": "Server Action 권한 검증 일괄 감사 + 표준 3-패턴 정착 (ADR-F25). assertFamilyAccess helper 신설 + family/update / category/create / invitation/delete 3 곳의 권한 검증 강화. PR #271 리뷰에서 surfaced 된 패턴 누락 해소.",
-  "status": "pending",
+  "status": "completed",
   "created_at": "2026-05-20",
   "total_phases": 3,
   "related_docs": [
@@ -19,21 +19,21 @@
       "file": "phase-01.md",
       "title": "assertFamilyAccess helper 신설 + family/update 적용 (Multi-family 패턴 B)",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 2,
       "file": "phase-02.md",
       "title": "category/create session 비교 (패턴 A) + invitation/delete entity ownership (패턴 C)",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 3,
       "file": "phase-03.md",
       "title": "통합 검증 + 전체 audit grep + 8단계 체크리스트 + status=completed",
       "model": "haiku",
-      "status": "pending"
+      "status": "completed"
     }
   ],
   "planning_checklist": {

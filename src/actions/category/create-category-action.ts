@@ -51,10 +51,19 @@ export async function createCategoryAction(
     }
     const validData = validationResult.data;
 
-    const selectedFamilyUuid = familyUuid || (await getSelectedFamilyUuid());
-    if (!selectedFamilyUuid) {
+    // ADR-F25 패턴 A: Single-family — 입력 familyUuid 가 세션과 불일치 시 거부
+    const sessionFamilyUuid = await getSelectedFamilyUuid();
+    if (!sessionFamilyUuid) {
       throw ActionError.familyNotSelected();
     }
+    if (familyUuid && familyUuid !== sessionFamilyUuid) {
+      throw ActionError.invalidInput(
+        "familyUuid",
+        familyUuid,
+        "권한이 없습니다"
+      );
+    }
+    const selectedFamilyUuid = sessionFamilyUuid;
 
     const category = await createCategory(selectedFamilyUuid, validData);
 
