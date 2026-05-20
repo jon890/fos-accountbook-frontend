@@ -69,5 +69,5 @@ grep -nE '--color-(brand|expense|income|warning)-fg:' src/app/globals.css | wc -
 
 | 리스크 | 완화 |
 |---|---|
-| `oklch(0.985 0.003 25)` 의 hue=25 가 기존 `oklch(0.985 0.003 230)` 와 미세한 시각 차이 | chroma=0.003 매우 낮음 → 인지 불가. 빌드 후 NotificationBell smoke 로 확인 |
+| `oklch(0.985 0.003 25)` 의 hue=25 가 기존 `oklch(0.985 0.003 230)` 와 미세한 시각 차이 | chroma=0.003 매우 낮음 → 인지 불가. **회귀 추적**: ADR-F23 의 "hue 통일 원칙" 갱신과 함께 기록 (plan017 hue=230 → plan022 hue=25 통일). 빌드 후 (a) NotificationBell expense Badge, (b) 다른 `text-expense-fg` 호출처 (있다면 grep 으로 식별) 의 visual smoke 로 확인 |
 | Tailwind v4 가 `text-income-fg` / `text-warning-fg` arbitrary class 인식 못 함 | `@theme` 블록 안 `--color-*` 정의는 Tailwind v4 가 자동 utility 생성. 미작동 시 `text-[var(--color-income-fg)]` 폴백 |
