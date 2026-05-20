@@ -73,6 +73,11 @@ import {
 } from "@/lib/server/auth/auth-helpers";
 import { setDefaultFamily } from "@/services/user/user-service";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+const setDefaultFamilySchema = z.object({
+  familyUuid: z.string().min(1, "UUID는 필수입니다").uuid("올바른 UUID 형식이 아닙니다"),
+});
 
 /**
  * 기본 가족 설정 Server Action
@@ -87,17 +92,19 @@ export async function setDefaultFamilyAction(
   try {
     await requireAuth();
 
-    if (!familyUuid || familyUuid.trim().length === 0) {
+    // ADR-F06: Zod 런타임 검증
+    const parsed = setDefaultFamilySchema.safeParse({ familyUuid });
+    if (!parsed.success) {
       throw ActionError.invalidInput(
         "가족 UUID",
         familyUuid,
-        "UUID는 필수입니다"
+        parsed.error.flatten().fieldErrors.familyUuid?.[0] ?? "입력값을 확인해주세요"
       );
     }
 
-    await assertFamilyAccess(familyUuid);
+    await assertFamilyAccess(parsed.data.familyUuid);
 
-    await setDefaultFamily(familyUuid);
+    await setDefaultFamily(parsed.data.familyUuid);
     revalidatePath("/");
     return successResult(undefined);
   } catch (error) {
@@ -106,7 +113,24 @@ export async function setDefaultFamilyAction(
 }
 ```
 
-기존 JSDoc 예시 (useSessionRefresh 사용법) 는 길이 줄이고 ⚠️ 주의 한 줄만 유지.
+기존 `trim().length === 0` 빈 문자열 체크를 Zod schema 의 `.min(1).uuid()` 로 교체 — ADR-F06 준수 + 임의 문자열 차단.
+
+⚠️ **인증 방식 — 기존 패턴 확인**:
+
+기존 `selectFamilyAction` / `setDefaultFamilyAction` 모두 `requireAuth()` 사용 (리다이렉트 아님 + ActionResult 반환). 호출처 (FamilySelectorDropdown Client) 가 result.success 분기 후 toast 처리하는 패턴이라 일관성 유지. `requireAuthOrRedirect` 로 변경 시 호출처 분기 로직 재작성 필요 → 변경 안 함.
+
+### 4-1. dead code 삭제 전 호출처 0건 사전 확인 (필수)
+
+작업 항목 1 (`getFamilyByIdAction`) / 2 (`selectFamilyAction`) 삭제 전에 호출처 grep 으로 0건임을 확인:
+
+```bash
+# getFamilyByIdAction 호출처 확인
+grep -rn "getFamilyByIdAction" src --include='*.ts' --include='*.tsx'
+# selectFamilyAction 호출처 확인 (삭제 + 마이그레이션 후)
+grep -rn "selectFamilyAction" src --include='*.ts' --include='*.tsx'
+```
+
+각각 0건일 때만 파일 삭제. 잔존 호출처가 있으면 phase 중단 후 호출처 마이그레이션 우선 처리.
 
 ### 5. 자동 verification
 
