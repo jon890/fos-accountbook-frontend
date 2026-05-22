@@ -91,6 +91,8 @@ conflict 가 발생한 파일을 `git status` 로 식별.
 | `package.json` | 수동 머지: 신규 의존성은 보존, 버전은 main 우선. conflict marker 직접 편집 |
 | 코드 파일 (.ts/.tsx/.js/.css 등) | **사용자 결정 분기** (`AskUserQuestion`) — 의미적 충돌이라 자동 처리 금지 |
 | docs (.md) | 양쪽 보존 권장 — 두 변경이 의도된 다른 정보일 가능성 높음. 사용자 confirm 후 머지 |
+| 회고 번호 충돌 (`_shared/*-pitfalls.md` 시드 번호 양쪽 추가) | 본 PR 항목을 다음 번호로 재할당 + 카테고리 카운트 동기화. 사고 사례: docu-parser plan011/012 가 같은 번호 1-21 로 동시 추가 |
+| import 누락 (한쪽이 import 제거 + 다른 쪽이 그 모듈 사용) | import 재추가 — silent 회피. rebase 시 auto-merge 통과해도 NameError 잠재. 사고 사례: docu-parser plan011 `os.getenv → settings` 마이그레이션 + plan012 `os.environ` 사용 |
 
 **lockfile 처리 표준 절차**:
 
