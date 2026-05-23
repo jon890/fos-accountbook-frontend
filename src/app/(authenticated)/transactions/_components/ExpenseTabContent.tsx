@@ -39,7 +39,7 @@ export function ExpenseTabContent({
       <DialogTrigger asChild>
         <Button className="gradient-expense hover:opacity-90 text-white">+ 지출 추가</Button>
       </DialogTrigger>
-      <DialogContent className="p-0 border-0 bg-transparent">
+      <DialogContent className="bg-bg-elev">
         <DialogTitle className="sr-only">지출 추가</DialogTitle>
         <AddExpenseForm
           categories={categories}
