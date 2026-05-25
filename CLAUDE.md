@@ -55,6 +55,15 @@ Claude Code가 항상 따라야 할 규칙과 참조 문서 포인터.
 
 ---
 
+## 팀 소통
+
+- **프론트엔드 ↔ 백엔드 협의는 GitHub Issues** — Slack/Dooray/구두 합의 금지. 추적 가능성 + 컨텍스트 보존 목적.
+- **프론트엔드 레포**: `jon890/fos-accountbook-frontend`
+- **백엔드 레포**: `jon890/fos-accountbook-backend`
+- **백엔드 이슈 작성**: `/backend-issue` 스킬 사용 (`~/.claude/skills/backend-issue/`)
+
+---
+
 ## 기술 스택
 
 Next.js 16 (App Router) · TypeScript 6 (strict) · Tailwind CSS v4 · Radix UI + Shadcn · NextAuth v5 · pnpm 10 · Jest + Testing Library
@@ -122,6 +131,13 @@ Page (app/) → Action (actions/) → Service (services/) → lib/server/api
   - (c) **Entity ownership**: entity 의 familyUuid 가 본인 소속인지 확인 (`deleteInvitationAction` 패턴)
   - `formData.get("familyUuid")` 단순 신뢰 금지 — 클라이언트 주입 시 권한 상승 위험
   - 신규 Action 작성 시 3 패턴 분류 자체 점검 필수
+- **ActionError 코드 분리** — 권한·검증 실패 시 에러 코드를 정확히 구분한다. 클라이언트가 코드로 분기하므로 묶으면 핸들러 오동작 위험.
+  - 가족 미선택 (`getSelectedFamilyUuid() === null`): `ActionError.familyNotSelected()` (F002) — `ActionError.invalidInput("familyUuid", ...)` 사용 금지. 기준 패턴은 `create-category-action.ts`
+  - 가족 불일치 (다른 familyUuid 접근): `new ActionError(ErrorCode.NOT_FAMILY_MEMBER, "...")` (F003)
+  - 인증 실패: `ActionError.unauthorized()`
+- **외부 UUID 입력 형식 검증 필수** — Server Action 파라미터로 받은 UUID 가 API 경로에 직접 삽입될 때는 형식 검증 후 사용한다 (예: `notificationUuid`, `categoryUuid`).
+  - 기준 패턴: `mark-notification-read-action.ts` 의 `UUID_REGEX` 검증
+  - 세션에서 가져오는 `familyUuid` 는 검증 불필요 (서버 신뢰 가능)
 
 ---
 
@@ -264,6 +280,7 @@ markdown 렌더링 결과는 동일하지만 소스 가독성 ↑ + git diff 정
 
 - **main 직접 push 차단** — branch protection 으로 거부됨. 모든 변경은 작업 브랜치 + PR (task 파일/docs 도 동일).
 - **PR 제목**: `type(scope): description` — 절대 벗어나지 않는다.
+- **commit 전 로컬 검증 필수** — `pnpm lint && pnpm test` 를 로컬에서 통과시킨 후에만 commit/push. CI 왕복 (push → 실패 → 진단 → 재푸시) 비용 회피 목적. ESLint unused-variable 같은 자명한 실패는 로컬에서 잡힌다.
 
 ### 브랜치 명명
 
