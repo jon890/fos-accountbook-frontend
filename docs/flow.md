@@ -456,6 +456,38 @@ AlertDialog:
 
 ---
 
+## 14-5. /categories 페이지 구조 (plan024)
+
+Teal 리디자인 + 인라인 style 제거 + Empty state 일관화.
+
+```
+[/categories (server)]
+    ├─ getSelectedFamilyAction() → familyUuid
+    └─ getFamilyCategoriesAction(familyUuid) → CategoryResponse[]
+        │
+        └─ CategoryPageClient (use client)
+                │
+                ├─ CategoriesHero (gradient-category Teal)
+                │   ├─ 가족명 + 총 카테고리 수
+                │   └─ 카테고리 추가 CTA
+                │
+                ├─ CategoryList (grid 2/3/4)
+                │   └─ CategoryItem
+                │       ├─ 아이콘 영역 정사각형 (w-10 h-10 / w-12 h-12)
+                │       ├─ 동적 색은 CSS variable (--cat-color)
+                │       └─ Edit / Delete (destructive variant, plan020)
+                │
+                └─ Empty → EmptyState 공용 (plan012)
+```
+
+핵심 변경:
+- CategoriesHero 신설 — settings/budget Hero 패턴 일관
+- `style={{ backgroundColor, color }}` 인라인 → `style={{ '--cat-color': color } as CSSProperties}` + Tailwind arbitrary class
+- 색 코드 oklch 문자열 노출 제거 (dot 미리보기만)
+- 사용 통계 (이번 달 지출 금액) — 별도 plan 후보
+
+---
+
 ## 15. /settings 페이지 구조 (plan021)
 
 ```
