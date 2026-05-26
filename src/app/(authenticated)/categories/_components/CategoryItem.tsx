@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { CategoryResponse } from "@/types/category";
 import { Edit2, EyeOff, Trash2 } from "lucide-react";
+import type { CSSProperties } from "react";
 
 interface CategoryItemProps {
   category: CategoryResponse;
@@ -12,33 +13,21 @@ interface CategoryItemProps {
   onDelete: (category: CategoryResponse) => void;
 }
 
-function withAlpha(color: string | undefined, a: number): string {
-  if (!color) return `oklch(0.510 0.110 188 / ${a})`;
-  if (color.startsWith("oklch(")) {
-    return color.replace(/(\s*\/\s*[\d.]+)?\)$/, ` / ${a})`);
-  }
-  // hex fallback: append 2-digit hex alpha (e.g. 0.16 → "29")
-  const hex = Math.round(a * 255).toString(16).padStart(2, "0");
-  return color + hex;
-}
-
 export function CategoryItem({
   category,
   onEdit,
   onDelete,
 }: CategoryItemProps) {
+  const colorStyle = {
+    "--cat-color": category.color ?? "var(--color-brand-500)",
+  } as CSSProperties;
+
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-md transition-shadow" style={colorStyle}>
       <CardContent className="px-2 md:p-4">
         <div className="flex flex-col justify-between h-full gap-2 md:gap-3">
           <div className="flex items-start justify-between">
-            <div
-              className="w-10 h-8 md:w-12 md:h-12 rounded-lg flex items-center justify-center text-xl md:text-2xl shrink-0"
-              style={{
-                backgroundColor: withAlpha(category.color, 0.16),
-                color: category.color,
-              }}
-            >
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center text-xl md:text-2xl shrink-0 bg-[color-mix(in_srgb,var(--cat-color)_16%,transparent)] text-[var(--cat-color)]">
               {category.icon}
             </div>
             <div className="flex gap-1">
@@ -67,10 +56,7 @@ export function CategoryItem({
                 {category.name}
               </h3>
 
-              <div
-                className="w-2.5 h-2.5 rounded-full shrink-0 md:hidden"
-                style={{ backgroundColor: category.color }}
-              />
+              <div className="w-2.5 h-2.5 rounded-full shrink-0 md:hidden bg-[var(--cat-color)]" />
 
               {category.excludeFromBudget && (
                 <Badge
@@ -84,11 +70,8 @@ export function CategoryItem({
             </div>
 
             <div className="hidden md:flex items-center gap-2 mt-1">
-              <div
-                className="w-3 h-3 md:w-4 md:h-4 rounded-full"
-                style={{ backgroundColor: category.color }}
-              />
-              <span className="text-xs text-fg-subtle">{category.color}</span>
+              <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-[var(--cat-color)]" />
+              <span className="text-xs text-fg-subtle">색</span>
             </div>
           </div>
         </div>
