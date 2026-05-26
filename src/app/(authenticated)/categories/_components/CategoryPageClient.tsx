@@ -56,14 +56,7 @@ export function CategoryPageClient({
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <p className="text-sm text-fg-muted">
-          총{" "}
-          <span className="font-semibold text-fg">
-            {categories.length}
-          </span>
-          개의 카테고리
-        </p>
+      <div className="flex justify-end mb-4">
         <Button onClick={() => setAddDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
           카테고리 추가
