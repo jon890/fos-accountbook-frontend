@@ -1,7 +1,7 @@
 {
   "name": "plan024-categories-redesign",
   "description": "/categories 페이지 Teal 리디자인. CategoriesHero 신설 + CategoryItem 인라인 style → CSS variable + 색 코드 oklch 문자열 노출 제거 + 아이콘 정사각형 통일 + Empty state EmptyState 공용 재사용 (plan012).",
-  "status": "pending",
+  "status": "completed",
   "created_at": "2026-05-20",
   "total_phases": 3,
   "related_docs": [
@@ -23,21 +23,21 @@
       "file": "phase-01.md",
       "title": "CategoriesHero 신설 + page.tsx 갱신 (Teal Hero)",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 2,
       "file": "phase-02.md",
       "title": "CategoryItem CSS variable 패턴 + 색 코드 텍스트 제거 + 아이콘 정사각형",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     },
     {
       "number": 3,
       "file": "phase-03.md",
       "title": "Empty state EmptyState 공용 재사용 + Dialog 토큰 점검 + 검증 + completed",
       "model": "sonnet",
-      "status": "pending"
+      "status": "completed"
     }
   ],
   "planning_checklist": {
