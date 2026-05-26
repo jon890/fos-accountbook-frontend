@@ -160,7 +160,7 @@ export function AnalyticsClient({
 
       {/* 요약 카드 3개 */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="gradient-expense rounded-2xl p-3 text-white">
+        <div className="gradient-expense rounded-2xl p-3 text-expense-fg">
           <div className="flex items-center gap-1 mb-2 opacity-80">
             <TrendingDown className="w-3.5 h-3.5" />
             <span className="text-[11px] font-medium">지출</span>
@@ -169,7 +169,7 @@ export function AnalyticsClient({
             ₩{formatShortAmount(totalExpense)}
           </p>
         </div>
-        <div className="gradient-income rounded-2xl p-3 text-white">
+        <div className="gradient-income rounded-2xl p-3 text-income-fg">
           <div className="flex items-center gap-1 mb-2 opacity-80">
             <TrendingUp className="w-3.5 h-3.5" />
             <span className="text-[11px] font-medium">수입</span>
@@ -178,7 +178,7 @@ export function AnalyticsClient({
             ₩{formatShortAmount(totalIncome)}
           </p>
         </div>
-        <div className="gradient-budget rounded-2xl p-3 text-white">
+        <div className="gradient-budget rounded-2xl p-3 text-brand-fg">
           <div className="flex items-center gap-1 mb-2 opacity-80">
             <Wallet className="w-3.5 h-3.5" />
             <span className="text-[11px] font-medium">{isCurrentMonth ? "잔여예산" : "예산"}</span>

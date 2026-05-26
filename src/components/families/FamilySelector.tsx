@@ -125,7 +125,7 @@ export function FamilySelector({
               {families.length > 0 && (
                 <Button
                   onClick={onCreateFamily}
-                  className="gradient-primary hover:opacity-90 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                  className="gradient-primary hover:opacity-90 text-brand-fg shadow-lg hover:shadow-xl transition-all duration-300"
                   size="lg"
                 >
                   <Plus className="w-5 h-5 mr-2" />새 가족 만들기
@@ -239,7 +239,7 @@ export function FamilySelector({
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 gradient-primary rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <User className="w-7 h-7 text-white" />
+                    <User className="w-7 h-7 text-brand-fg" />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-fg mb-1">
@@ -261,7 +261,7 @@ export function FamilySelector({
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 gradient-family rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                    <Users className="w-7 h-7 text-white" />
+                    <Users className="w-7 h-7 text-brand-fg" />
                   </div>
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-fg mb-1">

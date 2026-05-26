@@ -92,7 +92,7 @@ export function StatusCard({
           {primaryCta && (
             <Link
               href={primaryCta.href}
-              className="h-12 px-6 rounded-xl bg-brand-500 text-white font-semibold flex items-center justify-center hover:opacity-90 transition-opacity"
+              className="h-12 px-6 rounded-xl bg-brand-500 text-brand-fg font-semibold flex items-center justify-center hover:opacity-90 transition-opacity"
             >
               {primaryCta.label}
             </Link>

@@ -66,7 +66,7 @@ export function InvitePageClient({
       <Card className="max-w-md w-full bg-bg-elev border-border shadow-default">
         <CardHeader className="text-center pb-4 pt-8">
           <div className="w-24 h-24 gradient-family rounded-full flex items-center justify-center mx-auto mb-4">
-            <Users className="w-12 h-12 text-white" />
+            <Users className="w-12 h-12 text-brand-fg" />
           </div>
           <CardTitle className="text-2xl font-bold text-fg tracking-tight">
             가족 초대
@@ -138,7 +138,7 @@ export function InvitePageClient({
             </Button>
             <Button
               onClick={handleAccept}
-              className="flex-1 gradient-family text-white rounded-xl shadow-default hover:opacity-90 transition-opacity"
+              className="flex-1 gradient-family text-brand-fg rounded-xl shadow-default hover:opacity-90 transition-opacity"
               disabled={isAccepting}
             >
               {isAccepting ? (

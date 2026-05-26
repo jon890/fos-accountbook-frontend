@@ -218,10 +218,10 @@ function AddTransactionDialogBody({ onOpenChange, defaultType }: AddTransactionD
 
   const ctaGradient =
     activeType === "expense"
-      ? "gradient-expense"
+      ? "gradient-expense text-expense-fg"
       : activeType === "income"
-        ? "gradient-income"
-        : "gradient-budget";
+        ? "gradient-income text-income-fg"
+        : "gradient-budget text-brand-fg";
 
   const ctaLabel =
     activeType === "expense" ? "지출" : activeType === "income" ? "수입" : "고정지출";
@@ -236,7 +236,7 @@ function AddTransactionDialogBody({ onOpenChange, defaultType }: AddTransactionD
           className={cn(
             "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all",
             activeType === "expense"
-              ? "gradient-expense text-white shadow-sm"
+              ? "gradient-expense text-expense-fg shadow-sm"
               : "text-fg-muted hover:text-fg",
           )}
         >
@@ -249,7 +249,7 @@ function AddTransactionDialogBody({ onOpenChange, defaultType }: AddTransactionD
           className={cn(
             "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all",
             activeType === "income"
-              ? "gradient-income text-white shadow-sm"
+              ? "gradient-income text-income-fg shadow-sm"
               : "text-fg-muted hover:text-fg",
           )}
         >
@@ -262,7 +262,7 @@ function AddTransactionDialogBody({ onOpenChange, defaultType }: AddTransactionD
           className={cn(
             "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all",
             activeType === "recurring"
-              ? "gradient-budget text-white shadow-sm"
+              ? "gradient-budget text-brand-fg shadow-sm"
               : "text-fg-muted hover:text-fg",
           )}
         >
@@ -300,7 +300,7 @@ function AddTransactionDialogBody({ onOpenChange, defaultType }: AddTransactionD
           취소
         </Button>
         <SubmitButton
-          className={cn("flex-1 text-white hover:opacity-90", ctaGradient)}
+          className={cn("flex-1 hover:opacity-90", ctaGradient)}
           pendingText="추가 중..."
         >
           {ctaLabel} 추가

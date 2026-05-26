@@ -10,7 +10,7 @@ export function PageLoadingSpinner() {
       <div className="flex flex-col items-center space-y-4 animate-in fade-in duration-300">
         <div className="relative">
           <div className="w-16 h-16 md:w-20 md:h-20 gradient-primary rounded-2xl md:rounded-3xl flex items-center justify-center shadow-xl">
-            <Wallet className="w-8 h-8 md:w-10 md:h-10 text-white animate-pulse" />
+            <Wallet className="w-8 h-8 md:w-10 md:h-10 text-brand-fg animate-pulse" />
           </div>
           <div className="absolute inset-0 w-16 h-16 md:w-20 md:h-20 gradient-primary rounded-2xl md:rounded-3xl animate-ping opacity-20"></div>
         </div>
