@@ -1,8 +1,9 @@
 "use client";
 
 import { deleteCategoryAction } from "@/actions/category/delete-category-action";
-import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/empty/EmptyState";
 import type { CategoryResponse } from "@/types/category";
+import { FolderPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { CategoryItem } from "./CategoryItem";
@@ -54,14 +55,11 @@ export function CategoryList({
 
   if (categories.length === 0) {
     return (
-      <Card>
-        <CardContent className="py-12">
-          <div className="text-center text-fg-muted">
-            <p className="text-lg mb-2">등록된 카테고리가 없습니다</p>
-            <p className="text-sm">카테고리를 추가해주세요</p>
-          </div>
-        </CardContent>
-      </Card>
+      <EmptyState
+        icon={FolderPlus}
+        title="등록된 카테고리가 없습니다"
+        description="카테고리를 추가해 가족의 지출을 관리해보세요"
+      />
     );
   }
 
