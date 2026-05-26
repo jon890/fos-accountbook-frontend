@@ -21,7 +21,7 @@ function FAB({ onClick }: { onClick: () => void }) {
       type="button"
       onClick={onClick}
       aria-label="지출 추가"
-      className="absolute bottom-[28px] left-1/2 -translate-x-1/2 w-14 h-14 rounded-full bg-brand-500 text-white border-4 border-bg-elev shadow-[var(--shadow-fab)] flex items-center justify-center transition-all hover:bg-brand-600"
+      className="absolute bottom-[28px] left-1/2 -translate-x-1/2 w-14 h-14 rounded-full bg-brand-500 text-brand-fg border-4 border-bg-elev shadow-[var(--shadow-fab)] flex items-center justify-center transition-all hover:bg-brand-600"
     >
       <Plus className="w-6 h-6" strokeWidth={2.4} />
     </button>

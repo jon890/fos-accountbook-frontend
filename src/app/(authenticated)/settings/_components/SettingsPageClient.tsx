@@ -142,7 +142,7 @@ export function SettingsPageClient({
                   !selectedFamily ||
                   selectedFamily === currentDefaultFamily
                 }
-                className="bg-brand-500 hover:bg-brand-600 text-white"
+                className="bg-brand-500 hover:bg-brand-600 text-brand-fg"
               >
                 {isSaving ? "저장 중..." : "기본 가족으로 설정"}
               </Button>

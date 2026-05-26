@@ -19,7 +19,7 @@ interface AuthCenterCardProps {
 
 export function AuthCenterCard({
   iconBg,
-  iconColor = "text-white",
+  iconColor = "text-brand-fg",
   icon: Icon,
   title,
   subtitle,

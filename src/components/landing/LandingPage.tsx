@@ -44,7 +44,7 @@ export function LandingPage() {
       {/* Top bar */}
       <div className="px-5 pt-[14px] flex items-center justify-between md:px-14 md:pt-5">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-brand-500 text-white flex items-center justify-center font-extrabold text-[13px] tracking-[-0.04em] md:w-8 md:h-8 md:text-[15px]">
+          <div className="w-7 h-7 rounded-lg bg-brand-500 text-brand-fg flex items-center justify-center font-extrabold text-[13px] tracking-[-0.04em] md:w-8 md:h-8 md:text-[15px]">
             f
           </div>
           <span className="text-[14.5px] font-bold tracking-[-0.015em] text-brand-700 md:text-base">
@@ -80,7 +80,7 @@ export function LandingPage() {
         <div className="mt-[26px] md:mt-8 flex flex-col items-start gap-3 md:flex-row">
           <Link
             href="/auth/signin"
-            className="w-full md:w-auto h-[54px] md:h-14 px-7 rounded-[13px] bg-brand-500 text-white flex items-center justify-center gap-2 text-[15.5px] font-bold [box-shadow:var(--shadow-hero-cta)]"
+            className="w-full md:w-auto h-[54px] md:h-14 px-7 rounded-[13px] bg-brand-500 text-brand-fg flex items-center justify-center gap-2 text-[15.5px] font-bold [box-shadow:var(--shadow-hero-cta)]"
           >
             지금 시작하기
             <ArrowRightIcon />
@@ -112,7 +112,7 @@ export function LandingPage() {
 
       {/* Bottom CTA section */}
       <div
-        className="gradient-family mx-5 mb-6 p-7 rounded-[18px] text-white md:mx-14 md:mb-9 md:px-14 md:py-[52px] md:rounded-3xl md:flex md:items-center md:justify-between md:gap-8"
+        className="0 md:mx-14 md:mb-9 md:px-14 md:py-[52px] md:rounded-3xl md:flex md:items-center md:justify-between md:gap-8"
       >
         <div>
           <div className="text-[19px] font-bold tracking-[-0.02em] leading-[1.3] md:text-[32px] md:font-extrabold md:tracking-[-0.028em] md:leading-[1.2]">

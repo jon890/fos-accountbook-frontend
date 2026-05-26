@@ -233,10 +233,10 @@ function EditTransactionDialogBody({
 
   const ctaGradient =
     type === "expense"
-      ? "gradient-expense"
+      ? "gradient-expense text-expense-fg"
       : type === "income"
-        ? "gradient-income"
-        : "gradient-budget";
+        ? "gradient-income text-income-fg"
+        : "gradient-budget text-brand-fg";
 
   const ctaLabel = type === "expense" ? "지출" : type === "income" ? "수입" : "고정지출";
 
@@ -266,7 +266,7 @@ function EditTransactionDialogBody({
           className={cn(
             "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all",
             type === "expense"
-              ? "gradient-expense text-white shadow-sm"
+              ? "gradient-expense text-expense-fg shadow-sm"
               : "text-fg-muted opacity-40 cursor-not-allowed",
           )}
         >
@@ -280,7 +280,7 @@ function EditTransactionDialogBody({
           className={cn(
             "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all",
             type === "income"
-              ? "gradient-income text-white shadow-sm"
+              ? "gradient-income text-income-fg shadow-sm"
               : "text-fg-muted opacity-40 cursor-not-allowed",
           )}
         >
@@ -294,7 +294,7 @@ function EditTransactionDialogBody({
           className={cn(
             "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all",
             type === "recurring"
-              ? "gradient-budget text-white shadow-sm"
+              ? "gradient-budget text-brand-fg shadow-sm"
               : "text-fg-muted opacity-40 cursor-not-allowed",
           )}
         >
@@ -336,7 +336,7 @@ function EditTransactionDialogBody({
           취소
         </Button>
         <SubmitButton
-          className={cn("flex-1 text-white hover:opacity-90", ctaGradient)}
+          className={cn("flex-1 hover:opacity-90", ctaGradient)}
           pendingText="수정 중..."
         >
           {ctaLabel} 수정

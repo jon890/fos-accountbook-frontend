@@ -73,7 +73,7 @@ export default function CreateFamilyPage() {
         <Card className="bg-bg-elev border-border shadow-default">
           <CardHeader className="text-center pt-8 pb-4">
             <div className="mx-auto mb-3 w-24 h-24 rounded-full gradient-family flex items-center justify-center">
-              <Users className="w-10 h-10 text-white" strokeWidth={2.2} />
+              <Users className="w-10 h-10 text-brand-fg" strokeWidth={2.2} />
             </div>
             <CardTitle className="text-2xl font-bold tracking-tight text-fg">
               우리집 가계부 시작하기
@@ -122,7 +122,7 @@ export default function CreateFamilyPage() {
               {/* 제출 버튼 */}
               <Button
                 type="submit"
-                className="w-full h-12 bg-brand-500 hover:bg-brand-600 text-white"
+                className="w-full h-12 bg-brand-500 hover:bg-brand-600 text-brand-fg"
                 disabled={isLoading}
               >
                 {isLoading ? (

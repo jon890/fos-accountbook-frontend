@@ -17,7 +17,7 @@ export function IncomeTabContent() {
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className="gradient-income hover:opacity-90 text-white"
+        className="gradient-income hover:opacity-90 text-income-fg"
       >
         <Plus className="w-4 h-4 mr-2" />
         수입 추가

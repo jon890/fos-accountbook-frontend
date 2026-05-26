@@ -41,7 +41,7 @@ export function QuickActions() {
           <CardContent className="p-3 md:p-6">
             <div className="flex items-center space-x-2 md:space-x-4">
               <div className="w-10 h-10 md:w-14 md:h-14 gradient-expense rounded-xl md:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <Plus className="w-5 h-5 md:w-7 md:h-7 text-white" />
+                <Plus className="w-5 h-5 md:w-7 md:h-7 text-expense-fg" />
               </div>
               <div>
                 <h3 className="font-semibold text-fg mb-0 md:mb-1 text-sm md:text-base">
@@ -62,7 +62,7 @@ export function QuickActions() {
           <CardContent className="p-3 md:p-6">
             <div className="flex items-center space-x-2 md:space-x-4">
               <div className="w-10 h-10 md:w-14 md:h-14 gradient-income rounded-xl md:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <TrendingUp className="w-5 h-5 md:w-7 md:h-7 text-white" />
+                <TrendingUp className="w-5 h-5 md:w-7 md:h-7 text-income-fg" />
               </div>
               <div>
                 <h3 className="font-semibold text-fg mb-0 md:mb-1 text-sm md:text-base">
@@ -83,7 +83,7 @@ export function QuickActions() {
           <CardContent className="p-3 md:p-6">
             <div className="flex items-center space-x-2 md:space-x-4">
               <div className="w-10 h-10 md:w-14 md:h-14 gradient-family rounded-xl md:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <UserPlus className="w-5 h-5 md:w-7 md:h-7 text-white" />
+                <UserPlus className="w-5 h-5 md:w-7 md:h-7 text-brand-fg" />
               </div>
               <div>
                 <h3 className="font-semibold text-fg mb-0 md:mb-1 text-sm md:text-base">
@@ -102,7 +102,7 @@ export function QuickActions() {
           <CardContent className="p-3 md:p-6">
             <div className="flex items-center space-x-2 md:space-x-4">
               <div className="w-10 h-10 md:w-14 md:h-14 gradient-category rounded-xl md:rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg">
-                <Settings className="w-5 h-5 md:w-7 md:h-7 text-white" />
+                <Settings className="w-5 h-5 md:w-7 md:h-7 text-brand-fg" />
               </div>
               <div>
                 <h3 className="font-semibold text-fg mb-0 md:mb-1 text-sm md:text-base">

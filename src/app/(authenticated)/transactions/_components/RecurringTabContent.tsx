@@ -12,7 +12,7 @@ export function RecurringTabContent() {
     <>
       <Button
         onClick={() => setIsAddOpen(true)}
-        className="gradient-budget hover:opacity-90 text-white"
+        className="gradient-budget hover:opacity-90 text-brand-fg"
       >
         <Plus className="w-4 h-4 mr-2" />
         고정지출 추가

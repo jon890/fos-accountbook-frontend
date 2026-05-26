@@ -20,7 +20,7 @@ export function BudgetHeroCard({
   const isExceeded = remainingBudget < 0;
 
   return (
-    <div className="gradient-primary rounded-[var(--radius-xl)] p-5 md:p-6 text-white mb-4 overflow-hidden">
+    <div className="gradient-primary rounded-[var(--radius-xl)] p-5 md:p-6 text-brand-fg mb-4 overflow-hidden">
       <p className="text-xs md:text-sm font-medium opacity-85">
         이번 달 남은 예산
       </p>

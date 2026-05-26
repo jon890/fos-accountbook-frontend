@@ -20,8 +20,10 @@
   --color-income:  oklch(0.610 0.150 152);
   --color-expense: oklch(0.620 0.180 25);
   --color-warning: oklch(0.760 0.150 78);
-  --color-expense-fg: oklch(0.985 0.003 230);
-  --color-brand-fg: oklch(0.985 0.003 188); /* brand-500 위 near-white. hue=188 (brand) */
+  --color-expense-fg: oklch(0.985 0.003 25);
+  --color-income-fg:  oklch(0.985 0.003 152);
+  --color-warning-fg: oklch(0.985 0.003 78);
+  --color-brand-fg:   oklch(0.985 0.003 188);
 
   /* ── neutral (cool gray, h=230) ─────────────── */
   --color-neutral-0:   oklch(1 0 0);

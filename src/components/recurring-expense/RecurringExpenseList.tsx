@@ -18,7 +18,7 @@ export function RecurringExpenseList({ data }: RecurringExpenseListProps) {
   return (
     <div className="space-y-3 md:space-y-4">
       {/* 이달 합계 카드 */}
-      <Card className="border-0 gradient-expense text-white shadow-xl">
+      <Card className="border-0 gradient-expense text-expense-fg shadow-xl">
         <CardContent className="p-4 md:p-6">
           <p className="text-sm opacity-90">이번달 고정비</p>
           <p className="text-2xl md:text-3xl font-bold mt-1">
@@ -52,7 +52,7 @@ export function RecurringExpenseList({ data }: RecurringExpenseListProps) {
       {/* 추가 버튼 */}
       <Button
         onClick={() => setIsAddOpen(true)}
-        className="w-full gradient-expense text-white hover:opacity-90 shadow-lg"
+        className="w-full gradient-expense text-expense-fg hover:opacity-90 shadow-lg"
       >
         <Plus className="w-4 h-4 mr-2" />
         고정지출 추가

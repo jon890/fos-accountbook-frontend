@@ -20,7 +20,7 @@ export default async function SignInPage({
     <AuthCenterCard
       icon={Users}
       iconBg="gradient-family"
-      iconColor="text-white"
+      iconColor="text-brand-fg"
       title="우리집 가계부"
       subtitle="가족과 함께 관리하는 스마트 가계부"
     >

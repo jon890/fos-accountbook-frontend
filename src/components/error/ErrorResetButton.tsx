@@ -13,7 +13,7 @@ export function ErrorResetButton({
     <button
       type="button"
       onClick={reset}
-      className="h-12 px-6 rounded-xl bg-brand-500 text-white font-semibold hover:opacity-90 transition-opacity"
+      className="h-12 px-6 rounded-xl bg-brand-500 text-brand-fg font-semibold hover:opacity-90 transition-opacity"
     >
       {label}
     </button>

@@ -67,7 +67,7 @@ export function BudgetClient({
           </p>
         </div>
         <div className="p-3 gradient-budget rounded-xl shadow-md">
-          <PiggyBank className="w-5 h-5 md:w-6 md:h-6 text-white" />
+          <PiggyBank className="w-5 h-5 md:w-6 md:h-6 text-brand-fg" />
         </div>
       </div>
 
@@ -87,7 +87,7 @@ export function BudgetClient({
             <Button
               variant="default"
               onClick={() => router.push("/settings")}
-              className="gradient-budget text-white shadow-sm hover:opacity-90 transition-opacity"
+              className="gradient-budget text-brand-fg shadow-sm hover:opacity-90 transition-opacity"
             >
               <Settings className="w-4 h-4" />
               예산 설정하기
@@ -100,8 +100,10 @@ export function BudgetClient({
       {hasBudget && (
         <Card
           className={cn(
-            "relative overflow-hidden text-white border-0 shadow-lg",
-            isBudgetExceeded ? "gradient-expense" : "gradient-budget"
+            "relative overflow-hidden border-0 shadow-lg",
+            isBudgetExceeded
+              ? "gradient-expense text-expense-fg"
+              : "gradient-budget text-brand-fg"
           )}
         >
           <CardContent className="p-4 md:p-6">
@@ -110,7 +112,7 @@ export function BudgetClient({
                 {isBudgetExceeded ? "예산 초과" : "예산 남은 금액"}
               </p>
               {isBudgetExceeded && (
-                <Badge className="gradient-card-overlay text-white border-0 text-xs">
+                <Badge className="gradient-card-overlay text-expense-fg border-0 text-xs">
                   <AlertTriangle className="w-3 h-3 mr-1" />
                   초과
                 </Badge>
