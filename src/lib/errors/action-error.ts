@@ -4,6 +4,7 @@
  */
 
 import { ERROR_MESSAGES, type ErrorCode } from "./error-code";
+import { ServerApiError } from "@/lib/server/api/types";
 
 /**
  * Server Action 에러 정보
@@ -110,6 +111,13 @@ export class ActionError extends Error {
    */
   static unauthorized(message?: string): ActionError {
     return new ActionError("A001", message || "로그인이 필요합니다");
+  }
+
+  /**
+   * 세션 만료
+   */
+  static sessionExpired(message?: string): ActionError {
+    return new ActionError("A002", message || "세션이 만료되었습니다");
   }
 
   /**
@@ -228,6 +236,11 @@ export function handleActionError(
   // 이미 ActionError인 경우
   if (error instanceof ActionError) {
     return error.toFailureResult();
+  }
+
+  // 백엔드 401 = 인증 만료 (ADR-F26)
+  if (error instanceof ServerApiError && error.status === 401) {
+    return ActionError.sessionExpired().toFailureResult();
   }
 
   // Error 객체인 경우

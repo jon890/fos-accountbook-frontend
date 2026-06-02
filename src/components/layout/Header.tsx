@@ -124,16 +124,15 @@ export function Header({ session, selectedFamilyUuid }: HeaderProps) {
                     <span>설정</span>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-expense focus:text-expense" asChild>
-                    <form action={signOutAction}>
-                      <button
-                        type="submit"
-                        className="flex items-center w-full"
-                      >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>로그아웃</span>
-                      </button>
-                    </form>
+                  <DropdownMenuItem
+                    className="text-expense focus:text-expense"
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      void signOutAction();
+                    }}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>로그아웃</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
