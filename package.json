@@ -11,6 +11,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:md": "node scripts/check-tailwind-md.mjs",
     "test": "jest",
     "test:ci": "jest --ci --coverage --maxWorkers=2",
     "test:watch": "jest --watch",
