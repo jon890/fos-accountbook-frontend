@@ -449,7 +449,7 @@
 ## ADR-F26: 백엔드 401 응답을 인증 만료로 분류해 로그인으로 일관 리다이렉트 (2026-06-02)
 
 - **결정**: 백엔드 401 응답은 "인증 만료" 단일 경로로 처리한다.
-  - `handleActionError` (try-catch 변환기) 가 `ServerApiError.status === 401` 을 `ActionError.unauthorized()` (코드 `A001`) 로 변환한다.
+  - `handleActionError` (try-catch 변환기) 가 `ServerApiError.status === 401` 을 `ActionError.sessionExpired()` (코드 `A002`) 로 변환한다.
   - `getActionDataOrDefault` 는 결과 코드가 `A001`/`A002` (인증 에러) 일 때는 기본값을 반환하지 않고 `handleActionError` 로 redirect 한다.
   - refresh 실패는 jwt callback 에서 `token.error` 표시만 하고, 실제 무효화는 다음 API 호출이 401 을 받는 시점에 일어난다.
   - redirect 목적지는 `/auth/signin?error=auth` 이며, signin 진입 시 sonner 토스트로 만료를 고지한다.

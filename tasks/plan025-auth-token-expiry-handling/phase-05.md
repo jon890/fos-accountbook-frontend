@@ -50,7 +50,8 @@ grep -n "SessionExpiredToast" src/app/auth/signin/page.tsx
 
 ```bash
 # cwd: /Users/nhn/personal/fos-accountbook
-sed -i '' 's/"status": "pending"/"status": "completed"/g' tasks/plan025-auth-token-expiry-handling/index.json
+# perl 사용 — macOS(BSD)/Linux(GNU) 양쪽 호환 (sed -i 는 두 환경의 백업 인수 문법이 달라 깨짐)
+perl -i -pe 's/"status": "pending"/"status": "completed"/g' tasks/plan025-auth-token-expiry-handling/index.json
 
 # 검증: index 1개 + phase 5개 = 6건
 grep -c '"status": "completed"' tasks/plan025-auth-token-expiry-handling/index.json
