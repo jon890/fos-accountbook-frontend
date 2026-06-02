@@ -376,6 +376,19 @@ critic 평가 관점:
 
 단순 "재평가 부탁" 만 보내면 critic 이 캐시된 v1 결과를 재전송 가능. critic 회신이 v1 과 동일 내용이면 즉시 강제 재읽기 메시지 송신 (이번 세션 plan007-2 에서 1회 발생, 위 패턴으로 즉시 회복).
 
+**docs-verifier / code-reviewer 도 동일 v1 재전송 (fos-accountbook plan026 직접 관측)**: critic 뿐 아니라 docs-verifier(architect) 도 재검증 시 "재전송합니다" 라며 이미 수정된 지적을 잔존으로 회신하는 사고.
+위 critic 패턴을 그대로 적용하되, 한 단계 더 강하게 — team-lead 가 **수정된 실제 파일 라인을 직접 grep/awk 로 떠서 재검증 메시지에 증거로 붙인다**.
+
+```
+$ grep -cE "<수정 확인 패턴>" <파일>
+0          ← 이미 해소됨
+$ awk 'NR==<줄>' <파일>
+<실제 수정된 라인 내용>
+```
+
+증거를 붙이면 sub-agent 가 캐시 대신 실제 상태를 보고 재판정한다.
+plan026 에서 docs-verifier 1회 v1 재전송 → 라인 증거 첨부 후 즉시 PASS 회복.
+
 ### 6. executor 실행
 
 critic APPROVE 후 executor 를 `run_in_background: true`, `mode: "bypassPermissions"` 로 스폰. critic 승인 + docs-verifier 검증의 이중 안전망이 있으므로 executor 는 권한 확인 없이 실행.
@@ -392,6 +405,20 @@ executor 규칙:
 - **커밋은 하지 않음** — team-lead 가 검증 후 커밋
 - 완료/실패 시 team-lead 에게 결과 보고
 - 코드 주석 규칙은 프로젝트 `CLAUDE.md` 를 따른다 (자명한 내용을 한국어로 번역한 주석 금지)
+
+**phase별 executor 스폰 — 4+ phase 대 규모 권장 (fos-accountbook plan026 관측)**: 단일 executor 가 여러 phase 를 순차 처리하면 idle 알림 / 완료 보고 / 다음 phase 지시가 메시지 큐에서 교차해 "이미 완료했습니다" 혼선이 반복된다 (plan026 에서 phase 2~4 에 3회 발생).
+phase 경계마다 executor 를 새로 스폰하면 각 phase 가 깨끗한 컨텍스트로 시작하고 보고-종료가 명확해진다.
+
+- 한 phase 완료 보고를 받으면 그 executor 에 `shutdown_request` → 승인 후 다음 phase 전용 executor 를 새 이름(`executor-p{N}`)으로 스폰.
+- 새 이름을 쓰면 inactive 멤버 이름 충돌(`-2` suffix) + auto-deliver 누락도 회피.
+- 소~중 규모(1~3 phase)는 단일 executor 로 충분 — 스폰 오버헤드가 혼선 비용을 넘는다.
+- phase 가 자기완결적(이전 대화 없이 독립 실행 가능)이라 컨텍스트 비공유가 무해하다.
+
+### 검증 grep 은 변수 없이 직접 경로 (fos-accountbook plan026 관측)
+
+team-lead·executor 가 `SK=".../a .../b"; grep ... $SK` 처럼 셸 변수로 grep 경로를 넘기면, 변수가 빈 값으로 확장돼 **0건으로 오인**하는 사고가 plan026 에서 2회 발생했다 (실제론 잔존하는데 통과로 판정).
+검증 grep 은 경로를 직접 나열한다.
+0건이 나오면 변수 확장부터 의심하고 단일 경로로 재확인한다.
 
 ### 7. 코드 품질 검사 (code-reviewer)
 
