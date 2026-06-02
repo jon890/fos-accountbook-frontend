@@ -166,8 +166,8 @@ task 파일을 **사용자에게 제출하기 전**에 반드시 [`common-pitfal
 3. **`common-pitfalls.md` PLAN-1~9 소진 체크리스트 + 각 phase domain 매칭 CODE-N 함정 사전 해소** — task 제출 전 self-check
 4. **plan 브랜치 생성** — `git switch -c plan/{N}-{kebab-slug} origin/main`. 매 plan 마다 origin/main 기준 신규 브랜치 (이전 plan 브랜치 위에 쌓지 않는다)
 5. **git commit** — docs 변경 + task 파일을 **한 커밋** 으로 묶어 생성. commit 메시지: `docs(plan{N}): {plan 한 줄 요약}`
-6. **git push -u origin plan/{N}-{kebab-slug}** — 원격에 push (`-u` 로 upstream 설정).
-7. **git push -u origin plan/{N}-{kebab-slug} 만 — PR 생성 안 함**. 원격에 push 만 하면 다른 세션이 `tasks/plan{N}-*/` 를 fetch 로 이어받을 수 있다.
+6. **git push -u origin plan/{N}-{kebab-slug}** — 원격에 push (`-u` 로 upstream 설정). **PR 은 생성하지 않는다.**
+7. **PR 생성 단계 생략** — push 만으로 다른 세션이 `tasks/plan{N}-*/` 를 fetch 로 이어받을 수 있다. PR 은 `/build-with-teams` 가 계획+구현 완료 후 1개만 생성한다.
 8. **main 으로 복귀** — `git switch main`. 이후 `/build-with-teams plan{N}` 가 **같은 `plan/{N}` 브랜치에서** 구현을 이어 붙인다.
 9. 사용자 보고 + 실행 안내:
 
