@@ -32,11 +32,9 @@ export async function refreshTokenIfNeeded(token: JWT): Promise<JWT> {
         token.backendRefreshToken = refreshedResponse.data.refreshToken;
         token.backendTokenExpiredAt = refreshedResponse.data.expiredAt;
         token.backendTokenIssuedAt = refreshedResponse.data.issuedAt;
-        token.error = undefined;
+        delete token.error;
       } else {
-        console.warn(
-          "[auth.js callback (JWT)] backend token refresh 실패 — 다음 API 호출 401 시 로그인으로 처리"
-        );
+        // 갱신 실패 — token.error 플래그만 설정. 다음 API 호출 401 시 ADR-F26 흐름(A002 → redirect)이 사용자 인지 처리.
         token.error = "RefreshAccessTokenError";
       }
     }

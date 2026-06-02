@@ -25,7 +25,7 @@ export default async function SignInPage({
       title="우리집 가계부"
       subtitle="가족과 함께 관리하는 스마트 가계부"
     >
-      <SessionExpiredToast error={error} />
+      <SessionExpiredToast error={error === "auth" ? "auth" : undefined} />
       {(error || customMessage) && (
         <div className="bg-expense/10 border border-expense/20 text-expense px-4 py-3 rounded-md">
           <p className="text-sm font-medium">

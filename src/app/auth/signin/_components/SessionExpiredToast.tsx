@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 interface SessionExpiredToastProps {
-  error?: string;
+  error?: "auth";
 }
 
 /**
