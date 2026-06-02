@@ -460,7 +460,7 @@
 - **대안 기각**:
   - HTTP 클라이언트 (`client.ts` afterResponse hook) 에서 직접 redirect: Service 레이어에서 호출되는데 `redirect()` 는 RSC/Action context 구분이 필요해 레이어 경계를 깬다. 변환은 에러 레이어에 두는 것이 책임에 맞다.
   - jwt callback 에서 refresh 실패 즉시 세션 무효화: NextAuth v5 동작 검증 부담이 크고, 페이지 진입 자체가 차단돼 토스트 고지 흐름과 맞물리기 어렵다. 401 시점 무효화가 기존 `action-result-handler` 흐름과 일관된다.
-- **적용 범위**: `src/lib/errors/action-error.ts` (변환) + `src/lib/server/action-result-handler.ts` (인증 에러 가드) + `src/lib/server/auth/config.ts` (token.error 표시) + signin 토스트.
+- **적용 범위**: `src/lib/errors/action-error.ts` (변환) + `src/lib/server/action-result-handler.ts` (인증 에러 가드) + `src/lib/server/auth/refresh-token.ts` (refresh 가드·token.error 표시) + `src/lib/server/auth/config.ts` (jwt callback 진입점) + signin 토스트.
 
 ## ADR-F27: Radix `DropdownMenuItem` 안에서 form submit 금지 — `onSelect` 직접 호출 (2026-06-02)
 
