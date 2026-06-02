@@ -167,22 +167,29 @@ task 파일을 **사용자에게 제출하기 전**에 반드시 [`common-pitfal
 4. **plan 브랜치 생성** — `git switch -c plan/{N}-{kebab-slug} origin/main`. 매 plan 마다 origin/main 기준 신규 브랜치 (이전 plan 브랜치 위에 쌓지 않는다)
 5. **git commit** — docs 변경 + task 파일을 **한 커밋** 으로 묶어 생성. commit 메시지: `docs(plan{N}): {plan 한 줄 요약}`
 6. **git push -u origin plan/{N}-{kebab-slug}** — 원격에 push (`-u` 로 upstream 설정).
-7. **PR 생성** — `gh pr create --base main --head plan/{N}-{kebab-slug} --title "docs(plan{N}): {요약}" --body ...`. 본문은 변경 요약 (docs 변경 + task phase 목록) + Test plan (구현 PR 검증 항목) 포함. plan 브랜치가 main 에 머지되어야 향후 다른 세션에서 `tasks/plan{N}-*/` 를 참조할 수 있고, 머지 이력에 plan 의 존재가 남는다.
-8. **main 으로 복귀** — `git switch main`. 이후 사용자가 `/build-with-teams` 호출 시 origin/main 에서 새 `feat/plan{N}-*` 브랜치로 구현 시작.
+7. **git push -u origin plan/{N}-{kebab-slug} 만 — PR 생성 안 함**. 원격에 push 만 하면 다른 세션이 `tasks/plan{N}-*/` 를 fetch 로 이어받을 수 있다.
+8. **main 으로 복귀** — `git switch main`. 이후 `/build-with-teams plan{N}` 가 **같은 `plan/{N}` 브랜치에서** 구현을 이어 붙인다.
 9. 사용자 보고 + 실행 안내:
 
-> plan{N} task 파일 생성 + PR #{번호} 생성 완료 (브랜치: `plan/{N}-{kebab-slug}`).
-> PR 머지 후 `/build-with-teams plan{N}` 로 구현을 시작하면 `feat/plan{N}-{kebab-slug}` 브랜치에서 phase 실행 후 별도 구현 PR 이 생성됩니다.
+> plan{N} task + docs 를 `plan/{N}-{kebab-slug}` 브랜치에 push 완료 (**PR 미생성**).
+> `/build-with-teams plan{N}` 로 구현하면 같은 브랜치에서 phase 실행 후 docs+task+구현을 묶어 `plan/{N}`→main **단일 PR** 이 생성됩니다.
 
-**PR 정책 (2026-05-11 결정)**: plan 의 docs + task 변경은 별도 PR 로 머지. 구현 PR 과 분리. 이유: (a) 계획 단계 검토 + 구현 단계 검토 부담을 분산, (b) 머지 이력에서 "계획 / 구현" 식별 즉시 가능, (c) plan 머지 후 `tasks/plan{N}-*/` 가 main 에 존재해야 `/build-with-teams` 가 어디서든 시작 가능. CLAUDE.md "브랜치 명명" 표의 정책과 일치.
+**PR 정책 (2026-06-02 갱신 — 단일 PR)**: planning 은 PR 을 만들지 않는다.
+`plan/{N}` 브랜치에 task+docs commit + push 만 한다.
+build-with-teams 가 같은 브랜치에서 구현을 이어 붙이고, 완료 후 `plan/{N}`→main **단일 PR**(계획+구현) 을 생성한다.
+
+- 이유: 계획 PR 을 따로 머지하면 그 사이 main 변경과 구현 브랜치가 충돌한다.
+- 실사례: plan026 에서 #308(계획 PR) 을 먼저 머지 → #311(구현 PR) 이 common-pitfalls / adr.md conflict.
+- 단일 PR 로 계획+구현을 한 번에 머지해 이 충돌을 원천 차단한다.
+- 다른 세션이 plan 을 이어받는 건 `plan/{N}` 브랜치 push 로 충분하다 (main 머지 불필요).
 
 ### 중복 실행 방지
 
-`status="pending"` 인 task 가 main 에 머지된 상태에서 다른 세션이 `/build-with-teams plan{N}` 호출 시 사전 검증이 통과해 중복 실행 위험 — 다음 가드로 방지:
+단일 PR 워크플로에서는 계획이 main 에 머지되지 않으므로(plan/{N} 브랜치에만 존재), 중복 실행은 다음 가드로 방지:
 
-- `/build-with-teams` 실행 시 origin/main 의 latest `index.json` 의 `status` 가 `"completed"` 면 즉시 종료
+- `/build-with-teams` 가 plan/{N} 브랜치의 `index.json` `status` 가 `"completed"` 면 (= 이미 단일 PR 머지됨) 즉시 종료
 - 구현 phase 의 마지막 단계가 항상 `status="completed"` 마킹 + commit 포함 (CLAUDE.md "Task 작업 규칙")
-- 동일 plan 을 두 세션이 동시에 잡으면 PR 생성 시 브랜치 충돌로 자연 감지
+- 동일 plan 을 두 세션이 동시에 잡으면 `plan/{N}` push 시 브랜치 충돌로 자연 감지
 
 ### 예외
 

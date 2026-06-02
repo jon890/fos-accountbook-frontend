@@ -288,12 +288,12 @@ markdown 렌더링 결과는 동일하지만 소스 가독성 ↑ + git diff 정
 
 | 단계 | 브랜치 | 내용 |
 |---|---|---|
-| 계획 | `plan/{N}-{slug}` | `tasks/plan{N}-{slug}/` task 파일 + docs 갱신 (→ main 머지) |
-| 구현 | `feat/plan{N}-{slug}` | task 의 phase 별 코드 commit (→ main 머지) |
+| 계획+구현 | `plan/{N}-{slug}` | `/planning` 이 task+docs commit + push (**PR 생성 안 함**) → `/build-with-teams` 가 **같은 브랜치**에서 구현 → `plan/{N}`→main **단일 PR** |
 | 기타 | `chore/...` · `fix/...` · `refactor/...` · `docs/...` | 일반 작업 |
 
-plan 의 계획/구현 분리는 머지 이력에서 즉시 식별 + 검토 부담 분산이 목적.
-`/build-with-teams` 사전검증 4번이 task-only 머지를 잡아도 정상 — `feat/plan{N}-{slug}` 신 브랜치로 진행.
+계획과 구현을 **단일 PR** 로 묶는다 (2026-06-02 갱신).
+계획 PR 을 따로 머지하면 그 사이 main 변경과 구현 브랜치가 충돌하기 때문 (plan026 사례: #308 계획 PR 머지 → #311 구현 PR conflict).
+`/planning` 은 `plan/{N}` 브랜치 push 까지만, PR 은 `/build-with-teams` 가 계획+구현 완료 후 1개만 생성한다.
 
 ### 예시
 
