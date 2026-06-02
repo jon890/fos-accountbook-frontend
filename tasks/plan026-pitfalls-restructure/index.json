@@ -42,7 +42,7 @@
     {
       "number": 5,
       "file": "phase-05.md",
-      "title": "자동 게이트(task md lint) 신설 + CI 연결 + 통합 검증 + completed 마킹",
+      "title": "자동 게이트(globals.css @source not 1차 + task md lint 보조) + CI 연결 + 통합 검증 + completed 마킹",
       "model": "sonnet",
       "status": "pending"
     }

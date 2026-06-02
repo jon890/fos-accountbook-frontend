@@ -28,7 +28,11 @@
    - `BE1~BE3` (Spring) · `CLI1~CLI3` (dooray-cli)
    - `BLG1~BLG8, BLG10~BLG17` — Drizzle / pino / NJS proxy / shiki 등 fos-blog
 3. **헤더 갱신**: 제목을 `# Common Pitfalls — fos-accountbook` 로. 마지막 줄의 "3 레포 동기화" 문구 제거 → "fos-accountbook 전용. 다른 레포는 각자 common-pitfalls 유지" 로 교체.
-4. **§ 3/§ 4 의 남는 항목**(3-3, 3-4, FE1~3, BLG9)은 일단 그 자리에 두고 phase 03 에서 재배치.
+4. **fos-blog/webtoon 잔재 정리** — 유지 섹션(§ 2 team 운영 등)에 남은 다른 레포 흔적 제거:
+   - `:243-244` § 2 cwd 예시의 `git -C /Users/.../fos-blog/...` 경로를 fos-accountbook 경로로 치환.
+   - `:430` "fos-blog (Next.js 16 / Drizzle ORM …)" 같은 레포 소개 줄 제거.
+   - 단 `(fos-blog 관측)` 같은 **출처 표기는 의도적 잔존 허용** — 그 함정이 어디서 발견됐는지 맥락이라 유지. 경로 예시·레포 소개만 정리.
+5. **§ 3/§ 4 의 남는 항목**(3-3, 3-4, FE1~3, BLG9)은 일단 그 자리에 두고 phase 03 에서 재배치.
 
 ## 주의
 
@@ -43,6 +47,8 @@ F=.claude/skills/_shared/common-pitfalls.md
 grep -ciE "drizzle|pino|hast|shiki|mermaid|rehype|react-markdown|vitest|spring|commander" "$F"   # = 0
 # "3 레포 동기화" 문구 제거됨
 grep -c "3 레포" "$F"   # = 0
+# fos-blog 경로 예시·레포 소개 제거 (출처 표기 "(fos-blog 관측)" 만 허용)
+grep -nE "git -C .*fos-blog|fos-blog \(Next" "$F"   # = 0 (경로/소개 0건)
 # 줄 수 대폭 감소 (452 → 대략 150 이하)
 wc -l "$F"
 ```
@@ -51,4 +57,5 @@ wc -l "$F"
 
 - 제거 대상 기술 언급 0건
 - "3 레포 동기화" 0건
+- fos-blog 경로 예시·레포 소개 0건 (출처 표기만 잔존 허용)
 - 남은 함정이 plan 작성 / team 운영 / 이 레포 코드 패턴(3-3, 3-4, BLG9, FE1~3) 으로만 구성

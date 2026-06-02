@@ -21,19 +21,20 @@
 
    | 작업 종류 | 봐야 할 함정 | 자동 게이트 |
    |---|---|---|
-   | markdown/task 문서 작성 | BLG9(재번호) | task md lint (phase 05) |
-   | 색 토큰 / 스타일 | CODE-(3-3,3-4 재번호) | — |
+   | markdown/task 문서 작성 | CODE-N(구 BLG9) | task md lint (phase 05) |
+   | 색 토큰 / 스타일 | CODE-N(구 3-3, 3-4) | — |
    | Server Action 작성 | CLAUDE.md ADR-F25/F06 참조 | — |
-   | App Router 경계 | FE-(재번호) | — |
+   | App Router 경계 | CODE-N(구 FE1~3) | — |
    | plan 작성 | PLAN-1~9 | critic |
    | team 운영 | TEAM-1~10 | — |
 
-   (실제 작업종류 키는 남은 함정에 맞춰 확정.)
+   - 작업종류 키는 남은 함정에 맞춰 확정. 코드 패턴은 단일 `CODE-N` (phase 02 와 동일 체계 — 별도 prefix 금지).
+   - **PLAN-/TEAM- 은 executor 주입 대상이 아니다** — plan 작성(planner)·team 운영(team-lead)의 상시 점검 항목. phase domain 태그로 executor 에 주입되는 건 CODE-N 함정만. 이 구분을 인덱스 표 아래 1줄로 명시.
 
 2. **각 함정에 머신 파싱 태그** — 헤더 줄에:
    - `trigger:` 어떤 작업에서 관련되는가 (인덱스의 작업종류 키와 동일 어휘 — 통제 어휘)
    - `auto-gate:` 자동 검출 가능 여부 (가능하면 게이트 이름, 아니면 `—`)
-   - 예: `### BLG9-재번호 · trigger: markdown-write · auto-gate: md-lint`
+   - 예: `### CODE-N · trigger: markdown-write · auto-gate: md-lint` (구 BLG9)
 
 3. **2분류 명시** — 파일 상단에 "이 문서 쓰는 법" 섹션:
    - 자동 검출형은 게이트가 막으니 통독 불필요

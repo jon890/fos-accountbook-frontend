@@ -17,8 +17,8 @@
 2. **번호체계 통일** — 묶음별 prefix 로 단일화:
    - plan 작성 → `PLAN-1 ~ PLAN-9`
    - team 운영 → `TEAM-1 ~ TEAM-10`
-   - 코드 패턴 (남은 것) → `CODE-1 ~` (구 3-3, 3-4, BLG9, FE1~3 을 순차 재번호)
-   - 매핑 표(구번호 → 신번호)를 커밋 메시지에 남겨 phase 04 의 스킬 참조 갱신에 사용.
+   - 코드 패턴 (남은 것) → **단일 `CODE-1 ~`** (구 3-3, 3-4, BLG9, FE1~3 을 순차 재번호). BLG9·FE 도 별도 prefix 없이 모두 `CODE-N` 으로 — 도메인 구분은 phase 03 의 `trigger:` 태그가 담당하므로 prefix 는 단일.
+   - 매핑 표(구번호 → 신번호)를 **`tasks/plan026-pitfalls-restructure/number-map.md` 파일로 산출** (커밋 메시지 의존 금지 — phase 04 executor 가 Read 로 신뢰성 있게 읽는다).
 3. **헤딩 숫자 prefix 제거** — `## PLAN-1. 수치 추측` 형태로 식별자만 유지, markdown 자동번호와 이중 안 되게.
 4. **한 줄 압축 해소** — 각 함정을 일관 형식으로:
    - **증상** (한 줄)
@@ -31,7 +31,8 @@
 ## 주의
 
 - **내용(함정 자체)은 바꾸지 않는다.** 이 phase 는 표기/형식만. 함정 추가·삭제 금지(분리는 phase 01 에서 끝).
-- 번호 변경은 phase 04 의 스킬 참조 갱신과 짝이다 — 매핑 표를 반드시 커밋 메시지나 phase 04 입력에 남긴다.
+- 번호 변경은 phase 04 의 스킬 참조 갱신과 짝이다 — 매핑을 `number-map.md` 파일로 반드시 남긴다 (phase 04 가 Read).
+- 코드 패턴은 단일 `CODE-N` 으로 — phase 03 인덱스도 같은 단일 체계를 쓰므로 BLG9-/FE- 별도 prefix 신설 금지.
 
 ## 검증
 
@@ -40,10 +41,12 @@ F=.claude/skills/_shared/common-pitfalls.md
 grep -c "§" "$F"                          # = 0 (기호 제거)
 grep -cE "^#+ [0-9]+-[0-9]+" "$F"         # = 0 (헤딩 숫자 prefix 제거)
 grep -cE "PLAN-|TEAM-|CODE-" "$F"         # > 0 (신 번호체계 적용)
+test -f tasks/plan026-pitfalls-restructure/number-map.md && echo "number-map 산출됨"
 ```
 
 성공 기준:
 
 - `§` 0건, 헤딩 숫자 prefix 0건
-- 모든 함정이 `PLAN-/TEAM-/CODE-` 단일 체계
+- 모든 함정이 `PLAN-/TEAM-/CODE-` 단일 체계 (코드 패턴은 전부 CODE-N)
 - 각 함정이 증상/Good/검출/Why sub-bullet 분리 형식
+- `number-map.md` 파일 산출 (구→신 번호 매핑)
