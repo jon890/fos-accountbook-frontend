@@ -259,7 +259,7 @@
 
 ## ADR-F13: OKLCH 색 시스템 채택
 - **결정**: 모든 디자인 토큰을 OKLCH 색 공간으로 정의한다 (HSL 채널 패턴 폐기). brand 50~900, semantic(income/expense/warning), neutral 0~950, surface(bg/fg/border 등) 모두 `oklch(L C H)` 평면 값.
-- **맥락**: Teal fintech 리디자인(`tokens.js` / `styleguide.css` handoff)에서 brand=Teal h=188 + semantic 분리 + dark mode 토큰을 한 번에 정의해야 함. HSL 은 어두운 색 명도가 hue 따라 다르게 인지됨 → 토큰 스케일이 시각적으로 균일하지 않음.
+- **맥락**: Teal fintech 리디자인(`tokens.js` / `styleguide.css` handoff)에서 brand=Teal h=188(→ 현재 Toss Blue h=257, [ADR-F28](#adr-f28)) + semantic 분리 + dark mode 토큰을 한 번에 정의해야 함. HSL 은 어두운 색 명도가 hue 따라 다르게 인지됨 → 토큰 스케일이 시각적으로 균일하지 않음.
 - **대안 기각**:
   - HSL 채널 + shadcn 패턴 유지: 어두운 색에서 명도 들쭉날쭉. brand 50~900 같은 단계 스케일에 부적합.
   - 하이브리드 (shadcn HSL + OKLCH 일부): 동일 토큰을 두 형식으로 관리 → 동기화 사고 위험.
@@ -473,4 +473,22 @@
   - form 을 `DropdownMenu` 바깥으로 분리: 메뉴 항목 레이아웃을 깨고, 메뉴 닫힘 타이밍과 submit 순서를 다시 맞춰야 해 복잡도만 늘어난다.
   - `onSelect` 유지 + setTimeout 으로 submit 지연: 타이밍 의존이라 취약하다.
 - **적용 범위**: `src/components/layout/Header.tsx`. 향후 메뉴 항목에서 Server Action 호출 시 동일 패턴 적용.
+
+---
+
+<a id="adr-f28"></a>
+
+## ADR-F28: brand 색 Teal(h=188) → Toss Blue(h=257) 변경 (2026-06-02)
+
+- **결정**: brand 토큰 `--color-brand-{50..900}` + tint/fg, 그리고 brand 에서 파생되는 shadow·`--primary`·`--ring`·`gradient-{primary,family,category}` 의 hue 를 188(Teal) 에서 257(Toss Blue) 로 변경한다.
+  - semantic(income 152 / expense 25 / warning 78) 과 neutral(230) 은 불변.
+  - 카테고리 home 톤(`--color-cat-home`)은 brand 와 독립한 카테고리 팔레트라 188(teal) 유지.
+  - dark mode `--primary`/`--ring` 도 257 로 일관 적용.
+- **맥락**: Teal 보다 시원하고 선명한 파랑(Toss `#3182F6` ≈ `oklch(0.624 0.196 257)`) 을 brand 로 선호.
+  brand 토큰만 바꾸면 헤더·버튼·FAB 는 자동 반영되지만, 예산 카드 gradient 는 바뀌지 않았다.
+  gradient 클래스·shadow·`--primary`·`--ring` 이 brand 토큰을 참조하지 않고 hue 를 직접 하드코딩하고 있어, 이들도 257 로 함께 바꿔야 전역 적용이 완성됐다.
+- **트레이드오프**: gradient/shadow 가 `var(--color-brand-*)` 를 참조했다면 토큰 한 곳만 바꾸면 됐다.
+  hue 하드코딩이라 `globals.css` 전반의 188→257 일괄 치환이 필요했다.
+  향후 brand 재변경 비용을 줄이려면 gradient 정의를 brand 토큰 참조로 리팩토링하는 별도 작업이 바람직하다.
+- **적용 범위**: `src/app/globals.css`. ADR-F13 의 OKLCH 체계는 불변 — 본 ADR 은 brand hue 값만 갱신.
 

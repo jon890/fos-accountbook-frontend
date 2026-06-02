@@ -103,7 +103,7 @@ Page (app/) → Action (actions/) → Service (services/) → lib/server/api
 ### 스타일링
 
 - **OKLCH 토큰 강제** (ADR-F13) — `globals.css` 의 `@theme` 블록 외부에서 hex/rgb/hsl 직접 작성 금지
-  - brand: `--color-brand-{50..900}` (Teal h=188)
+  - brand: `--color-brand-{50..900}` (Toss Blue h=257)
   - semantic: `--color-{income|expense|warning}`
   - surface: `--color-{bg|bg-elev|bg-muted|fg|fg-muted|fg-subtle|border|border-strong}` (light/dark 분리)
 - **시맨틱 그라디언트 클래스 필수** — 하드코딩 색상 금지
