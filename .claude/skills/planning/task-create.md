@@ -87,6 +87,7 @@ CLAUDE.md "Agent Operating Rules" 의 Opus/Sonnet 라우팅 규칙 기반.
 
 **Model**: sonnet
 **Status**: pending
+**Domain**: [domain-key]
 
 ---
 
@@ -148,7 +149,8 @@ grep -n "expected-pattern" src/some/file.ts
 - [ ] 함수/컴포넌트의 이름·파라미터·반환 타입이 구체적
 - [ ] 이전 phase 산출물 참조 시 경로 명시
 - [ ] 성공 기준에 실행 가능한 명령 + 기대값 (`! grep`, `wc -l`, `exit=0` 등) 명시
-- [ ] `common-pitfalls.md § 1` 패턴 모두 소진
+- [ ] `common-pitfalls.md` PLAN-1~9 패턴 소진 체크리스트 해소
+- [ ] 각 phase 에 `**Domain**:` 태그 명시 (통제 어휘에서 선택 — `markdown-write` / `color-token` / `app-router` / `server-action` 중. CODE-N 함정 주입용. PLAN-/TEAM- 은 domain 태그 대상 아님). **domain 미지정 phase 는 critic REVISE**
 
 ---
 
@@ -209,6 +211,6 @@ CLAUDE.md "Architecture" 의 레이어 (app → services → infra, lib 는 횡�
 
 ## 참조
 
-- `common-pitfalls.md § 1 plan 작성` — critic 회피 패턴 모두 소진
+- `common-pitfalls.md` plan 작성 섹션 (PLAN-1~9) — critic 회피 패턴 소진
 - `CLAUDE.md` "Task 작업 규칙" — atomic phase, 5개 이하 작업, 자기완결 프롬프트, task 파일 즉시 commit
 - `CLAUDE.md` "DB 스키마 변경 규칙" — `pnpm db:push` 프로덕션 금지, `db:generate` + 마이그레이션 SQL 커밋

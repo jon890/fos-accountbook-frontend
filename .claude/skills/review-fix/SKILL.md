@@ -408,7 +408,7 @@ skip 인 경우 결과 보고에 **"신규 노하우 없음"** 한 줄만 명시
 | 종류 | 트리거 | 저장 위치 | 형식 |
 |---|---|---|---|
 | 라이브러리/스택 의사결정 패턴 | "왜 이렇게 했나" + 대안 기각 + 적용 범위 광범위 | `docs/adr.md` | `## ADR-FXX` (결정/맥락/대안 기각/적용 범위) |
-| 봇 반복 지적 패턴 | claude bot 동일 결함 타입 2회+ | `.claude/skills/_shared/common-pitfalls.md` | `### P{N}.` (Bad/Good/Why/How to apply) |
+| 봇 반복 지적 패턴 | claude bot 동일 결함 타입 2회+ | `.claude/skills/_shared/common-pitfalls.md` | `### CODE-N / PLAN-N / TEAM-N` (함정 성격에 맞는 prefix 선택. 증상/Good/검출/Why sub-bullet 형식) |
 | review-fix 프로세스 결함 | skill 절차 자체 사고 (conflict 처리, reply 누락 등) | 이 SKILL.md | 해당 섹션 끝 1-2줄 |
 | 프로젝트 전역 규칙 | 코딩 규칙/스택/금지사항 변경 | `CLAUDE.md` / `<dir>/AGENTS.md` | 기존 섹션 갱신 |
 | 일회용 (재발 가능성 낮음) | 단발 사고 | 누적 금지 — 결과 보고로만 끝 | — |

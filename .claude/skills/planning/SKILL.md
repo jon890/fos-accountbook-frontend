@@ -18,7 +18,13 @@ description: 새 기능/변경사항 구현 전 8단계 설계 워크플로우. 
 
 ## Critic 패턴 사전 해소 (필수)
 
-task 파일을 **사용자에게 제출하기 전**에 반드시 [`common-pitfalls.md`](../_shared/common-pitfalls.md)의 시드 7 패턴 + 레포별 +α를 모두 self-check한다. 이 체크리스트를 거치지 않으면 `/build-with-teams` 실행 시 critic이 REVISE를 내놓고 재평가 사이클이 돈다.
+task 파일을 **사용자에게 제출하기 전**에 반드시 [`common-pitfalls.md`](../_shared/common-pitfalls.md) 를 참조한다.
+
+- **PLAN-1~9** (plan 작성 함정) 을 전부 self-check 한다.
+- 각 phase 의 `domain` 태그에 매칭되는 **CODE-N 함정만** 추가로 참조한다 (인덱스 표에서 domain → CODE-N 확인).
+- `auto-gate:` 값이 있는 함정은 게이트가 자동으로 막으므로 self-check 면제.
+
+이 체크리스트를 거치지 않으면 `/build-with-teams` 실행 시 critic 이 REVISE 를 내놓고 재평가 사이클이 돈다.
 
 **축적 규칙**: critic이 **새로운 타입**의 지적을 하면 세션 종료 후 `common-pitfalls.md`에 패턴을 추가한다. 이 파일은 시간이 지날수록 두꺼워지고, critic이 할 말은 줄어든다.
 
@@ -157,7 +163,7 @@ task 파일을 **사용자에게 제출하기 전**에 반드시 [`common-pitfal
 
 1. **docs 반영 완료 확인** — `docs/adr.md` / `docs/flow.md` / `docs/data-schema.md` / `docs/code-architecture.md` / `CLAUDE.md` 중 해당하는 문서에 이번 결정이 모두 기록됐는지 점검
 2. **task 파일 생성** — `tasks/plan{N}-{kebab-slug}/` 디렉터리 + `index.json` + phase 파일들 작성. 상세 규칙은 [`task-create.md`](./task-create.md) 참조 (index.json 스키마 / model 라우팅 / phase 작성 체크리스트 / 마지막 2 phase 표준). CLAUDE.md "Task 작업 규칙" 도 준수 — 원자적 단일 책임, phase 당 작업 5개 이하, 자기완결 프롬프트, **마지막 phase 에 index.json status="completed" 마킹 명시**
-3. **`common-pitfalls.md` 의 P1~P9 + 패턴 소진 체크리스트 사전 해소** — task 제출 전 self-check
+3. **`common-pitfalls.md` PLAN-1~9 소진 체크리스트 + 각 phase domain 매칭 CODE-N 함정 사전 해소** — task 제출 전 self-check
 4. **plan 브랜치 생성** — `git switch -c plan/{N}-{kebab-slug} origin/main`. 매 plan 마다 origin/main 기준 신규 브랜치 (이전 plan 브랜치 위에 쌓지 않는다)
 5. **git commit** — docs 변경 + task 파일을 **한 커밋** 으로 묶어 생성. commit 메시지: `docs(plan{N}): {plan 한 줄 요약}`
 6. **git push -u origin plan/{N}-{kebab-slug}** — 원격에 push (`-u` 로 upstream 설정).

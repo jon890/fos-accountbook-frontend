@@ -74,7 +74,7 @@ verdict 회신이 v1 과 동일 (텍스트 매칭 hash 또는 핵심 평가 라�
 
 **복구**: `oh-my-claudecode:writer` (haiku, 빠르고 저렴) 를 spawn:
 - 입력: 본 plan 의 (a) git log (PR 브랜치) (b) sub-agent 통신 transcript 요약 (c) team-lead 가 마주친 분기점 (AskUserQuestion 답변 포함) (d) 검증 단계 실패/재시도 횟수
-- 작업: 위 데이터에서 **재현 가능 + 추상화 가능 + 검증 가능** 패턴 1-3 개 추출 → 누적 위치 결정 (BLG# / SKILL.md 섹션 / ADR / 페이지 문서)
+- 작업: 위 데이터에서 **재현 가능 + 추상화 가능 + 검증 가능** 패턴 1-3 개 추출 → 누적 위치 결정 (`common-pitfalls.md` CODE-N/PLAN-N/TEAM-N / SKILL.md 섹션 / ADR / 페이지 문서)
 - 출력: SendMessage 로 team-lead 에 마크다운 draft 전달
 - 승인 점검: team-lead 가 사용자에게 `AskUserQuestion` 으로 확인 (옵션: 누적 / 일부만 / 스킵)
 
