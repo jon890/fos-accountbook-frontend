@@ -1,6 +1,7 @@
 import { Users } from "lucide-react";
 import { AuthCenterCard } from "@/components/auth/AuthCenterCard";
 import { SignInForm } from "@/components/auth/SignInForm";
+import { SessionExpiredToast } from "./_components/SessionExpiredToast";
 
 export default async function SignInPage({
   searchParams,
@@ -24,6 +25,7 @@ export default async function SignInPage({
       title="우리집 가계부"
       subtitle="가족과 함께 관리하는 스마트 가계부"
     >
+      <SessionExpiredToast error={error} />
       {(error || customMessage) && (
         <div className="bg-expense/10 border border-expense/20 text-expense px-4 py-3 rounded-md">
           <p className="text-sm font-medium">
