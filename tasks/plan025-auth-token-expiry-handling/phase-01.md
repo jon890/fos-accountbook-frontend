@@ -35,15 +35,17 @@
 
 ### 1. `src/lib/errors/action-error.ts` — `ActionError.sessionExpired()` 헬퍼 추가
 
-`unauthorized()`(111행 근처) 바로 아래에 추가. `ErrorCode.SESSION_EXPIRED`("A002") 사용.
+`unauthorized()`(111행 근처) 바로 아래에 추가. 코드값은 `"A002"` 문자열 리터럴 사용.
 
 ```ts
 static sessionExpired(message?: string): ActionError {
-  return new ActionError(ErrorCode.SESSION_EXPIRED, message || "세션이 만료되었습니다");
+  return new ActionError("A002", message || "세션이 만료되었습니다");
 }
 ```
 
-`ErrorCode` import 가 이미 있는지 확인 — 없으면 `import { ErrorCode } from "./error-code"` 추가 (파일 내 기존 import 스타일 따름).
+import 변경 불필요.
+이 파일의 `ErrorCode` 는 `import { ERROR_MESSAGES, type ErrorCode }` 로 **타입 전용 import** 다.
+값으로 쓰면 tsc TS2693 컴파일 에러가 난다 — 기존 헬퍼(`unauthorized()`→`"A001"`, `familyNotSelected()`→`"F002"`)와 동일하게 문자열 리터럴을 쓴다.
 
 ### 2. `src/lib/errors/action-error.ts` — `handleActionError` 변환기에 401 분기 추가
 
