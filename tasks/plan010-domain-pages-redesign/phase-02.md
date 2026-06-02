@@ -72,7 +72,7 @@ backend 가 hex 만 수용한다면 plan 본문에 보고 + plan011 로 backend 
 ### 3. CategoryList row 토큰 교체
 
 `CategoryList.tsx` + `CategoryItem.tsx`:
-- 카테고리 icon cell: 기존 `bg-[${color}]/15 text-[${color}]` Tailwind arbitrary 패턴 → inline style 로 교체. **color 가 OKLCH 문자열이므로 alpha 합성은 슬래시 문법 사용** (hex 접미사 `26` 같은 합성 불가):
+- 카테고리 icon cell: 기존 Tailwind arbitrary 패턴(OKLCH 값 동적 보간) → inline style 로 교체. **color 가 OKLCH 문자열이므로 alpha 합성은 슬래시 문법 사용** (hex 접미사 `26` 같은 합성 불가):
   ```ts
   // OKLCH 슬래시 alpha 합성 helper
   function withAlpha(oklch: string, a: number): string {
