@@ -39,7 +39,7 @@ return (
 ### 2. RecentActivity 행 디자인 + 입력자 아바타
 
 `src/components/dashboard/RecentActivity.tsx`. 핸드오프 TxRow 패턴으로 행 교체:
-- 좌: 카테고리 아이콘 36px (`bg-[var(--color-cat-{X}-bg)] text-[var(--color-cat-{X}-fg)]` — phase 04 의 `category-tone.ts` 재사용).
+- 좌: 카테고리 아이콘 36px (`bg-[var(--color-cat-KEY-bg)] text-[var(--color-cat-KEY-fg)]` — KEY 는 canonical 키, phase 04 의 `category-tone.ts` 재사용).
 - 중: 메모 (14px font-semibold, ellipsis) + 카테고리명 · 시간 (11.5px muted).
 - 우: 금액 (14px font-bold, `.num` tabular-nums) + 입력자 아바타 16px (`expense.createdBy?.name` 존재 시 shadcn `<Avatar>` 첫 글자 fallback). createdBy 부재 시 16px 빈 spacer 로 우측 정렬 유지.
 

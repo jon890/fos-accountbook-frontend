@@ -130,6 +130,6 @@ grep -rn 'text-brand-fg\|text-expense-fg\|text-income-fg\|text-warning-fg' \
 | 리스크 | 완화 |
 |---|---|
 | 컨텍스트 미식별로 surface 위 text-white 잘못 교체 | 각 파일 ancestor className 검토 후 교체. sed 일괄 금지. 의심 시 사용자 확인 |
-| Tailwind v4 가 새 token utility 미인식 | phase-01 build 검증 통과 시 안전. 미인식 시 `text-[var(--color-*-fg)]` 폴백 |
+| Tailwind v4 가 새 token utility 미인식 | phase-01 build 검증 통과 시 안전. 미인식 시 `text-[var(--color-SEMANTIC-fg)]` 형태 폴백 |
 | 51 파일 = 5 작업 한도 초과 | 카테고리별 묶음 (dashboard / layout / auth / ui / 기타) 5 묶음으로 처리. 항목 단위가 아닌 카테고리 단위 카운트 |
 | Button destructive variant 회귀 (AlertDialog) | 모든 AlertDialogAction 호출처 (plan020 의 4 곳) 가 destructive variant 사용 — 마이그레이션 후 회귀 smoke 필수 |

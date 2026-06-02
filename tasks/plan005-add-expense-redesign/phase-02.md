@@ -71,7 +71,7 @@ const TONE_CLASS: Record<CategoryToneKey, { bg: string; border: string; text: st
 };
 ```
 
-동적 보간 (`bg-[var(--color-cat-${key}-bg)]`) 절대 금지 — Tailwind 빌드 시 누락. **사전 정의된 10 키만 사용**.
+동적 보간 (런타임 템플릿 리터럴로 `--color-cat-KEY-bg` 클래스명을 조합하는 방식) 절대 금지 — Tailwind 빌드 시 누락. **사전 정의된 10 키만 사용**.
 
 ### 2. 아이콘 매핑
 

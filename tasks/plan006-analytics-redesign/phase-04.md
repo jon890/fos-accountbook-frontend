@@ -51,7 +51,7 @@ Layout:
 - 헤더: "카테고리별" / 데스크톱은 "카테고리별 상세" + 우측 "전월 대비 증감 포함" 라벨
 - 모바일: vertical list — row 마다 icon(36px) + 이름 / 금액 / progress bar + delta %
 - 데스크톱: 2-col grid (`grid-cols-2 gap-x-6`) — row 5-col grid (icon 34 / 이름+progress 1fr / 금액 90 / delta 56)
-- progress bar: `bg-bg-muted` track + `bg-[var(--color-cat-{key}-fg)]` fill (plan002 톤)
+- progress bar: `bg-bg-muted` track + `bg-[var(--color-cat-KEY-fg)]` fill (plan002 톤)
 - delta: 양수 → `text-expense` + `+N%` / 음수 → `text-income` + `−N%` / null → "—" 또는 숨김
 
 ### 3. `DailyBarChart.tsx` 제거
