@@ -212,7 +212,7 @@ describe("Header", () => {
       await user.click(logoutButton);
     });
 
-    // Then — signOutAction 이 form submit 으로 호출됨
+    // Then — signOutAction 이 onSelect 에서 직접 호출됨 (ADR-F27)
     await waitFor(() => {
       expect(mockSignOutAction).toHaveBeenCalled();
     });
