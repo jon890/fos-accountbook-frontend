@@ -172,6 +172,11 @@ export function getActionDataOrDefault<T>(
     return result.data;
   }
 
+  // 인증 에러는 빈 데이터로 숨기지 않고 로그인으로 (ADR-F26)
+  if (result.error.code === "A001" || result.error.code === "A002") {
+    return handleActionError(result);
+  }
+
   // 에러 로깅 (선택적)
   console.error("Action failed, using default value:", {
     code: result.error.code,

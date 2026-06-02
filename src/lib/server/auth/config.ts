@@ -1,8 +1,9 @@
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import Naver from "next-auth/providers/naver";
-import { refreshBackendToken, requestSocialLogin } from "./backend-auth";
+import { requestSocialLogin } from "./backend-auth";
 import { fetchUserProfile } from "./profile-fetcher";
+import { refreshTokenIfNeeded } from "./refresh-token";
 
 export const authConfig = {
   providers: [Google, Naver],
@@ -62,33 +63,7 @@ export const authConfig = {
         return token;
       }
 
-      // 토큰 갱신이 필요한 경우 (만료 시간 체크)
-      if (
-        token.backendTokenExpiredAt &&
-        token.backendRefreshToken &&
-        token.backendAccessToken
-      ) {
-        const expiredAt = new Date(token.backendTokenExpiredAt);
-        const now = new Date();
-        const bufferTime = 5 * 60 * 1000; // 5분 전에 갱신
-
-        // 토큰이 만료되기 5분 전이면 갱신
-        if (now.getTime() >= expiredAt.getTime() - bufferTime) {
-          console.log("[auth.js callback (JWT)] refreshing backend token");
-          const refreshedResponse = await refreshBackendToken({
-            refreshToken: token.backendRefreshToken,
-          });
-
-          if (refreshedResponse.success) {
-            token.backendAccessToken = refreshedResponse.data.accessToken;
-            token.backendRefreshToken = refreshedResponse.data.refreshToken;
-            token.backendTokenExpiredAt = refreshedResponse.data.expiredAt;
-            token.backendTokenIssuedAt = refreshedResponse.data.issuedAt;
-          }
-        }
-      }
-
-      return token;
+      return refreshTokenIfNeeded(token);
     },
 
     /**

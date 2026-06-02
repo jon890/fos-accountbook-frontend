@@ -33,5 +33,7 @@ declare module "next-auth/jwt" {
     backendTokenIssuedAt: string;
     /** 사용자 프로필 정보 (jwt callback에서 캐싱) */
     profile: UserProfile | null;
+    /** refresh 실패 표시 — 설정되면 jwt callback이 추가 refresh 재시도를 건너뜀 */
+    error?: "RefreshAccessTokenError";
   }
 }
