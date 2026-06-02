@@ -320,10 +320,10 @@ inline style vs Tailwind arbitrary class (PR #81)
 
 JSDoc/TSDoc 코멘트에 Tailwind 클래스 패턴 금지 (PR #94 관측)
 
-- **증상**: Tailwind v4 의 content scanner 가 `.ts`/`.tsx` 파일의 코멘트 안 문자열까지 클래스 후보로 추출. arbitrary value 안에 와일드카드나 중괄호가 포함된 패턴이 layer utilities 에 invalid CSS 를 생성 → `Unexpected token` parse error → 모든 페이지 500.
-- **Good**: 코멘트에서 클래스 패턴을 prose 로 표현 (예: "color-cat 토큰 (canonical key 별)"). 코드 예시가 필요하면 `text-[var(--color-cat-KEY)] 형태` 처럼 placeholder(KEY) 로 쓴다. 추가 안전망: `globals.css` 에 `@source not` 지시어로 tasks/ 와 docs/ 디렉터리를 스캔 대상에서 제외한다 (phase 05 에서 적용).
-- **검출**: 코멘트 안에 Tailwind arbitrary value 형식이 있고 그 안에 와일드카드나 중괄호가 포함된 경우 위험 — md-lint 가 자동 감지 (phase 05 게이트).
-- **Why**: 한 번 발생하면 dev 서버가 통째로 다운된다. plan017 task 작성 중 직접 발생.
+- **증상**: Tailwind v4 의 content scanner 가 `.ts`/`.tsx` 코멘트뿐 아니라 `tasks/`·`docs/`·`.claude/skills/` 의 `.md` 파일까지 클래스 후보로 추출. arbitrary value 안에 와일드카드나 중괄호가 포함된 패턴이 layer utilities 에 invalid CSS 를 생성 → `Unexpected token` parse error → 모든 페이지 500.
+- **Good**: 클래스 패턴을 prose 로 표현 (예: "color-cat 토큰 (canonical key 별)"). 코드 예시가 필요하면 `text-[var(--color-cat-KEY)] 형태` 처럼 placeholder(KEY) 로 쓴다.
+- **검출**: 닫힌 `[...]` arbitrary 값 안에 와일드카드나 중괄호가 든 경우 위험 — `pnpm lint:md`(`scripts/check-tailwind-md.mjs`)가 CI 에서 자동 차단 (ADR-F29).
+- **Why**: 한 번 발생하면 dev 서버가 통째로 다운된다. `@source not` 안전망은 Turbopack(Next 16 dev)에서 미작동이라(2026-06 실측) 쓰지 않고, 패턴을 안전 표기로 바꾸는 lint 게이트가 유일한 확실한 차단이다.
 
 ### CODE-4 · trigger: app-router · auto-gate: —
 
