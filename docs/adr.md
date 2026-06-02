@@ -446,3 +446,31 @@
 - **트레이드오프**: `assertFamilyAccess` 는 매 호출마다 `getFamilies()` 페치 (단 backend 가 캐시 + 짧은 TTL). single-family 패턴의 session 비교는 캐시된 JWT 만 사용해 0 네트워크.
 - **적용 범위**: `src/lib/server/auth/auth-helpers.ts` (helper) + `src/actions/family/update-family-action.ts` (B) + `src/actions/category/create-category-action.ts` (A, session 비교 추가) + `src/actions/invitation/delete-invitation-action.ts` (C). 다른 Action 은 이미 표준 패턴 준수.
 
+## ADR-F26: 백엔드 401 응답을 인증 만료로 분류해 로그인으로 일관 리다이렉트 (2026-06-02)
+
+- **결정**: 백엔드 401 응답은 "인증 만료" 단일 경로로 처리한다.
+  - `handleActionError` (try-catch 변환기) 가 `ServerApiError.status === 401` 을 `ActionError.sessionExpired()` (코드 `A002`) 로 변환한다.
+  - `getActionDataOrDefault` 는 결과 코드가 `A001`/`A002` (인증 에러) 일 때는 기본값을 반환하지 않고 `handleActionError` 로 redirect 한다.
+  - refresh 실패는 jwt callback 에서 `token.error` 표시만 하고, 실제 무효화는 다음 API 호출이 401 을 받는 시점에 일어난다.
+  - redirect 목적지는 `/auth/signin?error=auth` 이며, signin 진입 시 sonner 토스트로 만료를 고지한다.
+- **맥락**: 기존엔 401 이 `ServerApiError(status:401)` 까지는 도달했다.
+  그러나 `handleActionError` 가 status 를 검사하지 않고 모두 `internalError` (C 계열) 로 변환해 `onAuthError` (A001/A002) 분기에 닿지 못했다.
+  그 결과 `getActionDataOrDefault` 를 쓰는 dashboard/budget 은 만료 응답을 빈 데이터(0)로 숨겨 무효 토큰인 채 페이지가 잔존했다.
+  refresh 실패 시에도 jwt callback 이 만료 토큰을 유지해 무효 요청이 계속 나갔다.
+- **대안 기각**:
+  - HTTP 클라이언트 (`client.ts` afterResponse hook) 에서 직접 redirect: Service 레이어에서 호출되는데 `redirect()` 는 RSC/Action context 구분이 필요해 레이어 경계를 깬다. 변환은 에러 레이어에 두는 것이 책임에 맞다.
+  - jwt callback 에서 refresh 실패 즉시 세션 무효화: NextAuth v5 동작 검증 부담이 크고, 페이지 진입 자체가 차단돼 토스트 고지 흐름과 맞물리기 어렵다. 401 시점 무효화가 기존 `action-result-handler` 흐름과 일관된다.
+- **적용 범위**: `src/lib/errors/action-error.ts` (변환) + `src/lib/server/action-result-handler.ts` (인증 에러 가드) + `src/lib/server/auth/config.ts` (token.error 표시) + signin 토스트.
+
+## ADR-F27: Radix `DropdownMenuItem` 안에서 form submit 금지 — `onSelect` 직접 호출 (2026-06-02)
+
+- **결정**: `DropdownMenuItem` 안에 Server Action 을 붙일 때는 `<form action={...}>` 대신, `onSelect` 에서 `event.preventDefault()` 로 자동 닫힘을 막고 Server Action 을 직접 호출한다.
+- **맥락**: 로그아웃 버튼이 `DropdownMenuItem asChild` 안에 `<form action={signOutAction}>` + submit 버튼을 두는 구조였다.
+  클릭하면 `DropdownMenuItem` 의 `onSelect` 가 메뉴를 닫으며 Portal 을 unmount 한다.
+  그 과정에서 form 이 DOM 에서 제거되어 native submit 이 발생하기 전에 유실됐다.
+  로그인 시점과 무관하게 로그아웃이 항상 동작하지 않았다.
+- **대안 기각**:
+  - form 을 `DropdownMenu` 바깥으로 분리: 메뉴 항목 레이아웃을 깨고, 메뉴 닫힘 타이밍과 submit 순서를 다시 맞춰야 해 복잡도만 늘어난다.
+  - `onSelect` 유지 + setTimeout 으로 submit 지연: 타이밍 의존이라 취약하다.
+- **적용 범위**: `src/components/layout/Header.tsx`. 향후 메뉴 항목에서 Server Action 호출 시 동일 패턴 적용.
+

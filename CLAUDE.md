@@ -40,6 +40,8 @@ Claude Code가 항상 따라야 할 규칙과 참조 문서 포인터.
 | Page에서 데이터 조회 | ADR-F12 — Page에서 `serverApiGet` 직접 호출 금지, Action 경유 |
 | HTTP 클라이언트 / 재시도 설정 | ADR-F05 — ky 사용, 408/429/5xx 최대 2회 재시도 |
 | NextAuth 세션/토큰 수정 | ADR-F03 — JWT 전략, profile 캐싱, 만료 5분 전 갱신 |
+| 401 응답 / 토큰 만료 처리 | ADR-F26 — 401 을 `A002`(세션 만료) 로 변환, 인증 에러는 기본값으로 숨기지 않고 로그인 리다이렉트 |
+| DropdownMenu 안 Server Action 호출 | ADR-F27 — `form` submit 금지, `onSelect` 에서 preventDefault 후 직접 호출 |
 | Server Action 입력 검증 | ADR-F06 — Zod 런타임 검증 필수 |
 | Shadcn / Tailwind v4 스타일 | ADR-F07 — 시맨틱 그라디언트 클래스, 하드코딩 금지 |
 | 색 토큰 작성 (brand/semantic/surface) | ADR-F13 — OKLCH 평면 값. hex/rgb/hsl 금지 |
