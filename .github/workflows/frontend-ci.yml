@@ -37,6 +37,9 @@ jobs:
       - name: Run ESLint
         run: pnpm lint
 
+      - name: Check markdown Tailwind patterns
+        run: pnpm lint:md
+
       - name: Run tests
         run: pnpm test:ci
         env:

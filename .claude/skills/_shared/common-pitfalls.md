@@ -1,452 +1,363 @@
-# Common Pitfalls
+# Common Pitfalls — fos-accountbook
 
-skills 가 공유하는 사고 / 실수 회피 패턴. 카테고리별로 호출 시점이 다르므로 필요한 § 만 grep 해서 참조.
+## 이 문서 쓰는 법
 
-| § | 카테고리 | 호출 시점 | 사용 스킬 |
-|---|---|---|---|
-| § 1 | plan 작성 (critic 회피) | task 파일 작성 직후 self-check | `planning`, `build-with-teams` |
-| § 2 | team 운영 | 팀원 스폰 / 메시지 / 브랜치 작업 시 | `build-with-teams` |
-| § 3 | PR review 학습 (코드 패턴 함정) | 리뷰 댓글 처리 후 누적 | `review-fix` |
-| § 4 | 레포별 +α | task 도메인 코드 작성 시 | `planning`, `build-with-teams` |
+함정은 두 가지로 나뉜다.
+
+- **자동 검출형** — `auto-gate:` 값이 있는 항목. 빌드·lint·타입 게이트가 자동으로 막는다. 별도 self-check 불필요.
+- **판단형** — `auto-gate: —` 인 항목. 설계·UX·권한 판단이 필요하다. **아래 인덱스 표에서 작업 종류에 해당하는 항목만 골라 읽는다.**
+
+전체를 매번 통독하지 않는다. 인덱스로 필요한 항목만 참조한다.
+
+## 통제 어휘 (domain 키 목록)
+
+phase-04 의 phase 프런트매터 domain 태그와 아래 인덱스 표의 작업종류 키, 각 함정의 `trigger:` 태그가 **같은 어휘를 써야** 매핑이 성립한다.
+
+| domain 키 | 대상 작업 |
+|---|---|
+| `markdown-write` | markdown / task 문서 작성 |
+| `color-token` | 색 토큰 / Tailwind 스타일 작성 |
+| `app-router` | App Router 경계 / 컴포넌트 / revalidatePath |
+| `server-action` | Server Action 작성 (현재 연결 함정: CLAUDE.md ADR 참조) |
+| `plan-write` | plan 작성 — executor 주입 대상 아님, planner 상시 점검 |
+| `team-ops` | team 운영 — executor 주입 대상 아님, team-lead 상시 점검 |
+
+## 작업종류→함정 인덱스
+
+| 작업 종류 | 봐야 할 함정 | 자동 점검 |
+|---|---|---|
+| markdown/task 문서 작성 | CODE-3 | md-lint (phase 05) |
+| 색 토큰 / Tailwind 스타일 | CODE-1, CODE-2 | — |
+| Server Action 작성 | CLAUDE.md ADR-F25, ADR-F06 참조 | — |
+| App Router 경계 / 컴포넌트 | CODE-4, CODE-5, CODE-6 | — |
+| plan 작성 | PLAN-1~9 | critic |
+| team 운영 | TEAM-1~10 | — |
+
+**PLAN-/TEAM- 은 executor 주입 대상이 아님** — planner(plan 작성)·team-lead(team 운영)의 상시 점검 항목. domain 태그로 executor 에 주입되는 건 CODE-N 만.
 
 ## 축적 규칙
 
-- 새로운 사고 타입 발견 시 해당 § 에 **패턴 한 줄 + 실측 명령 + self-check** 추가
+- 새로운 사고 타입 발견 시 해당 섹션에 **패턴 한 줄 + 실측 명령 + self-check** 추가
+- 함정 추가 시 인덱스 표에도 해당 행을 갱신한다 (단일 소스: trigger 태그가 진실, 인덱스는 그 뷰)
 - 같은 사고 재발 시 패턴 강화 (예시 / 체크 엄격화)
 - "왜 이 가드가 필요한지" 1줄 단서는 반드시 — 미래 AI 가 의도 모르고 우회하지 않도록
 - 사고 사례 (plan###) 는 1개로 충분, 복수 나열 금지
 
 ---
 
-# § 1. plan 작성 (critic 회피)
+## plan 작성 (critic 회피)
 
-`/planning` 또는 `build-with-teams` 가 task 파일 작성 시 self-check. 이 § 의 모든 항목을 plan 생성 **전에 소진** 하면 critic 이 1-shot APPROVE 할 확률이 높다.
+`/planning` 또는 `build-with-teams` 가 task 파일 작성 시 self-check.
+이 섹션의 모든 항목을 plan 생성 **전에 소진** 하면 critic 이 1-shot APPROVE 할 확률이 높다.
 
-## 1-1. 수치 추측 (파일 수 / 줄 수)
+### PLAN-1 · trigger: plan-write · auto-gate: critic
 
-**증상**: "약 30개 파일", "100줄 줄어듦" 같은 수치를 실측 없이 적음.
-**왜**: critic 이 가장 먼저 검증하는 것은 phase 약속 수치 ↔ 실제 코드 일치 여부. 추측은 즉시 REVISE 사유.
+수치 추측 (파일 수 / 줄 수)
 
-```bash
-git diff <base>..<target> --stat | tail -5
-git diff <base>..<target> --name-only | wc -l
-```
+- **증상**: "약 30개 파일", "100줄 줄어듦" 같은 수치를 실측 없이 적음.
+- **Why**: critic 이 가장 먼저 검증하는 것은 phase 약속 수치 ↔ 실제 코드 일치 여부. 추측은 즉시 REVISE 사유.
+- **검출**:
+  ```bash
+  git diff <base>..<target> --stat | tail -5
+  git diff <base>..<target> --name-only | wc -l
+  ```
+- **Self-check**: 모든 수치가 실측 명령 결과? 명령 자체가 plan 에 인용되어 있는가?
 
-**Self-check**: 모든 수치가 실측 명령 결과? 명령 자체가 plan 에 인용되어 있는가?
+### PLAN-2 · trigger: plan-write · auto-gate: critic
 
-## 1-2. 파일 범위 부정확
+파일 범위 부정확
 
-**증상**: "step2 컴포넌트 전체 수정" — "전체" 표현은 critic 이 추적 불가.
-**왜**: 누락된 파일이 conflict 진앙이 되면 executor 가 헤맨다.
+- **증상**: "step2 컴포넌트 전체 수정" — "전체" 표현은 critic 이 추적 불가.
+- **Why**: 누락된 파일이 conflict 진앙이 되면 executor 가 헤맨다.
+- **검출**:
+  ```bash
+  git diff <base>..<target> --name-only -- <scope-dir>/
+  ```
+- **Self-check**: 파일 목록을 plan 에 전부 나열했고, 각 파일 처리 원칙이 서술됐는가?
 
-```bash
-git diff <base>..<target> --name-only -- <scope-dir>/
-```
+### PLAN-3 · trigger: plan-write · auto-gate: critic
 
-**Self-check**: 파일 목록을 plan 에 전부 나열했고, 각 파일 처리 원칙이 서술됐는가?
+이전 plan / main 커밋과의 상호작용 누락
 
-## 1-3. 이전 plan / main 커밋과의 상호작용 누락
+- **증상**: 이번 plan 이 다른 최근 plan 산출물과 충돌하는데 본문에 그 관계 미서술.
+- **Why**: executor 가 rebase 중 "어느 쪽이 final state 인가" 모르고 잘못된 방향으로 병합.
+- **검출**:
+  ```bash
+  git log origin/main --oneline -20 -- <scope-dir>/
+  ls -dt tasks/plan*/ | head -5
+  ```
+- **Self-check**: 최근 10개 커밋 중 plan 범위 파일을 건드린 게 있는가? 있으면 "어느 쪽이 final" 명시?
 
-**증상**: 이번 plan 이 다른 최근 plan 산출물과 충돌하는데 본문에 그 관계 미서술.
-**왜**: executor 가 rebase 중 "어느 쪽이 final state 인가" 모르고 잘못된 방향으로 병합.
+### PLAN-4 · trigger: plan-write · auto-gate: critic
 
-```bash
-git log origin/main --oneline -20 -- <scope-dir>/
-ls -dt tasks/plan*/ | head -5
-```
+실행 컨텍스트 모호 (cwd / branch)
 
-**Self-check**: 최근 10개 커밋 중 plan 범위 파일을 건드린 게 있는가? 있으면 "어느 쪽이 final" 명시?
+- **증상**: Bash 블록에 `cd` 없거나 "메인 디렉터리에서" 같은 애매한 서술.
+- **Why**: worktree 에서 main repo 로 잘못 커밋이 박히면 force-push 로 PR 에 섞임.
+- **Good**: 모든 Bash 블록 위에 `# cwd: {절대경로}` 주석 + 브랜치 의존 시 `# branch: {expected}`.
+- **Self-check**: 모든 Bash 블록이 실행 위치 명시? worktree 사용 plan 이면 main vs worktree 구분 명확?
 
-## 1-4. 실행 컨텍스트 모호 (cwd / branch)
+### PLAN-5 · trigger: plan-write · auto-gate: critic
 
-**증상**: Bash 블록에 `cd` 없거나 "메인 디렉터리에서" 같은 애매한 서술.
-**왜**: worktree 에서 main repo 로 잘못 커밋이 박히면 force-push 로 PR 에 섞임.
+"눈으로 확인" 검증
 
-**규칙**: 모든 Bash 블록 위에 `# cwd: {절대경로}` 주석 + 브랜치 의존 시 `# branch: {expected}`.
+- **증상**: 성공 기준에 "수동 검토", "눈으로 확인" 같은 인간 의존 문구.
+- **Why**: executor (LLM) 가 "확인했다" 단정 가능 → 사실상 검증 없음.
+- **Good**: 성공 기준의 각 항목은 grep / test / diff + 기대값 (건수 / exit / 문자열 포함) 명시.
+- **Self-check**: "확인" / "검토" 문구 0건? 각 명령에 기대값 명시?
 
-**Self-check**: 모든 Bash 블록이 실행 위치 명시? worktree 사용 plan 이면 main vs worktree 구분 명확?
+### PLAN-6 · trigger: plan-write · auto-gate: critic
 
-## 1-5. "눈으로 확인" 검증
+외부 상태 점검 부재
 
-**증상**: 성공 기준에 "수동 검토", "눈으로 확인" 같은 인간 의존 문구.
-**왜**: executor (LLM) 가 "확인했다" 단정 가능 → 사실상 검증 없음.
+- **증상**: 외부 시스템 변경 (push, merge, PR comment, 배포) 단계 앞에 상태 확인 명령 없음.
+- **Why**: PR 이 close / merge 됐는데 force-push 하거나 CI 실패 모르고 "검증 완료" 댓글.
+- **검출**:
+  ```bash
+  STATE=$(gh pr view {N} --json state -q .state)
+  [ "$STATE" = "OPEN" ] || { echo "PR is $STATE"; exit 1; }
+  ```
+- **Self-check**: 외부 가시 동작 앞에 점검, 뒤에 rollback 절차?
 
-**규칙**: 성공 기준의 각 항목은 grep / test / diff + 기대값 (건수 / exit / 문자열 포함) 명시.
+### PLAN-7 · trigger: plan-write · auto-gate: critic
 
-**Self-check**: "확인" / "검토" 문구 0건? 각 명령에 기대값 명시?
+새 불변식 도입 시 4면 가드 누락
 
-## 1-6. 외부 상태 gate 부재
+- **증상**: 스키마에 `isDefault: Boolean` 추가 + 일부 경로에만 가드 + UI 가드 누락.
+- **Why**: 같은 불변식이 다른 표면에서 깨짐 (mapper 드랍 / UI 삭제 / 트랜잭션 분리 등).
+- **Good**: load-bearing 불변식 도입 시 4면 가드 필수:
+  1. **Migration**: SQL 백필 + 인덱스 + 제약
+  2. **Repository**: 모든 write 메서드 (`create` / `update` / `delete` / `findOrCreate`) 가드
+  3. **Mapper / DTO**: 입력 매퍼가 새 필드를 드랍하지 않는지 (`grep` 확인)
+  4. **UI**: 사용자가 불변식을 깨뜨릴 수 있는 액션 (삭제 / 수정 폼) 에 disable / throw
+- **Self-check**: load-bearing 불변식 도입 시 4면 가드 모두 phase 작업 목록에 명시?
 
-**증상**: 외부 시스템 변경 (push, merge, PR comment, 배포) 단계 앞에 상태 확인 명령 없음.
-**왜**: PR 이 close / merge 됐는데 force-push 하거나 CI 실패 모르고 "검증 완료" 댓글.
+### PLAN-8 · trigger: plan-write · auto-gate: critic
 
-```bash
-STATE=$(gh pr view {N} --json state -q .state)
-[ "$STATE" = "OPEN" ] || { echo "PR is $STATE"; exit 1; }
-```
+마지막 phase 에 index.json completed 마킹 지시 누락
 
-**Self-check**: 외부 가시 동작 앞에 gate, 뒤에 rollback 절차?
+- **증상**: 마지막 phase 본문에 "index.json status + 모든 phase status 를 `completed` 로 + 단일 commit 포함" 지시 없음.
+- **Why**: executor 는 scope 가드로 자체 추가 안 함 (올바른 행동) → team-lead 가 PR 직전 amend / 별도 commit. main 직접 수정 유혹 발생.
+- **검출**:
+  ```bash
+  sed -i '' 's/"status": "pending"/"status": "completed"/g' tasks/{plan}/index.json
+  grep -c '"status": "completed"' tasks/{plan}/index.json   # = (1 + total_phases)
+  grep -lE "index\.json.*completed" tasks/{plan}/phase-*.md   # 마지막 phase 파일 매칭
+  ```
+- **Self-check**: 마지막 phase 에 마킹 지시 + 단일 commit 포함 명시?
 
-## 1-7. 새 불변식 도입 시 4면 가드 누락
+### PLAN-9 · trigger: plan-write · auto-gate: critic
 
-**증상**: 스키마에 `isDefault: Boolean` 추가 + 일부 경로에만 가드 + UI 가드 누락.
-**왜**: 같은 불변식이 다른 표면에서 깨짐 (mapper 드랍 / UI 삭제 / 트랜잭션 분리 등).
+macOS BSD sed \b 미지원
 
-**4면 검사 체크리스트** (load-bearing 불변식인 경우 필수):
-1. **Migration**: SQL 백필 + 인덱스 + 제약
-2. **Repository**: 모든 write 메서드 (`create` / `update` / `delete` / `findOrCreate`) 가드
-3. **Mapper / DTO**: 입력 매퍼가 새 필드를 드랍하지 않는지 (`grep` 확인)
-4. **UI**: 사용자가 불변식을 깨뜨릴 수 있는 액션 (삭제 / 수정 폼) 에 disable / throw
+- **증상**: rename plan 에 `sed -i '' 's|foo\b|bar|g'`. macOS BSD `sed` 는 `\b` 미지원 → 0 매치. 검증: `echo "x.contentReview.y" | sed 's|contentReview\b|X|g'` → 변경 없음.
+- **Why**: 핵심 치환 누락, 빌드 / 타입 검증 실패하지만 phase 본문은 통과로 보일 수 있음.
+- **Good**: `perl -i -pe 's/\bfoo\b/bar/g'`. 검증식도 `rg '\bfoo\b'`. `rg` 는 `-g '*.ts' -g '*.tsx'` 사용 (`--include` 미지원).
+- **Self-check**: rename plan 에서 sed `\b` → perl 교체? 검증식 일관성?
 
-**Self-check**: load-bearing 불변식 도입 시 4면 가드 모두 phase 작업 목록에 명시?
-
-## 1-8. 마지막 phase 에 index.json `completed` 마킹 지시 누락
-
-**증상**: 마지막 phase 본문에 "index.json status + 모든 phase status 를 `completed` 로 + 단일 commit 포함" 지시 없음.
-**왜**: executor 는 scope 가드로 자체 추가 안 함 (올바른 행동) → team-lead 가 PR 직전 amend / 별도 commit. main 직접 수정 유혹 발생.
-
-```bash
-sed -i '' 's/"status": "pending"/"status": "completed"/g' tasks/{plan}/index.json
-grep -c '"status": "completed"' tasks/{plan}/index.json   # = (1 + total_phases)
-grep -lE "index\.json.*completed" tasks/{plan}/phase-*.md   # 마지막 phase 파일 매칭
-```
-
-**Self-check**: 마지막 phase 에 마킹 지시 + 단일 commit 포함 명시?
-
-## 1-9. macOS BSD `sed` `\b` 미지원
-
-**증상**: rename plan 에 `sed -i '' 's|foo\b|bar|g'`. macOS BSD `sed` 는 `\b` 미지원 → 0 매치.
-검증: `echo "x.contentReview.y" | sed 's|contentReview\b|X|g'` → 변경 없음.
-**왜**: 핵심 치환 누락, 빌드 / 타입 검증 실패하지만 phase 본문은 통과로 보일 수 있음.
-
-**대체**: `perl -i -pe 's/\bfoo\b/bar/g'`. 검증식도 `rg '\bfoo\b'`. `rg` 는 `-g '*.ts' -g '*.tsx'` 사용 (`--include` 미지원).
-
-**Self-check**: rename plan 에서 sed `\b` → perl 교체? 검증식 일관성?
-
-## § 1 소진 체크리스트
+## plan 작성 소진 체크리스트
 
 plan 제출 전 9개 패턴 모두 self-check:
 
-- [ ] **1-1**: 모든 수치가 실측 명령 결과
-- [ ] **1-2**: 파일 목록이 `--name-only` 결과와 일치
-- [ ] **1-3**: 최근 10개 커밋과 이 plan 의 관계 서술
-- [ ] **1-4**: 모든 Bash 블록에 `# cwd:` 주석
-- [ ] **1-5**: 성공 기준에 인간 의존 문구 없음
-- [ ] **1-6**: 외부 상태 변경 단계에 gate + rollback
-- [ ] **1-7**: load-bearing 불변식 도입 시 4면 가드
-- [ ] **1-8**: 마지막 phase 에 index.json `completed` 마킹 지시
-- [ ] **1-9**: rename 시 `sed \b` 대신 `perl`
+- [ ] **PLAN-1**: 모든 수치가 실측 명령 결과
+- [ ] **PLAN-2**: 파일 목록이 `--name-only` 결과와 일치
+- [ ] **PLAN-3**: 최근 10개 커밋과 이 plan 의 관계 서술
+- [ ] **PLAN-4**: 모든 Bash 블록에 `# cwd:` 주석
+- [ ] **PLAN-5**: 성공 기준에 인간 의존 문구 없음
+- [ ] **PLAN-6**: 외부 상태 변경 단계에 점검 + rollback
+- [ ] **PLAN-7**: load-bearing 불변식 도입 시 4면 가드
+- [ ] **PLAN-8**: 마지막 phase 에 index.json `completed` 마킹 지시
+- [ ] **PLAN-9**: rename 시 `sed \b` 대신 `perl`
 
 ---
 
-# § 2. team 운영
+## team 운영
 
-`build-with-teams` 가 팀원 스폰 / 메시지 / 브랜치 작업 시 self-check. 사고가 자주 발생하는 영역.
+`build-with-teams` 가 팀원 스폰 / 메시지 / 브랜치 작업 시 self-check.
+사고가 자주 발생하는 영역.
 
-## 2-1. 팀원 SendMessage 회신 누락
+### TEAM-1 · trigger: team-ops · auto-gate: —
 
-**증상**: sub-agent 가 평가 결론을 자기 화면에만 출력하고 종료. team-lead inbox 미도달.
-**왜**: idle 알림만 도착 → team-lead 평가 미수신 상태로 다음 단계 진행 불가.
+팀원 SendMessage 회신 누락
 
-스폰 프롬프트 + 작업 지시 메시지 양쪽에:
-```
-회신은 반드시 SendMessage 로 team-lead 에 송신.
-화면 텍스트만 출력하고 종료 시 라우팅 안 됨.
-```
+- **증상**: sub-agent 가 평가 결론을 자기 화면에만 출력하고 종료. team-lead inbox 미도달.
+- **Why**: idle 알림만 도착 → team-lead 평가 미수신 상태로 다음 단계 진행 불가.
+- **Good**: 스폰 프롬프트 + 작업 지시 메시지 양쪽에 명시:
+  ```
+  회신은 반드시 SendMessage 로 team-lead 에 송신.
+  화면 텍스트만 출력하고 종료 시 라우팅 안 됨.
+  ```
+- **검출**: team-lead 가 idle 알림 2회 연속 + 평가 메시지 0 → 즉시 강제 재요청.
 
-team-lead 가 idle 알림 2회 연속 + 평가 메시지 0 → 즉시 강제 재요청.
+### TEAM-2 · trigger: team-ops · auto-gate: —
 
-## 2-2. 팀원 자발적 실행
+팀원 자발적 실행
 
-**증상**: idle 대기 지시 무시하고 team-lead 의 SendMessage 전에 자발 실행 / 검증 시작.
-**왜**: critic 점검 시점 정합성 망가짐.
+- **증상**: idle 대기 지시 무시하고 team-lead 의 SendMessage 전에 자발 실행 / 검증 시작.
+- **Why**: critic 점검 시점 정합성이 무너진다.
+- **Good**: 스폰 프롬프트에 명시:
+  ```
+  team-lead 의 명시적 "시작" 지시 전 절대 자발 실행 금지. idle 유지.
+  ```
+- **검출**: team-lead 는 critic 평가 중 worktree git status 점검으로 자발 실행 조기 감지.
 
-스폰 프롬프트에:
-```
-team-lead 의 명시적 "시작" 지시 전 절대 자발 실행 금지. idle 유지.
-```
+### TEAM-3 · trigger: team-ops · auto-gate: —
 
-team-lead 는 critic 평가 중 worktree git status 점검으로 자발 실행 조기 감지.
+self-shutdown 패턴 (fos-blog 관측)
 
-## 2-3. self-shutdown 패턴 (fos-blog 관측)
+- **증상**: `oh-my-claudecode:code-reviewer` / `architect` (docs-verifier) 가 `run_in_background: true` 로 스폰해도 idle 직후 자체 shutdown.
+- **Why**: critic 만 idle 유지 성공. reviewer / verifier 는 shutdown.
+- **Good**: 검사 결과 준비 시점에 즉시 새로 spawn (idle 대기 의존 금지). 죽었다는 시스템 알림 받으면 침묵 말고 새로 스폰 + 즉시 검사 지시 묶음.
 
-**증상**: `oh-my-claudecode:code-reviewer` / `architect` (docs-verifier) 가 `run_in_background: true` 로 스폰해도 idle 직후 자체 shutdown.
-**왜**: critic 만 idle 유지 성공. reviewer / verifier 는 shutdown.
+### TEAM-4 · trigger: team-ops · auto-gate: —
 
-**우회**: 검사 결과 준비 시점에 즉시 새로 spawn (idle 대기 의존 금지). 죽었다는 시스템 알림 받으면 침묵 말고 새로 스폰 + 즉시 검사 지시 묶음.
+executor cwd 격리 (main repo 오염 방지)
 
-## 2-4. executor cwd 격리 (main repo 오염 방지)
+- **증상**: worktree 절대경로 명시했는데 executor 가 main repo 에서 `cd /main-repo` 로 작업.
+- **Why**: main 오염 → origin 다이버전스 / 다른 plan 미푸시 작업과 충돌.
+- **Good**: executor 프롬프트에 명시:
+  ```
+  모든 cd / git / 파일 편집은 worktree 절대경로 기준만. main repo 직접 cd 금지.
+  의심 시 `pwd` 확인.
+  ```
+- **검출**: team-lead 는 executor 작업 중 `git -C {main-repo} status` 주기 점검. dirty 시 즉시 중단.
 
-**증상**: worktree 절대경로 명시했는데 executor 가 main repo 에서 `cd /main-repo` 로 작업.
-**왜**: main 오염 → origin 다이버전스 / 다른 plan 미푸시 작업과 충돌.
+### TEAM-5 · trigger: team-ops · auto-gate: —
 
-executor 프롬프트에:
-```
-모든 cd / git / 파일 편집은 worktree 절대경로 기준만. main repo 직접 cd 금지.
-의심 시 `pwd` 확인.
-```
+executor scope 확장 자체 판단
 
-team-lead 는 executor 작업 중 `git -C {main-repo} status` 주기 점검. dirty 시 즉시 중단.
+- **증상**: phase 도중 task 범위 외 (pre-existing 에러 / 발견한 bug / ADR 위반 자체 변경) 를 자체 추가. 또는 `eslint-disable` / `@ts-ignore` 자체 추가.
+- **Why**: critic 점검 우회 → 사후 평가 사이클 추가 + task 본문 / 성공 기준 어긋남.
+- **Good**: executor 프롬프트에 명시:
+  ```
+  task 범위 외 수정은 자체 판단 금지.
+  eslint-disable / @ts-ignore / @ts-nocheck / @ts-expect-error 자체 추가 = 정책 변경 → 보고 필수.
+  SendMessage 로 team-lead 에 보고: "X 발견, Y 수정 필요. 본 phase 포함 / 별도 plan 결정 부탁".
+  ```
+- **검출**: team-lead 흐름 — 보고 → critic 사후 평가 → ACCEPT (scope 확장 commit 명시) 또는 REJECT (별도 plan).
 
-## 2-5. executor scope 확장 자체 판단
+### TEAM-6 · trigger: team-ops · auto-gate: —
 
-**증상**: phase 도중 task 범위 외 (pre-existing 에러 / 발견한 bug / ADR 위반 자체 변경) 를 자체 추가. 또는 `eslint-disable` / `@ts-ignore` 자체 추가.
-**왜**: critic 점검 우회 → 사후 평가 사이클 추가 + task 본문 / 성공 기준 어긋남.
+critic v2 재평가 시 신 파일 미재읽기
 
-executor 프롬프트에:
-```
-task 범위 외 수정은 자체 판단 금지.
-eslint-disable / @ts-ignore / @ts-nocheck / @ts-expect-error 자체 추가 = 정책 변경 → 보고 필수.
-SendMessage 로 team-lead 에 보고: "X 발견, Y 수정 필요. 본 phase 포함 / 별도 plan 결정 부탁".
-```
+- **증상**: REVISE 후 v2 commit hash 받고도 v1 평가 그대로 반복 송신.
+- **Why**: critic 이 이전 평가 컨텍스트만 가지고 회신 → 신 파일 Read 누락.
+- **Good**: team-lead 재평가 메시지에 3가지 필수 포함:
+  1. `Read tool 로 다음 파일을 다시 읽고 재평가해 줘` 명시 + 변경 파일 절대경로
+  2. 4-5개 확인 포인트 체크리스트
+  3. "직전 메시지가 첫 평가 사본일 수 있음 — 실제 파일 상태 기준으로 판정"
+- **검출**: 회신이 v1 동일하면 즉시 강제 재읽기.
 
-team-lead 흐름: 보고 → critic 사후 평가 → ACCEPT (scope 확장 commit 명시) 또는 REJECT (별도 plan).
+### TEAM-7 · trigger: team-ops · auto-gate: —
 
-## 2-6. critic v2 재평가 시 신 파일 미재읽기
+code-reviewer 에 plan 비자명 설계 결정 미전달
 
-**증상**: REVISE 후 v2 commit hash 받고도 v1 평가 그대로 반복 송신.
-**왜**: critic 이 이전 평가 컨텍스트만 가지고 회신 → 신 파일 Read 누락.
+- **증상**: code-reviewer 가 plan 컨텍스트 모르면 정상 helper 사용을 권장하다 설계 의도와 충돌 (false positive LOW 양산).
+- **Why**: team-lead 가 일일이 판정해야 하는 상황이 발생한다.
+- **Good**: team-lead 의 검사 시작 메시지에 plan 의 비자명 결정 (helper 우회 사유 / 의도된 raw pattern / 의도된 placeholder 등) 1-2 줄 첨부.
 
-team-lead 재평가 메시지에 **3가지 필수 포함**:
-1. `Read tool 로 다음 파일을 다시 읽고 재평가해 줘` 명시 + 변경 파일 절대경로
-2. 4-5개 확인 포인트 체크리스트
-3. "직전 메시지가 첫 평가 사본일 수 있음 — 실제 파일 상태 기준으로 판정"
+### TEAM-8 · trigger: team-ops · auto-gate: —
 
-회신이 v1 동일하면 즉시 강제 재읽기.
+task 재분할 시 index.json 갱신 누락
 
-## 2-7. code-reviewer 에 plan 비자명 설계 결정 미전달
+- **증상**: critic REVISE 후 phase 파일 재작성 / 추가 / 제거 시 `index.json.total_phases` + `phases` 배열 미갱신.
+- **Why**: 파이프라인이 신 phase 인식 못 해 executor 가 구 phase 만 실행 → plan 핵심 누락.
+- **검출**:
+  ```bash
+  jq -r '.total_phases as $t | .phases | length as $p | "total=\($t), len=\($p)"' tasks/{plan}/index.json
+  ls tasks/{plan}/phase-*.md | wc -l   # 위 두 값과 일치
+  ```
+- **Good**: phase 파일과 index.json 은 같은 commit 으로 갱신.
 
-**증상**: code-reviewer 가 plan 컨텍스트 모르면 정상 helper 사용을 권장하다 설계 의도와 충돌 (false positive LOW 양산).
-**왜**: team-lead 가 일일이 판정해야 함.
+### TEAM-9 · trigger: team-ops · auto-gate: —
 
-team-lead 의 검사 시작 메시지에 plan 의 비자명 결정 (helper 우회 사유 / 의도된 raw pattern / 의도된 placeholder 등) 1-2 줄 첨부.
+cwd 추적 + 양쪽 git status 검증
 
-## 2-8. task 재분할 시 index.json 갱신 누락
+- **증상**: team-lead 가 task 재작성 / commit 시 cwd 가 main repo 인지 worktree 인지 헷갈림. 동일 상대경로가 다른 파일 가리킴.
+- **Why**: main repo 의 task 파일 의도치 않게 수정 / 삭제. system-reminder 알림이 어느 working tree 인지 명확히 표기 안 됨.
+- **Good**: commit 전 `pwd` + 양쪽 동시 점검:
+  ```bash
+  git -C /Users/nhn/personal/fos-accountbook status --short
+  git -C /Users/nhn/personal/fos-accountbook/.claude/worktrees/{plan} status --short
+  ```
 
-**증상**: critic REVISE 후 phase 파일 재작성 / 추가 / 제거 시 `index.json.total_phases` + `phases` 배열 미갱신.
-**왜**: 파이프라인이 신 phase 인식 못 해 executor 가 구 phase 만 실행 → plan 핵심 누락.
+### TEAM-10 · trigger: team-ops · auto-gate: —
 
-```bash
-jq -r '.total_phases as $t | .phases | length as $p | "total=\($t), len=\($p)"' tasks/{plan}/index.json
-ls tasks/{plan}/phase-*.md | wc -l   # 위 두 값과 일치
-```
+브랜치 확인 누락 commit 사고
 
-phase 파일과 index.json 은 같은 commit 으로 갱신.
+- **증상**: skill / docs 변경 commit 직전 `git branch --show-current` 안 함 → PR 작업 브랜치에 무관 commit 박힘.
+- **Why**: skill 외부 작업이라도 자동 mode 가 자동 switch 하는 듯. 같은 세션 두 번 발생.
+- **Good**: 모든 commit 직전 `git branch --show-current` 강제 확인. main 작업이면 main, PR 브랜치 작업이면 PR 브랜치 확인 후 commit.
 
-## 2-9. cwd 추적 + 양쪽 git status 검증
-
-**증상**: team-lead 가 task 재작성 / commit 시 cwd 가 main repo 인지 worktree 인지 헷갈림. 동일 상대경로가 다른 파일 가리킴.
-**왜**: main repo 의 task 파일 의도치 않게 수정 / 삭제. system-reminder 알림이 어느 working tree 인지 명확히 표기 안 됨.
-
-commit 전 `pwd` + 양쪽 동시 점검:
-```bash
-git -C /Users/.../fos-blog status --short
-git -C /Users/.../fos-blog/.claude/worktrees/{plan} status --short
-```
-
-## 2-10. 브랜치 확인 누락 commit 사고
-
-**증상**: skill / docs 변경 commit 직전 `git branch --show-current` 안 함 → PR 작업 브랜치에 무관 commit 박힘.
-**왜**: skill 외부 작업이라도 자동 mode 가 자동 switch 하는 듯. 같은 세션 두 번 발생.
-
-**규칙**: 모든 commit 직전 `git branch --show-current` 강제 확인. main 작업이면 main, PR 브랜치 작업이면 PR 브랜치 확인 후 commit.
-
-## § 2 소진 체크리스트
+## team 운영 소진 체크리스트
 
 스폰 / 메시지 / 검증 / commit 단계마다 해당 패턴 self-check.
 
 ---
 
-# § 3. PR review 학습 (코드 패턴 함정)
+## 코드 패턴 함정
 
-`review-fix` 가 PR 리뷰 댓글 처리 후 재발 가능 패턴을 누적하는 자리. 같은 지적이 다음 PR 에서 반복되지 않도록.
+`review-fix` 가 PR 리뷰 댓글 처리 후 재발 가능 패턴을 누적하는 자리.
+같은 지적이 다음 PR 에서 반복되지 않도록 도메인 코드 작성 시에도 참조한다.
 
-## 3-1. Drizzle `count(*)` 의 `sql<T>` 타입 부정확 (PR #81)
+### CODE-1 · trigger: color-token · auto-gate: —
 
-**증상**: `sql<number>\`count(*)\`` 선언. MySQL `COUNT(*)` 는 BigInt-safe 위해 string 반환 → 런타임 ↔ TypeScript 타입 불일치.
-**Good**: `sql<string>\`count(*)\`` + 호출처 `Number(result[0]?.count ?? 0)`. 또는 Drizzle `count()` helper.
-**검출**: `grep -nE "sql<number>\`count" src/infra/db/`
+CSS custom property 키는 as CSSProperties 단언 필요 (PR #81)
 
-## 3-2. SVG `<stop>` 의 `stopColor="var(--...)"` 미해결 (plan013)
+- **증상**: `style={{ "--my-var": value }}` 가 `Properties<>` 인덱스에 없는 키라 type-check 실패 (TS2353).
+- **Good**: `as CSSProperties` 단언은 그대로 유지. 단 값 부분에 number 직접 넣지 말고 `String(num)` 명시 변환으로 의도 명확화.
+- **Why**: claude bot 이 "단언 제거" 권장하기 쉽지만 custom property 키 자체가 단언 원인이라 제거 불가. 값 변환만이 의미 있다.
 
-**증상**: SVG presentation attribute 는 CSS context 가 아니라 var() 해석 안 됨 → stop 이 default 색 (검정 / 투명) 으로 떨어짐 → mesh 시각적으로 사라짐.
-**Good**: `<stop style={{ stopColor: "var(--mesh-stop-XX)", stopOpacity: 0.4 }} />` inline style (CSS property context). 또는 globals.css 에 `.mesh-layer-N stop:first-child { stop-color: var(--token) }`.
-**검출**: `! grep -nE 'stopColor="var\(' src/components/*.tsx`
+### CODE-2 · trigger: color-token · auto-gate: —
 
-## 3-3. CSS custom property 키는 `as CSSProperties` 단언 필요 (PR #81)
+inline style vs Tailwind arbitrary class (PR #81)
 
-**증상**: `style={{ "--my-var": value }}` 가 `Properties<>` 인덱스에 없는 키라 type-check 실패 (TS2353).
-**Good**: `as CSSProperties` 단언은 그대로 유지. 단 값 부분에 number 직접 넣지 말고 `String(num)` 명시 변환으로 의도 명확화.
-**Why**: claude bot 이 "단언 제거" 권장하기 쉽지만 custom property 키 자체가 단언 원인이라 제거 불가. 값 변환만이 의미 있음.
+- **증상**: 토큰 var() 적용에 `style={{ color: "var(--token)" }}` 사용.
+- **Good**: 단일 색상 / 크기 / 길이 토큰은 `className="text-[var(--token)]"` arbitrary class (프로젝트 관례). 다중 CSS property 또는 동적 계산 필요할 때만 inline style.
+- **예외**: SVG presentation attribute var() 미해결 우회 같은 경우 inline style 정당.
 
-## 3-4. inline `style={{ color: ... }}` vs Tailwind arbitrary class (PR #81)
+### CODE-3 · trigger: markdown-write · auto-gate: md-lint
 
-**증상**: 토큰 var() 적용에 `style={{ color: "var(--token)" }}` 사용.
-**Good**: 단일 색상 / 크기 / 길이 토큰은 `className="text-[var(--token)]"` arbitrary class (프로젝트 관례). 다중 CSS property 또는 동적 계산 필요할 때만 inline style.
-**예외**: SVG presentation attribute var() 미해결 우회 (3-2) 같은 경우 inline style 정당.
+JSDoc/TSDoc 코멘트에 Tailwind 클래스 패턴 금지 (PR #94 관측)
 
-## 3-5. 라이트 모드 selector — mockup 잔재 금지 (plan013)
+- **증상**: Tailwind v4 의 content scanner 가 `.ts`/`.tsx` 코멘트뿐 아니라 `tasks/`·`docs/`·`.claude/skills/` 의 `.md` 파일까지 클래스 후보로 추출. arbitrary value 안에 와일드카드나 중괄호가 포함된 패턴이 layer utilities 에 invalid CSS 를 생성 → `Unexpected token` parse error → 모든 페이지 500.
+- **Good**: 클래스 패턴을 prose 로 표현 (예: "color-cat 토큰 (canonical key 별)"). 코드 예시가 필요하면 `text-[var(--color-cat-KEY)] 형태` 처럼 placeholder(KEY) 로 쓴다.
+- **검출**: 닫힌 `[...]` arbitrary 값 안에 와일드카드나 중괄호가 든 경우 위험 — `pnpm lint:md`(`scripts/check-tailwind-md.mjs`)가 CI 에서 자동 차단 (ADR-F29).
+- **Why**: 한 번 발생하면 dev 서버가 통째로 다운된다. `@source not` 안전망은 Turbopack(Next 16 dev)에서 미작동이라(2026-06 실측) 쓰지 않고, 패턴을 안전 표기로 바꾸는 lint 게이트가 유일한 확실한 차단이다.
 
-**증상**: mockup (Claude Design 등) 의 가상 클래스 (`.ab.light`) 가 코드에 그대로 들어감 → 룰 미적용.
-**Good**: 프로젝트 룰 — ThemeToggle 이 `.dark` class 를 토글 → 라이트 모드 selector 는 `:root:not(.dark)` 만 유효.
-**검출**: `! grep -nE '\.ab\.light\b' src/app/globals.css`
+### CODE-4 · trigger: app-router · auto-gate: —
 
-## 3-6. silent 테스트 회귀 (plan007-2)
+App Router 경계 위반
 
-**증상**: 우회 정책 (rate-limit bypass) 확장 시, 기존 테스트가 사용하던 IP / UA 가 새 우회 대상으로 흡수되어 테스트는 통과하지만 검증 의미가 사라짐.
-**Good**: 우회 도입 plan 은 항상 기존 테스트 입력값 점검. 예: rate-limit bypass 에 RFC1918 추가 시 sweep test IP 를 `10.x.x.x` → `100.64.x.x` (CGN 대역) 변경.
-**검출**: 테스트 입력값 grep 으로 우회 대상 포함 여부 확인.
+- **증상**: `actions/` 가 `lib/server/api` 거치지 않고 `fetch` 직접 호출. `services/` 가 `revalidatePath` / `requireAuth` 호출.
+- **Good**: 레이어 규칙 준수 — `actions/` → `services/` → `lib/server/api`.
+- **검출**: `grep -nE 'fetch\(' src/actions/` — lib/server/api 경유 없이 직접 fetch 있으면 의심.
+- **Why**: 레이어 경계 위반이 누적되면 인증 / 검증 우회 가능성이 생긴다.
 
-## 3-7. `passNode: true` 누락 — hast-util-to-jsx-runtime default false (PR #83)
+### CODE-5 · trigger: app-router · auto-gate: —
 
-**증상**: `toJsxRuntime(tree, { Fragment, jsx, jsxs, components })` 만 쓰고 `passNode` 미명시. default 가 false 라서 components 핸들러의 `node` prop 이 모두 undefined → `node?.properties?.[...]` / `node?.tagName` 검사 코드 모두 무력화 → 코드블록 frame / mermaid 분기 / data-attribute 검사 silent 깨짐.
-**Good**: `toJsxRuntime(tree, { ..., passNode: true, components })`.
-**검출**: `grep -nE 'toJsxRuntime\(' src/ | xargs -I{} grep -L "passNode" {}` 가 비어 있어야 함. unified hast 트리 → React 변환 시 컴포넌트가 hast `node` 검사하면 무조건 명시.
+Shadcn 우회
 
-## 3-8. server-only 가드 + vitest node 환경 충돌 (PR #83)
+- **증상**: native `<button>` / `<select>` / `<dialog>` 직접 사용. 인라인 overlay 모달이 `Dialog` / `AlertDialog` 대신 `<div>`.
+- **Good**: `src/components/ui/` 의 Shadcn 컴포넌트 우선 사용.
+- **검출**: `grep -nE '<button|<select|<dialog' src/components/` — Shadcn 대체 없이 native 태그 직접 쓰면 의심.
+- **Why**: Shadcn 접근성 / 키보드 내비게이션 / 테마 통합이 native 직접 사용 시 무력화된다.
 
-**증상**: `import "server-only"` 가드 모듈을 vitest 의 node 환경 (`environment: "node"`) 에서 직접 import 하면 throw. Next.js RSC 의 react-server condition 미적용 환경이라 server-only 패키지가 client import 로 오인 → 모든 테스트 즉시 실패.
-**Good**: 테스트 파일 상단에 `vi.mock("server-only", () => ({}))` 1줄 추가. 가드는 production 빌드에서만 의미 있고 vitest 는 우회.
-**검출**: `grep -l 'import "server-only"' src/` 결과 모듈을 import 하는 test 파일이 `vi.mock("server-only"` 도 포함하는지 cross-check.
+### CODE-6 · trigger: app-router · auto-gate: —
 
-## 3-9. non-null assertion (`!`) 대신 타입 가드 (PR #83)
+revalidatePath 누락
 
-**증상**: `if (isRelativeMd && basePath)` 안에서 `resolveMarkdownLink(href!, basePath)` 처럼 `!` 사용. `isRelativeMd` 가 true 면 href 가 non-null 임이 논리적 보장이지만 TS 가 추론 못 함. 안전성 우회 + lint 경고 가능.
-**Good**: 조건문에 `&& href` 추가해 3-way 타입 가드로 좁히기 — `if (isRelativeMd && basePath && href)` 후 `resolveMarkdownLink(href, basePath)`.
-**검출**: `grep -rn '![\\s]*,' src/components/markdown/` 등 비slash 위치의 `!` 점검.
+- **증상**: write Server Action 데이터 변경 후 `revalidatePath` 누락 → stale UI.
+- **Good**: 데이터를 변경하는 모든 Server Action 끝에 `revalidatePath` 호출.
+- **검출**: `grep -rn 'revalidatePath' src/actions/` — write action 수 대비 revalidatePath 호출 수 점검.
+- **Why**: Next.js App Router 캐시가 갱신되지 않아 사용자에게 이전 데이터가 노출된다.
 
-## 3-10. derived counter 를 매 iter 재계산 (O(n²)) (PR #103)
+## 코드 패턴 누적 규칙
 
-**증상**: `toc.map((item, idx) => ... toc.slice(0, idx+1).filter(t => t.level === 2).length ...)` 처럼 누산값을 map iter 안에서 slice + filter 로 다시 계산. 항목 수가 적어 실측 영향은 미미해도 **자매 컴포넌트가 단순 증분 (`let h2Counter = 0; if (!isH3) h2Counter++`) 을 쓰면 일관성 깨짐**.
-**Good**: map 바깥에 누산 변수 선언 + iter 안에서 `++`. React 함수 컴포넌트 안의 `let` 누산은 매 렌더 새로 초기화되므로 안전.
-**검출**: `grep -rn 'slice(0, idx' src/components/` — pagination 외 위치에 등장 시 의심.
-
-## 3-11. client component catch 의 console.error 만 두면 UX 침묵 (PR #105)
-
-**증상**: fetch / mutation 의 catch 블록에서 `console.error("X failed:", error)` 만 호출하고 결과 영역은 비우거나 빈 결과로 fallback. 사용자는 "결과 없음" 으로 오해 (실제로는 네트워크/서버 에러).
-**Good**: `errorState: string | null` state 추가 → catch 에서 setError → UI 의 결과 영역에 빈 결과와 별개 분기로 표시. 새 요청 시작 시 reset (`setError(null)`). server-side 응답이 ok 가 아닐 때도 throw 하여 catch 로 라우팅 (`if (!response.ok) throw ...`).
-**검출**: `grep -rn 'console.error.*failed' src/components/` — client component 의 catch 안 console.error 호출이 사용자 피드백 state 없이 단독 사용되면 재발 가능.
-
-## 3-12. useRef array 가 source 변경 시 stale 잔존 (PR #105)
-
-**증상**: `const refs = useRef<(T | null)[]>([])` 로 N 개 항목의 DOM ref 를 모으는데, `items` 가 새 배열로 교체된 후 `refs.current` 가 이전 길이 그대로 남아 hover/scroll 등 후속 effect 가 stale element 를 가리킴.
-**Good**: items 변경 시 ref 배열을 trim 하는 effect 명시.
-```ts
-useEffect(() => {
-  refs.current = refs.current.slice(0, items.length);
-}, [items]);
-```
-**검출**: `grep -rn 'useRef<.*\[\]>' src/components/` 로 ref array 후보를 찾고, 같은 컴포넌트에서 items state 가 자주 교체되는데 위 trim effect 가 없으면 의심.
-
-## 3-13. npm dep 제거 전 globals.css / config 의 직접 참조 grep 누락 (PR #107)
-
-**증상**: package.json 에서 npm dep 가 "코드에서 직접 import 안 보임" 이라는 이유로 제거. 실제로는 `src/app/globals.css` 의 `@import "pkg/dist/.../style.css"`, `tailwind.config`, `tsconfig paths`, `next.config` 같은 비-TS 진입점이 그 dep 를 의존하던 케이스 → turbopack/webpack 빌드 단계에서 resolve 실패. 단위 테스트는 통과하지만 build 가 깨진다 (PR #107 의 pretendard 가 "OG 폰트 static asset" 으로 오해되어 제거된 사례).
-**Good**: dep 제거 전 아래 grep 모두 0건이어야 안전:
-```bash
-grep -rn "<pkg-name>" src/app/globals.css src/app/*.css tailwind.config.* next.config.* tsconfig.json postcss.config.* eslint.config.*
-grep -rn "from ['\"]<pkg-name>" src/ scripts/
-```
-**Why**: TS import 만 보면 CSS / config 의존을 놓친다. fos-blog 의 `pretendard` 처럼 "UI 폰트 CSS import + OG 폰트 자산" 처럼 한 dep 가 두 용도일 때 위험.
-
-## 3-14. hex 입력 string 을 parseInt 로 분해할 때 형식 검증 누락 (PR #107)
-
-**증상**: `parseInt(hex.slice(1, 3), 16)` 로 RGB 분해. 짧은 hex (`#abc`) / 빈 문자열 / 비-hex 문자열 입력 시 `parseInt` 가 NaN 반환 → `rgba(NaN, NaN, NaN, alpha)` 같은 무효 CSS 생성. satori / canvas / CSS 어디든 silent 실패.
-**Good**: `^#[0-9a-fA-F]{6}$` 패턴 검증 후 비매치 시 안전한 fallback rgba 반환.
-```ts
-const HEX_PATTERN = /^#[0-9a-fA-F]{6}$/;
-function hexWithAlpha(hex: string, alpha: number): string {
-  if (!HEX_PATTERN.test(hex)) return `rgba(63, 186, 201, ${alpha})`; // brand fallback
-  // ... parseInt 분해
-}
-```
-**검출**: `grep -rn 'parseInt.*16)' src/lib/` 로 hex 분해 후보 찾고, 함수 진입에 정규식 / length 가드 없으면 의심. 외부 입력 경로 (URL param / form / props) 가 닿는지 확인.
-
-## 3-15. react-hook-form + zod 의 create/edit 모드 schema 미분리 (PR #108)
-
-**증상**: 단일 zod schema 가 모든 필드 required 인데 edit 모드는 일부 필드만 입력 (예: `password` + `content` 만, `nickname` 은 read-only) → form 제출 시 누락 필드 validation 오류 발생.
-**Good**: `createSchema.pick({ ... })` 또는 `omit` 으로 mode 별 schema 분리 + props 를 discriminated union (`mode: "create" | "edit"`) 으로 강제. `useForm` resolver 가 mode 에 따라 분기.
-```ts
-const createSchema = z.object({ nickname, password, content });
-const editSchema = createSchema.pick({ password: true, content: true });
-const resolver = zodResolver(mode === "edit" ? editSchema : createSchema);
-```
-**검출**: `grep -rn 'zodResolver' src/components/` + 같은 컴포넌트가 `mode: "create" | "edit"` props 받으면서 schema 1개만 쓰면 의심.
-
-## 3-16. 서버 raw error 메시지를 클라이언트 toast 로 직접 노출 (PR #108)
-
-**증상**: `catch (error) { toast.error(error.message) }` 또는 `toast.error(data.message)` 로 서버 응답 메시지를 그대로 화면에 표시. SQL 구문 / 스택 / 내부 식별자 / DB 컬럼명 노출 위험.
-**Good**: 사용자 친화 일반 메시지만 toast, 상세는 콘솔 로그. 4xx 에서 의미 있는 코드는 화이트리스트 매핑.
-```ts
-const USER_FRIENDLY_ERRORS: Record<string, string> = {
-  PASSWORD_MISMATCH: "비밀번호가 일치하지 않습니다",
-};
-toast.error(USER_FRIENDLY_ERRORS[code] ?? "요청을 처리할 수 없습니다");
-```
-**검출**: `grep -rn 'toast.error.*\(error\|err\|data\)\.' src/components/` — error / data 의 message 필드를 toast 직접 전달이면 의심.
-
-## 3-17. Drizzle timestamp 컬럼이 API 응답 후 ISO string 직렬화 (PR #108)
-
-**증상**: 서버에서 Drizzle `comments.createdAt: timestamp` 가 `Date` 객체로 보이지만, `Response.json()` / `JSON.stringify` 직렬화 후 클라이언트는 ISO string 으로 받음. client 측 `(date: Date)` 시그니처 헬퍼에 넘기면 `date.getTime is not a function` 또는 런타임 NaN.
-**Good**: 클라이언트 시간 헬퍼는 `Date | string` 양쪽 수용 + invalid 가드.
-```ts
-function formatRelativeTime(dateOrIso: Date | string): string {
-  const date = typeof dateOrIso === "string" ? new Date(dateOrIso) : dateOrIso;
-  if (Number.isNaN(date.getTime())) return "";
-  // ...
-}
-```
-**검출**: `grep -rn 'createdAt\|updatedAt' src/components/` 후 Date 메서드 (`getTime()` / `toLocaleDateString()`) 직접 호출이 있으면 ISO string 케이스 처리 여부 확인.
-
-## § 3 누적 규칙
-
-- `review-fix` 6.5단계에서 추출. 같은 PR 에서 ✅ 누적 / ❌ 누적 금지 분류 후 § 3 추가
+- `review-fix` 6.5단계에서 추출. 같은 PR 에서 ✅ 누적 / ❌ 누락 금지 분류 후 코드 패턴 섹션에 추가
 - ✅ 재현 가능 패턴 — 같은 실수가 다른 코드에서도 발생 가능. 명령으로 검출 가능
 - ❌ 1회성 / 특정 plan 컨텍스트에서만 의미 / 칭찬 / 단순 확인 요청
 
 ---
 
-# § 4. 레포별 +α 패턴 (Stage 0 시드)
-
-레포 도메인 코드 작성 시 critic 이 추가로 검사하는 항목. 3 레포 (frontend-fos / backend-fos / dooray-cli / fos-blog) 동기화 시 공유.
-
-### frontend-fos (Next.js 16 / React 19)
-
-- **FE1. App Router 경계 위반**: `actions/` 가 `lib/server/api` 거치지 않고 `fetch` 직접 호출. `services/` 가 `revalidatePath` / `requireAuth` 호출.
-- **FE2. Shadcn 우회**: native `<button>` / `<select>` / `<dialog>` 직접 사용. 인라인 overlay 모달이 `Dialog` / `AlertDialog` 대신 `<div>`.
-- **FE3. revalidatePath 누락**: write Server Action 데이터 변경 후 누락 → stale UI.
-
-### backend-fos (Spring Boot 4 / Java 21 / Gradle)
-
-- **BE1. `@Transactional` 경계 누락**: write Service 가 여러 repository 호출 → 부분 커밋.
-- **BE2. Entity-DTO 노출**: Controller 가 `@Entity` 직접 응답. Response DTO + `static from(Entity)` 강제.
-- **BE3. AOP 자기호출 우회**: 같은 클래스 내 `@CacheEvict` / `@Transactional` 자기 호출 → 프록시 우회 무효.
-
-### dooray-cli (TypeScript / Commander.js / tsup)
-
-- **CLI1. exitCode 누락**: 에러 분기에 `process.exit(N)` / `throw new DoorayCliError` 누락 → 0 으로 종료.
-- **CLI2. ky 외 HTTP 클라이언트**: `axios` / `node-fetch` / `got` import → 번들 / 일관성.
-- **CLI3. 캐시 일관성**: `~/.dooray/cache/` write atomic + read schema 검증 (Zod).
-
-### fos-blog (Next.js 16 / Drizzle ORM / MySQL / pino)
-
-- **BLG1. Drizzle `db:push` 금지** (프로덕션). `pnpm db:generate` → SQL 커밋 → `pnpm db:migrate`. 로컬 한정 예외 + 커밋 전 revert.
-- **BLG2. pino 구조화 로그 컨텍스트 누락**. 최소 `{component, operation, ...domainContext, err}` 4-field.
-- **BLG3. GitHub sync silent 실패 금지**. Octokit 호출의 `try { ... } catch { return null }` 차단. 구조화 로그 + throw 또는 `SyncResult.failure`.
-- **BLG4. Markdown 렌더 XSS 회피**. `react-markdown` + `rehype-raw` 조합은 `rehype-sanitize` 동반 또는 source 자기 소유 명시 주석.
-- **BLG5. Next.js 16 proxy 규약** (NJS15 잔재 방지). `src/proxy.ts` = NJS16 정식 file convention. root `middleware.ts` 금지. `runtime` config 금지. `middleware-manifest.json` 비었다고 dead code 판단 금지.
-- **BLG6. `"use client"` 잘못 마킹 사고** (plan014 관측). `useState` / `useEffect` / `onClick` / `navigator` / `window` / `document` 사용 0건인데 `"use client"` 가 붙어 있으면 RSC server 첫 패스에서 client 컴포넌트 트리 평가가 일어나 sync 처리 (예: `react-markdown` 의 `runSync`) 가 server 에서 실행됨. shiki / mermaid 등 async 의존성이 있는 라이브러리와 결합하면 `runSync finished async` 같은 사고 발생. **검출**: `grep -l '"use client"' src/components/*.tsx | xargs -I{} sh -c 'grep -L "useState\|useEffect\|useRef\|onClick\|onChange\|navigator\\.\|document\\.\|window\\." {} && echo "{}: 잘못된 use client 의심"'`. **Good**: 인터랙션이 정말 없으면 `"use client"` 제거 (server component). 일부만 인터랙션이면 island 분리 (CodeCard / Mermaid 패턴).
-- **BLG7. task 파일 안의 테스트 코드 스니펫에 `as any` 금지** (PR #92 관측). phase-XX.md 의 ts 코드 블록은 executor 가 거의 그대로 복사 → 프로덕션 테스트 코드의 일부가 됨. `(tree as any)` / `(c: any)` / `as string[]` 같은 escape hatch 가 들어가면 type-check 가 unchecked 로 통과해 진짜 검증 의미 약화. **Good**: hast 트리는 `import type { Root, Element, ElementContent } from "hast"` + `function isElement(n: ElementContent): n is Element` type guard 패턴. union 가능 속성 (`Properties.className: string[] | string | number`) 은 `Array.isArray()` 가드. **Why**: planning doc 수준에서 깨끗한 코드 예시 = executor 의 1-shot 통과율 ↑.
-- **BLG8. prose-scoped 클래스 셀렉터는 `.prose` prefix 일관성 유지** (PR #93 관측). `.code-card-body` 처럼 마크다운 렌더러 안에서만 쓰이는 클래스의 자식 셀렉터를 `.prose` 없이 작성하면 미래에 다른 컨텍스트에서 사용 시 의도치 않은 스타일 누출. plan017 의 shiki dual theme 규칙이 이 패턴을 어겨 리뷰 지적. **Good**: `html.dark .prose .code-card-body pre span { ... }` — 기존 `.prose .code-card-body { padding: ... }` 규칙들과 일관. **검출**: `grep -nE '\.code-card-body' src/app/globals.css` 결과 중 `.prose` prefix 없는 셀렉터. **Why**: 일관된 스코프는 향후 컴포넌트 재사용 시 회귀 차단 + critic 이 globals.css 변경 평가 시 사전 점검할 패턴.
-- **BLG9. 코멘트·docs·tasks markdown 에 Tailwind arbitrary class 패턴 금지** (PR #94 최초, 2026-06 재발). Tailwind v4 content scanner 는 `.ts`/`.tsx` 코멘트 문자열뿐 아니라 `tasks/`·`docs/`·`.claude/skills/` 의 markdown 까지 클래스 후보로 추출한다. utility prefix (`text-[` / `bg-[` 등) 로 시작하는 arbitrary class 안에 와일드카드 `*` (예: `var(--color-cat-*)`) 나 중괄호 보간 `{ }` (예: `var(--color-cat-{key})`) 가 있으면 그대로 layer utilities 에 invalid CSS 가 생성돼 `Unexpected token Delim('*')` 또는 `CurlyBracketBlock` parse error → 모든 페이지 500. **검출**: 닫힌 `[...]` arbitrary 값 안에 `*` / `{` / `}` 가 든 utility 표기. **Good**: 패턴을 prose 로 풀거나, 예시가 필요하면 placeholder 를 유효 식별자로 쓴다 (`var(--color-cat-KEY)` 처럼 — `*`·`{`·`}` 대신 `KEY` 같은 영문자). 이 BLG9 항목 자체도 그래서 invalid 문자를 prefix 밖으로 분리해 표기한다. **주의 — `@source not` 안전망은 Turbopack 에서 미작동** (Next 16 dev, 2026-06 실측): `globals.css` 에 `@source not "../../tasks/**"` 를 넣어도 tasks/docs markdown 스캔이 계속됐다. 패턴 자체를 안전 표기로 바꾸는 것이 유일한 확실한 해결. **Why**: 한 번 발생하면 dev 통째로 다운. 게다가 현 `frontend-ci.yml` 은 `tsc + lint + test` 만 돌리고 `next build` 를 안 해서 이 깨짐이 CI 를 통과해 main 에 머지된다.
-- **BLG10. app/ 가 services/ 우회해 infra/ 직접 import 금지** (PR #114 관측). CLAUDE.md 의 layered architecture 규칙 ("app/ should not import directly from infra/ — go through services/"). 신규 코드에서 `import { getRepositories } from "@/infra/db/repositories"` 를 page.tsx 에 두면 review 지적. 기존 코드가 같은 패턴을 쓰더라도 신규는 더 나은 방향. **Good**: service 에 `createDefaultStatsService()` 같은 factory 추가 → page 가 services 만 의존. **검출**: `grep -nE 'from "@/infra/' src/app/**/*.tsx`. **Why**: layered 의존성 일관성. infra 변경 시 영향 범위 축소.
-- **BLG11. vitest mock 의 `as unknown as Repository` 캐스팅 금지** (PR #114 관측). full repository 인터페이스로 캐스팅하면 future 메서드 추가 시 mock 누락이 컴파일 단계에서 안 잡힘 — silent regression 위험. **Good**: service 측에서 사용 메서드만 가진 좁은 인터페이스 (예: `StatsPostRepository`) 분리하고 `interface ServiceRepos { post: StatsPostRepository }` 로 받음. test 의 `makeRepo()` 가 자연스레 인터페이스 만족, 캐스트 불필요. **Why**: structural typing 활용 + future-proof. PostRepository 에 메서드 추가 시 service / test 모두 영향 없음.
-- **BLG12. co-located CSS 페이지의 inline style 금지** (PR #114 관측). `src/app/<page>/<page>.css` 가 이미 있는 페이지에서 `style={{ fontFamily: "var(...)", fontSize: 11, ... }}` inline style 을 쓰면 일관성 깨짐 + 같은 토큰 다른 표기. **Good**: CSS 파일에 `.<page>-<region> .<modifier>` 클래스 추가 후 `<span className="modifier">`. **검출**: `grep -nE 'style=\{\{' src/app/**/page.tsx` 결과 중 `<page>.css` 가 동일 디렉터리에 있는 파일. **Why**: 단일 소스 (디자인 토큰 + 레이아웃 모두 CSS 파일).
-- **BLG13. TS narrowing 후 `as` 단언 금지** (PR #118 관측). `if (frontMatter.description) { return frontMatter.description as string; }` 처럼 narrowing 으로 이미 `string` 추론된 자리에 `as string` 을 붙이면, 향후 타입 정의 변경 (`description?: string` → `string | { html: string }` 등) 시 실제 타입 에러를 단언이 가려 silent 회귀. **Good**: 단언 제거 → `frontMatter.description.replace(...)` 직접 호출. narrowing 이 안 되면 타입 가드 함수 분리. **검출**: `grep -nE '\) as (string\|number\|boolean)\b' src/**/*.ts` 결과 중 narrowing 직후 라인. **Why**: TS strict 의 가치는 변경 시 컴파일러가 실제 위험을 알려주는 것 — 단언은 그 신호를 차단.
-- **BLG15. Drizzle `.select()` 부분 필드 + 광범위 반환 타입 mismatch 금지** (PR #121 관측). `db.select({ title, path, slug, category, ... })` 처럼 일부 컬럼만 선택하면서 반환 타입을 `Promise<PostData[]>` 같은 전체 타입으로 명시하면, 호출자가 누락 필드 (예: `updatedAt`) 에 접근해도 컴파일러가 막지 않음 → 런타임 `undefined` silent 회귀. **Good**: 반환 타입을 `Pick<PostData, "title" | "path" | "slug" | ...>[]` 로 좁히거나 전용 alias (`RSSPostData`) 분리. service 레이어에서 `export type RSSPostData = Pick<PostData, ...>` 로 재사용. **검출**: `.select({ ... })` 와 함수 시그니처의 `Promise<XData[]>` 가 키 집합 불일치. 코드 리뷰 시 select 키 vs 반환 타입 키 매핑 점검. **Why**: Drizzle 의 type inference 는 select 객체에서 정확한 타입을 추론하지만, 명시적 반환 타입이 그 추론을 widening 으로 덮어씀. 이후 호출자가 `r.updatedAt` 처럼 누락 필드에 접근해도 strict 모드라도 통과.
-- **BLG16. phase verification 스크립트의 단순 indexOf false positive 금지** (PR #122 관측). `node -e "...indexOf('CategoryList')..."` 처럼 단순 문자열 검색으로 JSX 위치를 비교하면 import 라인 / 주석 / 다른 등장을 잡아 false positive 발생 (실제로 plan030 phase-01 의 검증 스크립트가 import 라인을 잡아 ORDER 가 거꾸로 판정됨). **Good**: JSX 태그 패턴 (`'<CategoryList categories'`) 또는 조건문 패턴 (`'popularPosts.length > 0 &&'`) 처럼 위치 고유한 substring 사용. 또는 grep 의 `-n` 으로 라인 번호를 받아 비교. **검출**: phase-XX.md 의 `node -e` 블록 중 `indexOf('<단어>')` 형태가 있고 해당 단어가 import/타입 선언 등에서도 등장 가능하면 위험. **Why**: planning 시점의 검증 스크립트는 그대로 executor 의 success criteria 가 되므로 false positive/negative 양쪽 모두 task 통과율을 흐림. 위치 고유 substring 으로 명시해야 한다.
-- **BLG17. connection string / 시크릿이 에러 메시지를 통해 로그에 노출되는 패턴 금지** (PR #124 관측). MySQL 드라이버 (`mysql2`) / Redis / Octokit 등 외부 클라이언트 라이브러리는 connection 실패 시 `error.message` 에 host/port/username/password 가 포함된 raw URL 일부를 그대로 넣는 경우가 많다. `console.log/error(error.message)` 또는 `logger.error({ err })` 로 출력하면 컨테이너 로그 / pino 구조화 로그에 비밀번호가 잔류 → 운영 로그 유출 위험. **Good**: 출력 직전에 마스킹 helper 적용 (`message.replace(/:([^@/]*)@/, ":***@")`). 필요 시 `lib/` 의 공용 `maskSecret()` 유틸로 분리. **검출**: `grep -rnE 'console\.(log|error)\([^)]*error.*message|err\.message' src/ scripts/` 결과 중 connection string 을 다루는 라이브러리 호출 (mysql.createConnection / redis.createClient / Octokit init / fetch with auth header 등) 의 catch 블록. **Why**: connection 실패는 정상 운영에서도 자주 발생 (네트워크 일시 불안정 / DB 재시작) 하므로 마스킹 누락은 실시간으로 노출이 누적된다. `restart=unless-stopped` 와 결합되면 더 빈번.
-- **BLG14. phase 문서 테스트 스니펫의 자기완결성** (PR #119 관측, BLG7 결마저). phase-XX.md 의 테스트 코드 블록은 executor 가 거의 그대로 복사 → 누락 / 빈 stub / 검증 부족이 그대로 프로덕션 테스트가 됨. **3가지 흔한 결함**: ① import 구문 누락 (`toHtml(tree)` 사용하면서 `import { toHtml } from "hast-util-to-html"` 빠짐 → `ReferenceError`), ② 빈 stub (`it("...", async () => { /* TODO */ })` 통과하지만 실제 검증 없음 — 보안/회귀 검증 무의미), ③ allowlist 정합성 부족 (sanitize/schema 변경 시 일부 속성만 검증, 다른 속성 누락 silent 회귀). **Good**: phase 의 모든 테스트 스니펫에 (a) 상단 import 블록 명시 (`vitest`, 외부 lib, project module 모두), (b) 모든 `it(...)` 에 최소 1개 `expect`, (c) schema/allowlist 가 등록한 속성마다 보존 케이스. **검출**: `grep -nE 'it\([^)]*async \(\) => \{ /\*' tasks/**/phase-*.md` (빈 stub 의심). **Why**: planning doc 의 코드 = executor 의 1-shot 통과율 + critic 의 사후 review 부담을 결정.
-
----
-
-이 파일은 3 레포 (fos-blog / webtoon-maker-v1 / 기타) 에서 동기화된다. 레포 고유 패턴은 § 4 +α 섹션에만 추가.
+fos-accountbook 전용. 다른 레포는 각자 common-pitfalls 유지.

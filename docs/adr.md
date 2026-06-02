@@ -30,6 +30,12 @@
 - [ADR-F21](#adr-f21) — Add/Edit Transaction 다이얼로그 단일화
 - [ADR-F22](#adr-f22) — 민감 정보를 다루는 컴포넌트는 Server Component 로 유지 + Client 핸들러는 children 슬롯
 - [ADR-F23](#adr-f23) — semantic foreground 토큰 (`--color-{semantic}-fg`) 으로 강조 배경 위 텍스트 색 명시
+- [ADR-F24](#adr-f24) — sonner richColors OFF + Teal 토큰 직접 매핑
+- [ADR-F25](#adr-f25) — Server Action 권한 검증 3-패턴 표준화
+- [ADR-F26](#adr-f26) — 백엔드 401 응답을 인증 만료로 분류해 로그인으로 일관 리다이렉트
+- [ADR-F27](#adr-f27) — Radix `DropdownMenuItem` 안에서 form submit 금지 — `onSelect` 직접 호출
+- [ADR-F28](#adr-f28) — brand 색 Teal(h=188) → Toss Blue(h=257) 변경
+- [ADR-F29](#adr-f29) — Tailwind v4 markdown 스캔 위험 패턴 차단 — md-lint 게이트 + 안전 표기
 
 ---
 
@@ -491,4 +497,23 @@
   hue 하드코딩이라 `globals.css` 전반의 188→257 일괄 치환이 필요했다.
   향후 brand 재변경 비용을 줄이려면 gradient 정의를 brand 토큰 참조로 리팩토링하는 별도 작업이 바람직하다.
 - **적용 범위**: `src/app/globals.css`. ADR-F13 의 OKLCH 체계는 불변 — 본 ADR 은 brand hue 값만 갱신.
+
+<a id="adr-f29"></a>
+
+## ADR-F29: Tailwind v4 markdown 스캔 위험 패턴 차단 — md-lint 게이트 + 안전 표기 (2026-06-02)
+
+- **결정**: `tasks/`·`docs/`·`.claude/skills/` markdown 의 위험 arbitrary class 패턴(닫힌 `[...]` 안 와일드카드·중괄호)을 `scripts/check-tailwind-md.mjs` 로 검출하고 CI(`pnpm lint:md`)에서 차단한다.
+  패턴 자체를 안전 표기(placeholder)로 쓰는 것을 작성 규율로 삼는다.
+- **맥락**: Tailwind v4 자동 content 탐지가 `tasks/`·`docs/`·`.claude/skills/` 의 `.md` 까지 스캔했다.
+  arbitrary value 안에 와일드카드·중괄호가 든 표기가 invalid CSS 로 파싱돼 dev 서버가 통째로 500 을 반환했다(2026-06-02 직접 발생 — 함정 코드 CODE-3).
+- **`@source not` 미채택 이유 (2026-06 실측)**: `globals.css` 에 `@source not "../../tasks/**"` 를 넣어도 Turbopack(Next 16 dev)에서 markdown 스캔이 계속됐다.
+  원천 차단이 안 되므로 1차 방어로 부적합 → `globals.css` 에 넣지 않는다.
+  유일하게 확실한 해결은 위험 패턴을 안전 표기로 바꾸는 것이며, lint 게이트가 이를 기계로 강제한다.
+- **`next build` 부적합 이유**: production build 는 invalid CSS 를 경고로 넘기고 통과(`Compiled successfully`)한다.
+  dev 에서만 500 이 발생하므로 CI 에 `next build` 를 추가해도 이 버그를 잡지 못한다.
+- **대안 기각**:
+  - `@source not` 1차 방어: Turbopack 미작동(위 실측)으로 무효.
+  - `next build` CI 게이트: 위 이유로 부적합.
+- **적용 범위**: `scripts/check-tailwind-md.mjs`, `package.json`, `.github/workflows/frontend-ci.yml`.
+  함정 코드: `common-pitfalls.md` CODE-3(`auto-gate: md-lint`).
 
