@@ -119,7 +119,7 @@ src/
 
 - **단일 소스**: `src/app/globals.css` 의 `@theme` 블록. OKLCH 평면 값 (ADR-F13).
 - **토큰 카테고리**:
-  - `--color-brand-{50..900}` — Teal h=188 스케일 (primary/hover/pressed 파생)
+  - `--color-brand-{50..900}` — Toss Blue h=257 스케일 (primary/hover/pressed 파생)
   - `--color-{income|expense|warning}` — semantic 의미색
   - `--color-neutral-{0..950}` — cool gray h=230
   - `--color-{bg|bg-elev|bg-muted|fg|fg-muted|fg-subtle|border|border-strong}` — surface 토큰 (light/dark 분리)
