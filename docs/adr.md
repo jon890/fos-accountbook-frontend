@@ -202,7 +202,7 @@
 
 ## ADR-F11: CI 코드 리뷰 워크플로 설계 (개정)
 
-**결정**: Claude Code Action 기반 자동 코드 리뷰 워크플로를 아래 방침으로 운영. fos-blog 정착 패턴과 동일화 (2026-05-09 개정).
+**결정**: Claude Code Action 기반 자동 코드 리뷰 워크플로를 아래 방침으로 운영. fos-blog 정착 패턴과 동일화 (2026-05-09 개정, 2026-06-02 단일 opus 리뷰어로 모델 전환).
 
 **핵심 결정 사항**:
 
@@ -214,12 +214,12 @@
 | 댓글 정리 | DELETE (REST) | minimize 누적 시 PR 스레드 시각 답답. 이력은 GitHub event log 로 충분 |
 | Dummy 댓글 자동 정리 | post-step bash 로 길이/regex/severity 마커 검사 후 삭제 | Claude action 이 자연어 sanity check 무시하고 placeholder 게시하는 사고 (fos-blog PR #114) 강제 차단 |
 | literal `\n` 자동 보정 | post-step bash 로 검출 후 perl 교체 + PATCH API | Claude action 이 HEREDOC 무시하고 `--body "...\n..."` 호출 시 literal 두 글자 박힘 (PR #208 사고). 보정 후 정상 줄바꿈 |
-| 모델 | orchestrator=sonnet, specialist=haiku | 토큰 비용 최적화. haiku로 충분한 단일 관점 분석 |
-| allowed_bots | `"*"` | 광범위 허용 — Dependabot/Claude 모두 차단되지 않음. 보안 검증은 specialist agent 가 담당 |
+| 모델 | 단일 opus 리뷰어 (`--model opus` 별칭) | haiku specialist 는 추론 능력이 떨어져 오탐(false positive) 많고 실제 버그 놓침. 리뷰 신뢰도 > 토큰 절약. `opus` 별칭은 버전업 무수정 추종 |
+| allowed_bots | `"*"` | 광범위 허용 — Dependabot/Claude 모두 차단되지 않음. 보안 검증은 리뷰어가 담당 |
 | diff 필터 | `pnpm-lock.yaml`, `*.lock`, `*.snap` 제외 | 노이즈 감소 |
 | Job timeout | 15분 | agent hang 시 불필요한 비용 방지 |
 | Check Run 수동 등록 | `issue_comment` 트리거 시 수동 생성 | issue_comment workflow run 이 PR Checks 탭에 자동 노출 안 됨 — 수동 Check Run 으로 진행 상태 가시화 |
-| 프롬프트 관리 | yml 인라인 유지 | 4개 agent 규모에서 파일 분리는 오버엔지니어링 |
+| 프롬프트 관리 | `.github/claude-review-prompt.txt` 외부 분리 + `envsubst` 로 `$PR_NUMBER`·`$REPO` 치환 | ~180줄 인라인 heredoc 가독성·diff 정밀도 확보. `.md` 아닌 `.txt` 로 IDE 포맷터의 glob·식별자 깨짐 회피 |
 | 소규모 PR 스킵 | 안 함 | 모든 PR 동일 리뷰 |
 
 **대안 기각**:
