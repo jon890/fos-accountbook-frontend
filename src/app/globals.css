@@ -3,18 +3,18 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
-  /* ── brand teal (h=188) ─────────────────────── */
-  --color-brand-tint: oklch(0.975 0.025 188); /* Hero fade 배경 (brand-50 보다 채도 약간 높음) */
-  --color-brand-50:  oklch(0.975 0.018 188);
-  --color-brand-100: oklch(0.945 0.040 188);
-  --color-brand-200: oklch(0.890 0.075 188);
-  --color-brand-300: oklch(0.810 0.105 188);
-  --color-brand-400: oklch(0.720 0.130 188);
-  --color-brand-500: oklch(0.640 0.140 188);
-  --color-brand-600: oklch(0.555 0.130 188);
-  --color-brand-700: oklch(0.470 0.110 188);
-  --color-brand-800: oklch(0.385 0.090 188);
-  --color-brand-900: oklch(0.300 0.070 188);
+  /* ── brand toss blue (h=257) ────────────────── */
+  --color-brand-tint: oklch(0.975 0.030 257); /* Hero fade 배경 (brand-50 보다 채도 약간 높음) */
+  --color-brand-50:  oklch(0.975 0.020 257);
+  --color-brand-100: oklch(0.945 0.048 257);
+  --color-brand-200: oklch(0.890 0.090 257);
+  --color-brand-300: oklch(0.810 0.135 257);
+  --color-brand-400: oklch(0.720 0.175 257);
+  --color-brand-500: oklch(0.640 0.190 257);
+  --color-brand-600: oklch(0.555 0.195 257);
+  --color-brand-700: oklch(0.470 0.165 257);
+  --color-brand-800: oklch(0.385 0.130 257);
+  --color-brand-900: oklch(0.300 0.095 257);
 
   /* ── semantic ───────────────────────────────── */
   --color-income:  oklch(0.610 0.150 152);
@@ -23,7 +23,7 @@
   --color-expense-fg: oklch(0.985 0.003 25);
   --color-income-fg:  oklch(0.985 0.003 152);
   --color-warning-fg: oklch(0.985 0.003 78);
-  --color-brand-fg:   oklch(0.985 0.003 188);
+  --color-brand-fg:   oklch(0.985 0.004 257);
 
   /* ── neutral (cool gray, h=230) ─────────────── */
   --color-neutral-0:   oklch(1 0 0);
@@ -59,10 +59,10 @@
   --shadow-default: 0 2px 8px -2px rgb(15 23 42 / 0.06), 0 1px 3px -1px rgb(15 23 42 / 0.04);
   --shadow-popover: 0 8px 24px -8px rgb(15 23 42 / 0.12), 0 2px 6px -2px rgb(15 23 42 / 0.06);
   --shadow-modal:   0 24px 48px -16px rgb(15 23 42 / 0.18), 0 8px 16px -8px rgb(15 23 42 / 0.10);
-  --shadow-brand-btn: 0 6px 18px -6px oklch(0.640 0.140 188 / 0.5);
-  --shadow-hero-cta:  0 10px 28px -10px oklch(0.640 0.140 188 / 0.55);
+  --shadow-brand-btn: 0 6px 18px -6px oklch(0.640 0.140 257 / 0.5);
+  --shadow-hero-cta:  0 10px 28px -10px oklch(0.640 0.140 257 / 0.55);
   --shadow-cta-white: 0 8px 24px oklch(0 0 0 / 0.18);
-  --shadow-fab:     0 6px 20px -4px oklch(0.640 0.140 188 / 0.45),
+  --shadow-fab:     0 6px 20px -4px oklch(0.640 0.140 257 / 0.45),
                     0 2px 6px -2px rgb(15 23 42 / 0.10);
 
   /* ── font (mono only — sans/num from next/font) ─ */
@@ -154,7 +154,7 @@
 
   --background:            oklch(0.155 0.010 230);
   --foreground:            oklch(0.965 0.005 230);
-  --primary:               oklch(0.720 0.130 188);
+  --primary:               oklch(0.720 0.130 257);
   --primary-foreground:    oklch(0.190 0.010 230);
   --secondary:             oklch(0.275 0.012 230);
   --secondary-foreground:  oklch(0.965 0.005 230);
@@ -170,7 +170,7 @@
   --popover-foreground:    oklch(0.965 0.005 230);
   --border:                oklch(0.275 0.012 230);
   --input:                 oklch(0.275 0.012 230);
-  --ring:                  oklch(0.720 0.130 188);
+  --ring:                  oklch(0.720 0.130 257);
 }
 
 @layer base {
@@ -200,13 +200,13 @@
     background: linear-gradient(
       160deg,
       oklch(0.985 0.003 230) 0%,
-      oklch(0.945 0.040 188 / 0.4) 55%,
-      oklch(0.945 0.040 188 / 0.2) 100%
+      oklch(0.945 0.040 257 / 0.4) 55%,
+      oklch(0.945 0.040 257 / 0.2) 100%
     );
   }
 
   .gradient-primary {
-    background-image: linear-gradient(135deg, oklch(0.720 0.130 188) 0%, oklch(0.555 0.130 188) 100%);
+    background-image: linear-gradient(135deg, oklch(0.720 0.130 257) 0%, oklch(0.555 0.130 257) 100%);
   }
 
   .gradient-expense {
@@ -222,7 +222,7 @@
   }
 
   .gradient-family {
-    background-image: linear-gradient(135deg, oklch(0.810 0.105 188) 0%, oklch(0.640 0.140 188) 100%);
+    background-image: linear-gradient(135deg, oklch(0.810 0.105 257) 0%, oklch(0.640 0.140 257) 100%);
   }
 
   .hero-fade {
@@ -230,7 +230,7 @@
   }
 
   .gradient-category {
-    background-image: linear-gradient(135deg, oklch(0.890 0.075 188) 0%, oklch(0.720 0.130 188) 100%);
+    background-image: linear-gradient(135deg, oklch(0.890 0.075 257) 0%, oklch(0.720 0.130 257) 100%);
   }
 
   .gradient-card-label {
