@@ -31,7 +31,7 @@ description: AI 에이전트 하네스를 사용한 대규모 구현 자동화. 
 - `docs/prd.md` — 제품 범위, MVP 기능 명세
 - `docs/data-schema.md` — DB 스키마, 테이블 관계, Json 구조 명세
 - `docs/flow.md` — 사용자 플로우, 화면 레이아웃
-- `docs/code-architecture.md` — 디렉터리 구조, 레이어 (app → services → infra), API 전략
+- `docs/code-architecture.md` — 디렉터리 구조, 레이어 (app → actions → services → lib/server/api), API 전략
 - `docs/adr.md` — 기술 결정 기록
 - `CLAUDE.md` — 코딩 규칙, 금지사항
 
@@ -145,7 +145,7 @@ python3 .claude/skills/plan-and-build/run-phases.py tasks/{task-name} --from-pha
 ### 6. 완료 후 처리
 
 1. `index.json` status 확인 → `completed` 이면 성공
-2. **`pnpm run ci` 실행하여 최종 통합 검증** — lint + test + build 전원 통과 필수 (`pnpm build && pnpm test`만 돌리지 말 것. lint 누락 방지)
+2. **`pnpm lint && pnpm tsc --noEmit && pnpm test:ci && pnpm build` 실행하여 최종 통합 검증** — lint + type-check + test + build 전원 통과 필수 (`pnpm build && pnpm test`만 돌리지 말 것. lint·type-check 누락 방지. CI 워크플로 `frontend-ci.yml` 과 동일한 순서)
 3. ci 실패 시 해당 phase로 회귀 (`--from-phase N`) — "tsc만 통과했으니 OK"로 넘기지 않는다
 4. 사용자에게 로컬 테스트 요청
 5. 사용자 확인 후 **git commit + push** 진행
@@ -180,19 +180,19 @@ tasks/
   task-create.md      # task/phase 작성 가이드 (planning 스킬 산출물 규격)
 ```
 
-## fos-blog 레이어별 phase 순서
+## fos-accountbook 레이어별 phase 순서
 
-CLAUDE.md "Architecture" 의 레이어 (`app → services → infra`, `lib` 는 횡단). 새 기능 추가 시 권장 phase 분리:
+CLAUDE.md "아키텍처 레이어 규칙" 의 레이어 (`app → actions → services → lib/server/api`). 새 기능 추가 시 권장 phase 분리:
 
 | Phase | 내용 | 비고 |
 | --- | --- | --- |
-| 1 | infra 레이어 (`src/infra/db/` 또는 `src/infra/github/`) | Drizzle schema / repository / Octokit 클라이언트 |
-| 2 | service 레이어 (`src/services/`) | 도메인 로직, idempotency, 트랜잭션 |
-| 3 | app 레이어 (`src/app/`) — page / API route | server action 또는 route handler |
-| 4 | UI 컴포넌트 (`src/components/`) | shadcn/ui + 디자인 토큰 사용 |
-| 5 | 빌드 + lint + type-check + test 통합 검증 | `pnpm lint && pnpm type-check && pnpm test --run && pnpm build` |
+| 1 | service 레이어 (`src/services/`) | API 호출, 쿼리 빌딩, 데이터 변환 (ADR-F04) |
+| 2 | action 레이어 (`src/actions/`) | `"use server"`, 인증, Zod 검증, revalidatePath (ADR-F04, ADR-F06) |
+| 3 | app 레이어 (`src/app/`) — page / server component | ADR-F12 — page 에서 `serverApiGet` 직접 호출 금지, action 경유 |
+| 4 | UI 컴포넌트 (`src/components/`) | shadcn/ui + 시맨틱 색 토큰 사용 (ADR-F07, ADR-F13) |
+| 5 | 빌드 + lint + type-check + test 통합 검증 | `pnpm lint && pnpm tsc --noEmit && pnpm test:ci && pnpm build` |
 
-DB 스키마 변경이 필요한 경우 별도 plan 으로 선행 — Drizzle 규칙 (`pnpm db:generate` → SQL 커밋 → `pnpm db:migrate`). `db:push` 프로덕션 금지 (CLAUDE.md 의 DB 스키마 변경 규칙 참조).
+DB 스키마는 이 저장소가 아닌 백엔드 레포(`jon890/fos-accountbook-backend`)에서 관리한다. 스키마 변경이 필요하면 GitHub Issue 로 백엔드 레포에 먼저 협의한다 (CLAUDE.md "팀 소통" 참조).
 
 ## Phase 모델 라우팅 (토큰 효율 최우선)
 
