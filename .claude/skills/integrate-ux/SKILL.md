@@ -158,10 +158,7 @@ main에 바로 `gh pr merge`하지 않는다. PR 브랜치에서 main을 rebase�
 
 ### 8. task 실행
 
-```bash
-# cwd: <repo root>
-python3 .claude/skills/plan-and-build/run-phases.py tasks/{task-name}
-```
+`/build-with-teams tasks/{task-name}` 로 실행한다.
 
 ### 9. PR 처리 (task 완료 후 필수)
 
@@ -223,7 +220,7 @@ function updateItem(idx, field, value) {
     ↓ 분석 결과 + 개선 항목 목록 도출
 /planning (DB 설계 → API 설계 → 아키텍처 결정 → docs 반영)
     ↓ 구현 계획 확정
-/plan-and-build 또는 /build-with-teams (task 생성 → 자동 실행)
+/build-with-teams (task 생성 → 자동 실행)
 ```
 
 **`/integrate-ux` 완료 시 출력**:

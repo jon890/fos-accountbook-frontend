@@ -88,5 +88,5 @@ gh pr list --state open --json number,headRefName,title --jq '.[] | "\(.headRefN
 - **커밋**: docs 변경 + task 파일을 **한 커밋**으로 묶는다. 메시지: `docs(plan{N}): {plan 한 줄 요약}`.
 - **push**: `git push -u origin plan/{N}-{slug}`. 이후 `git switch main` 으로 복귀.
 - **단일 PR 원칙**: 계획 PR 을 따로 만들면 이후 main 변경과 구현 브랜치가 충돌한다(실사례: plan026 이전 #308 계획 PR 선(先)머지 → #311 구현 PR conflict). PR 은 구현 완료 후 `plan/{N}`→main **1개만** 생성.
-- **핸드오프**: `/plan-and-build plan{N}` (기본, 자동 하네스) 또는 `/build-with-teams plan{N}` (가시적 Agent Teams 협업) 로 구현 시작 안내 — 둘 다 같은 `plan/{N}` 브랜치에서 이어 붙는다.
+- **핸드오프**: `/build-with-teams plan{N}` 로 구현 시작 안내 — 같은 `plan/{N}` 브랜치에서 이어 붙는다.
 - **중복 실행 방지**: `plan/{N}` 브랜치의 `index.json.status` 가 `"completed"` 면 재실행 금지.
