@@ -20,7 +20,8 @@
 
 ### domain 태그 통제 어휘 (phase 작성 시 필수)
 
-phase 프런트매터 `**Domain**:` 태그와 `common-pitfalls.md` 의 작업종류→함정 인덱스가 참조하는 어휘. 아래 중 하나를 선택한다 (PLAN-/TEAM- 은 executor 주입 대상 아님, planner/team-lead 상시 점검):
+phase 프런트매터 `**Domain**:` 태그와 `common-pitfalls.md` 의 작업종류→함정 인덱스가 참조하는 어휘다.
+아래 표의 domain 키 중 하나를 선택한다.
 
 | domain 키 | 대상 작업 |
 |---|---|
@@ -84,7 +85,7 @@ phase 프런트매터 `**Domain**:` 태그와 `common-pitfalls.md` 의 작업종
 
 - **common-pitfalls 경로**: `.claude/skills/_shared/common-pitfalls.md` (fos-accountbook 전용으로 이미 분리됨 — plan026). 코어 `verify-task.sh` 5 패턴은 이 파일의 자동 검출형과 겹친다.
 - **작업종류→함정 인덱스**를 이 파일에서 먼저 확인 — 전체 통독 대신 해당 작업 종류 행만 참조.
-- `Server Action 작성` 행은 그레인이 CLAUDE.md ADR 참조로 위임되어 있다 — ADR-F25(권한 3-패턴)·ADR-F06(Zod 검증) 를 phase 작성 시 직접 확인.
+- `Server Action 작성` 행은 상세 규칙이 CLAUDE.md ADR 참조로 위임되어 있다 — ADR-F25(권한 3-패턴)·ADR-F06(Zod 검증) 를 phase 작성 시 직접 확인.
 - `markdown/task 문서 작성` 은 `scripts/check-tailwind-md.mjs` (CI `pnpm lint:md`) 로 자동 점검 — Tailwind arbitrary class 위험 패턴(대괄호 안 와일드카드·중괄호) 검출.
 
 ## plan / ADR 네이밍
@@ -104,6 +105,7 @@ gh pr list --state open --json number,headRefName,title --jq '.[] | "\(.headRefN
 - **main 직접 push 차단** — branch protection. `/planning` 은 `plan/{N}` 브랜치에 push 만 하고 **PR 은 생성하지 않는다**.
 - **커밋**: docs 변경 + task 파일을 **한 커밋**으로 묶는다. 메시지: `docs(plan{N}): {plan 한 줄 요약}`.
 - **push**: `git push -u origin plan/{N}-{slug}`. 이후 `git switch main` 으로 복귀.
-- **단일 PR 원칙**: 계획 PR 을 따로 만들면 이후 main 변경과 구현 브랜치가 충돌한다(실사례: plan026 이전 #308 계획 PR 선(先)머지 → #311 구현 PR conflict). PR 은 구현 완료 후 `plan/{N}`→main **1개만** 생성.
+- **단일 PR 원칙**: 계획 PR 을 따로 만들면 이후 main 변경과 구현 브랜치가 충돌한다. PR 은 구현 완료 후 `plan/{N}`→main **1개만** 생성.
+    - 실사례: plan026 이전에 #308 계획 PR 을 먼저 머지했더니 #311 구현 PR 이 충돌했다.
 - **핸드오프**: `/build-with-teams plan{N}` 로 구현 시작 안내 — 같은 `plan/{N}` 브랜치에서 이어 붙는다.
 - **중복 실행 방지**: `plan/{N}` 브랜치의 `index.json.status` 가 `"completed"` 면 재실행 금지.
