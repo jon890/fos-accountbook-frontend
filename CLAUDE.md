@@ -15,6 +15,7 @@ Claude Code가 항상 따라야 할 규칙과 참조 문서 포인터.
 | 커밋 | `/commit-convention` | "커밋해줘" |
 
 `/planning` → docs 갱신 → task 생성 → `/build-with-teams` 실행 흐름이 표준.
+`/planning` 은 공용 코어(`~/.claude/skills/planning`) + `.claude/planning-overlay.md` 조합으로 동작한다.
 
 ---
 

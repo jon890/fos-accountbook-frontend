@@ -7,10 +7,16 @@
 
 가계부 서비스의 프론트엔드. 백엔드(`fos-accountbook-backend`, Spring Boot)와는 별도 레포·별도 PR 로 분리되어 있다.
 
-- **3단계 (호출/사용자 흐름)**: 시니어 UX 리서처 관점. 화면 전환·사용자 액션·시스템 반응을 구체화. 엣지 케이스(에러/빈 상태/권한 충돌)를 점검. 백엔드 API 가 아직 없으면 `docs/calendar-api.md` 처럼 요청 명세를 남기고 사용자와 일정을 논의한다.
+- **3단계 (호출/사용자 흐름)**: 시니어 UX 리서처 관점.
+    - 화면 전환·사용자 액션·시스템 반응을 구체화한다.
+    - 엣지 케이스(에러/빈 상태/권한 충돌)를 점검한다.
+    - 백엔드 API 가 아직 없으면 `docs/calendar-api.md` 처럼 요청 명세를 남기고 사용자와 일정을 논의한다.
 - **4단계 (인터페이스)**: 각 화면의 정보·기능 체크리스트, 컴포넌트 구조 초안(Server/Client 경계), 상태 관리 방식.
-- **5단계 (API/함수)**: Server Action 우선 (ADR-F04 — `actions/`와 `services/` 분리). 신규 백엔드 엔드포인트가 필요하면 5단계에서 계약(요청/응답 스키마)을 먼저 확정하고, 백엔드 팀 요청 문서(`docs/calendar-api.md` 패턴)로 남긴다.
-- **6단계**: `src/actions → src/services → src/lib/server` 레이어 일관성 확인. 권한 검증은 ADR-F25 의 3 패턴(Single-family / Multi-family / Entity ownership) 중 하나로 명시.
+- **5단계 (API/함수)**: Server Action 우선 (ADR-F04 — `actions/`와 `services/` 분리).
+    - 신규 백엔드 엔드포인트가 필요하면 5단계에서 계약(요청/응답 스키마)을 먼저 확정한다.
+    - 백엔드 팀 요청 문서(`docs/calendar-api.md` 패턴)로 남긴다.
+- **6단계**: `src/actions → src/services → src/lib/server` 레이어 일관성 확인.
+    - 권한 검증은 ADR-F25 의 3 패턴(Single-family / Multi-family / Entity ownership) 중 하나로 명시한다.
 
 ### domain 태그 통제 어휘 (phase 작성 시 필수)
 
@@ -39,7 +45,7 @@ phase 프런트매터 `**Domain**:` 태그와 `common-pitfalls.md` 의 작업종
 
 `docs/adr.md` 상단에 "백엔드 결정은 `fos-accountbook-backend/docs/adr.md` 참고"가 명시되어 있다 — 프론트 ADR 만 `ADR-F` 번호를 쓴다.
 
-### ADR 자명성 게이트 (작성 전 필수 자문)
+### ADR 자명성 점검 (작성 전 필수 자문)
 
 아래 3개에 **모두 NO** 여야 ADR 로 기록. 하나라도 YES 면 대안 채널(CLAUDE.md 규칙/코드 주석/커밋 메시지/다른 docs)로 내려보낸다.
 
@@ -47,7 +53,13 @@ phase 프런트매터 `**Domain**:` 태그와 `common-pitfalls.md` 의 작업종
 2. "왜 X 를 선택했다" 를 1~2 문장 이상으로 설명하기 어려운가?
 3. 다른 프로젝트에서도 일반적으로 하는 선택인가?
 
-**유지 적격**(3개 모두 NO): 라이브러리 고유 함정 / 실험 결과(수치) / 대안 기각 근거 / 정책·규칙 / 비용·성능 트레이드오프.
+**유지 적격**(3개 모두 NO):
+
+- 라이브러리 고유 함정
+- 실험 결과(수치)
+- 대안 기각 근거
+- 정책·규칙
+- 비용·성능 트레이드오프
 
 ### ADR 구조 템플릿 (실제 `docs/adr.md` 표기와 일치)
 
@@ -61,14 +73,19 @@ phase 프런트매터 `**Domain**:` 태그와 `common-pitfalls.md` 의 작업종
 - **적용 범위**: {파일 경로 — 코드 블록 나열 아닌 경로만}
 ```
 
-**금지**: 코드 블록 10줄 이상(1~3줄 식별자 예시만 허용) · 파일 경로 3개 이상 표 형태 나열 · "변경 항목 1/2/3/4" 작업 내역 · CLAUDE.md 스택 규칙 반복.
+**금지**:
+
+- 코드 블록 10줄 이상(1~3줄 식별자 예시만 허용)
+- 파일 경로 3개 이상 표 형태 나열
+- "변경 항목 1/2/3/4" 작업 내역
+- CLAUDE.md 스택 규칙 반복
 
 ## 검증
 
 - **common-pitfalls 경로**: `.claude/skills/_shared/common-pitfalls.md` (fos-accountbook 전용으로 이미 분리됨 — plan026). 코어 `verify-task.sh` 5 패턴은 이 파일의 자동 검출형과 겹친다.
 - **작업종류→함정 인덱스**를 이 파일에서 먼저 확인 — 전체 통독 대신 해당 작업 종류 행만 참조.
 - `Server Action 작성` 행은 그레인이 CLAUDE.md ADR 참조로 위임되어 있다 — ADR-F25(권한 3-패턴)·ADR-F06(Zod 검증) 를 phase 작성 시 직접 확인.
-- `markdown/task 문서 작성` 은 `scripts/check-tailwind-md.mjs` (CI `pnpm lint:md`) 로 자동 게이트 — Tailwind arbitrary class 위험 패턴(대괄호 안 와일드카드·중괄호) 검출.
+- `markdown/task 문서 작성` 은 `scripts/check-tailwind-md.mjs` (CI `pnpm lint:md`) 로 자동 점검 — Tailwind arbitrary class 위험 패턴(대괄호 안 와일드카드·중괄호) 검출.
 
 ## plan / ADR 네이밍
 
