@@ -4,7 +4,7 @@
 
 ## 통합 검증 명령
 
-`CLAUDE.md` 는 `pnpm lint && pnpm test` 까지만 명시한다. 코어 9단계가 요구하는 **전체** 통합 검증은 다음을 실행한다.
+`CLAUDE.md` 는 `pnpm lint && pnpm test` 까지만 명시한다. 코어의 통합 검증 단계가 요구하는 **전체** 통합 검증은 다음을 실행한다.
 
 ```bash
 # cwd: <worktree root>
@@ -61,4 +61,4 @@ pnpm lint && pnpm lint:md && pnpm test:ci && pnpm build
 - **단일 PR 원칙**: 계획+구현을 한 PR로 묶는다. `plan/{N}` → main PR은 `/build-with-teams`가 구현 완료 후 1개만 생성 (계획 단계 PR 별도 생성 금지 — plan026 계획 PR 선(先)머지가 구현 PR과 충돌한 사례).
 - **main 직접 push 차단** — branch protection. 완료 마킹도 반드시 `plan/{N}` 브랜치 안에서.
 - **PR 제목**: `type(scope): description` 형식 엄수.
-- **중복 실행 방지**: `index.json.status == "completed"`면 재실행 금지 (코어 사전 검증 1번과 동일 축).
+- **중복 실행 방지**: `index.json.status == "completed"`면 재실행 금지 (코어 사전 검증의 완료 상태 점검과 동일 축).

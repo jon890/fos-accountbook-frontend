@@ -13,7 +13,10 @@ ls docs/prd.md docs/adr.md docs/data-schema.md docs/flow.md \
    CLAUDE.md .claude/skills/*/SKILL.md .claude/skills/_shared/*.md
 ```
 
-- **ADR**: 단일 파일 `docs/adr.md` (디렉터리 아님). 상단에 `## ADR Index` 섹션이 링크 목록, 본문은 `## ADR-FNN: ...` 헤딩. `<a id="adr-fNN">` 앵커 없이 헤딩 자체가 앵커(GitHub 자동 slug) — 코어의 별도 앵커 검증은 미적용, Index ↔ 본문 번호 일치만 확인.
+- **ADR**: 단일 파일 `docs/adr.md` (디렉터리 아님).
+    - 구조: 상단 `## ADR Index` 섹션이 링크 목록, 본문은 `## ADR-FNN: ...` 헤딩.
+    - 앵커: `<a id>` 별도 없이 헤딩 자체가 앵커(GitHub 자동 slug).
+    - 코어 검증 범위: 별도 앵커 검증은 미적용, Index ↔ 본문 번호 일치만 확인.
 - 백엔드 ADR은 별도 레포(`fos-accountbook-backend/docs/adr.md`) 소관 — 이 레포 docs-check 범위 아님.
 
 ## ADR Index 동기화 검증 (코어 명령 대입)
