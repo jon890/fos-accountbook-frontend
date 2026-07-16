@@ -85,7 +85,7 @@ git switch main && git pull --ff-only origin main
 # 그 다음에만 common-pitfalls.md / SKILL.md 수정 + commit
 ```
 
-자동 차단: `.claude/hooks/branch-contamination-guard.sh` 가 `.claude/skills/_shared/` 또는 `.claude/skills/build-with-teams/SKILL.md` 또는 `docs/adr.md` 수정 후 git commit 을 시도할 때 현재 브랜치가 main 이 아니면 `exit 2`.
+자동 차단: `.claude/hooks/branch-contamination-guard.sh` 가 `.claude/skills/_shared/` 또는 `.claude/build-with-teams-overlay.md` 또는 `docs/adr.md` 수정 후 git commit 을 시도할 때 현재 브랜치가 main 이 아니면 `exit 2`.
 
 ## 실행 절차 (build-with-teams 위에 덧입히는 단계)
 

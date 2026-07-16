@@ -58,7 +58,7 @@ cat tasks/{plan_name}/index.json | jq                     # task 구조
 |---|---|---|
 | 라이브러리/DB/타입 함정 | `.claude/skills/_shared/common-pitfalls.md` "fos-blog" 섹션 | BLG# 라인 |
 | 일반 critic 시드 | 같은 파일 § 1 | P# 4-section |
-| build-with-teams 프로세스 결함 | `.claude/skills/build-with-teams/SKILL.md` 해당 섹션 끝 | 1-2 줄 |
+| build-with-teams 프로세스 결함 (레포 특화) | `.claude/build-with-teams-overlay.md` 해당 섹션 끝 | 1-2 줄 |
 | self-healing-teams 메커니즘 보강 | `.claude/skills/self-healing-teams/SKILL.md` 해당 메커니즘 섹션 | 1-2 줄 |
 | 도메인 의사결정 | `docs/adr.md` | 신규 ADR-### (ADR 작성 전 자체 점검 절차 통과 시만) |
 | 페이지/컴포넌트 흐름 변경 | `docs/pages/{page}.md` | 해당 표 갱신 |
