@@ -66,9 +66,11 @@ phase 프런트매터 `**Domain**:` 태그와 `common-pitfalls.md` 의 작업종
 항목 이름과 순서, 넣지 않는 것은 그 뼈대를 그대로 따른다.
 여기에는 이 레포가 실제로 다르게 쓰는 것만 둔다.
 
-- **번호 접두어**: 프론트 ADR 은 `ADR-FNN`. 백엔드 결정은 `fos-accountbook-backend/docs/adr.md` 가 소유하므로 이 레포에는 쓰지 않는다.
+- **번호 접두어**: 프론트 ADR 은 `ADR-FNN` 을 쓴다.
+    - 백엔드 결정은 `fos-accountbook-backend/docs/adr.md` 가 소유하므로 이 레포에는 쓰지 않는다.
 - **앵커**: 다른 문서가 번호로 링크하므로 제목 바로 위에 `<a id="adr-fnn"></a>` 를 둔다.
-- **제목 날짜**: 제목 끝에 `(YYYY-MM-DD)` 를 붙인다. ADR-F24 이후로 굳은 관행이다.
+- **제목 날짜**: 제목 끝에 `(YYYY-MM-DD)` 를 붙인다.
+    - ADR-F24 이후로 굳은 관행이다.
 
 ### ADR 채워진 예시는 이 레포의 ADR 을 기준으로 삼는다
 
