@@ -84,7 +84,7 @@ jobs:
           PR_NUMBER="${{ env.PR_NUMBER }}"
 
           # 이전 일반 PR 코멘트 삭제 (claude[bot] 작성)
-          gh api "repos/$REPO/issues/$PR_NUMBER/comments" \
+          gh api --paginate "repos/$REPO/issues/$PR_NUMBER/comments?per_page=100" \
             --jq '.[] | select(.user.login == "claude[bot]") | .id' \
             | while read -r comment_id; do
               if [ -n "$comment_id" ]; then
@@ -94,7 +94,7 @@ jobs:
             done
 
           # 이전 인라인 리뷰 코멘트 삭제 (claude[bot] 작성)
-          gh api "repos/$REPO/pulls/$PR_NUMBER/comments" \
+          gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/comments?per_page=100" \
             --jq '.[] | select(.user.login == "claude[bot]") | .id' \
             | while read -r comment_id; do
               if [ -n "$comment_id" ]; then
@@ -105,7 +105,7 @@ jobs:
 
           # 이전 리뷰 본문 접기 (claude[bot] 작성) — REST DELETE 가 없어 GraphQL minimizeComment 사용.
           # 이미 접힌 리뷰를 다시 접어도 안전하므로 isMinimized 필터 없이 그대로 재시도한다.
-          gh api "repos/$REPO/pulls/$PR_NUMBER/reviews" \
+          gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/reviews?per_page=100" \
             --jq '.[] | select(.user.login == "claude[bot]") | .node_id' \
             | while read -r review_node_id; do
               if [ -n "$review_node_id" ]; then
@@ -174,14 +174,14 @@ jobs:
           }
 
           # 일반 PR 댓글 (issue comments)
-          gh api "repos/$REPO/issues/$PR_NUMBER/comments" \
+          gh api --paginate "repos/$REPO/issues/$PR_NUMBER/comments?per_page=100" \
             --jq '.[] | select(.user.login == "claude[bot]") | select(.body | contains("\\n")) | .id' \
             | while read -r id; do
               [ -n "$id" ] && fix_one "issues" "$id"
             done
 
           # 인라인 리뷰 댓글 (PR review comments)
-          gh api "repos/$REPO/pulls/$PR_NUMBER/comments" \
+          gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/comments?per_page=100" \
             --jq '.[] | select(.user.login == "claude[bot]") | select(.body | contains("\\n")) | .id' \
             | while read -r id; do
               [ -n "$id" ] && fix_one "pulls" "$id"
@@ -200,7 +200,7 @@ jobs:
             fi
           }
 
-          gh api "repos/$REPO/pulls/$PR_NUMBER/reviews" \
+          gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/reviews?per_page=100" \
             --jq '.[] | select(.user.login == "claude[bot]") | select(.body | contains("\\n")) | .id' \
             | while read -r id; do
               [ -n "$id" ] && fix_review "$id"
@@ -219,7 +219,7 @@ jobs:
           PR_NUMBER="${{ env.PR_NUMBER }}"
 
           # claude[bot] 가 작성한 인라인 댓글만 검사
-          gh api "repos/$REPO/pulls/$PR_NUMBER/comments" \
+          gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/comments?per_page=100" \
             --jq '.[] | select(.user.login == "claude[bot]") | "\(.id)\t\(.body)"' \
             | while IFS=$'\t' read -r comment_id body; do
               [ -z "$comment_id" ] && continue
