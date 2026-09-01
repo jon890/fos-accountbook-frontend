@@ -208,7 +208,7 @@
 
 ## ADR-F11: CI 코드 리뷰 워크플로 설계 (개정)
 
-**결정**: Claude Code Action 기반 자동 코드 리뷰 워크플로를 아래 방침으로 운영. fos-blog 정착 패턴과 동일화 (2026-05-09 개정, 2026-06-02 단일 opus 리뷰어로 모델 전환).
+**결정**: Claude Code Action 기반 자동 코드 리뷰 워크플로를 아래 방침으로 운영. fos-blog 정착 패턴과 동일화 (2026-05-09 개정, 2026-06-02 단일 opus 리뷰어로 모델 전환, 2026-09-01 요약을 리뷰 body 로 통합).
 
 **핵심 결정 사항**:
 
@@ -216,10 +216,12 @@
 |------|------|------|
 | 트리거 | `opened` + `/review` 수동 | `synchronize` 제거 — 매 push마다 토큰 소비 방지 |
 | Review Event | 항상 `COMMENT` (🔴 있어도 차단 안 함) | 리뷰는 권고. 머지 차단은 인간 reviewer 책임. `REQUEST_CHANGES` 사고 회피 |
-| 일반 요약 댓글 | 인라인 리뷰와 분리해 1회 추가 게시 | Conversation 탭 가시성 확보. inline 만 두면 Files changed 탭에 묻힘 |
-| 댓글 정리 | DELETE (REST) | minimize 누적 시 PR 스레드 시각 답답. 이력은 GitHub event log 로 충분 |
+| 요약 게시 | 인라인과 같은 리뷰의 `body` 로 통합 — `reviews` POST 1회 | 요약과 인라인이 리뷰 단위로 접힘. 일반 댓글로 분리하면 Conversation 탭에서 흩어짐 |
+| 리뷰 요청 본문 전달 | `mktemp` 임시 파일 + `--input` | 인자로 직접 쓰면 shell 이 `\n` 을 literal 두 글자로 전달. 체크아웃 밖에 만들어 wrapper 의 `git add -A` 회피 |
+| 댓글 정리 | 일반 댓글과 인라인은 DELETE (REST) | minimize 누적 시 PR 스레드 시각 답답. 이력은 GitHub event log 로 충분 |
+| 리뷰 정리 | 리뷰 본문만 GraphQL `minimizeComment` (OUTDATED) | 제출된 COMMENT 리뷰는 REST 삭제가 없고 dismiss 도 APPROVED / CHANGES_REQUESTED 에만 가능. 실행당 1개라 누적량이 인라인과 다름 |
 | Dummy 댓글 자동 정리 | post-step bash 로 길이/regex/severity 마커 검사 후 삭제 | Claude action 이 자연어 sanity check 무시하고 placeholder 게시하는 사고 (fos-blog PR #114) 강제 차단 |
-| literal `\n` 자동 보정 | post-step bash 로 검출 후 perl 교체 + PATCH API | Claude action 이 HEREDOC 무시하고 `--body "...\n..."` 호출 시 literal 두 글자 박힘 (PR #208 사고). 보정 후 정상 줄바꿈 |
+| literal `\n` 자동 보정 | post-step bash 로 세 경로 검출 후 perl 교체 — 일반 댓글과 인라인은 comments PATCH, 리뷰 요약은 `reviews/{id}` PUT | Claude action 이 가이드 무시하고 `--field body="...\n..."` 호출 시 literal 두 글자 박힘 (PR #208 사고). 보정 후 정상 줄바꿈 |
 | 모델 | 단일 opus 리뷰어 (`--model opus` 별칭) | haiku specialist 는 추론 능력이 떨어져 오탐(false positive) 많고 실제 버그 놓침. 리뷰 신뢰도 > 토큰 절약. `opus` 별칭은 버전업 무수정 추종 |
 | allowed_bots | `"*"` | 광범위 허용 — Dependabot/Claude 모두 차단되지 않음. 보안 검증은 리뷰어가 담당 |
 | diff 필터 | `pnpm-lock.yaml`, `*.lock`, `*.snap` 제외 | 노이즈 감소 |
@@ -231,12 +233,14 @@
 **대안 기각**:
 - `REQUEST_CHANGES` event 유지: PR 머지 버튼 비활성으로 사용자가 매번 dismiss 해야 함 + Reviews 탭 빨간 X 가 시각적으로 부정적. 안전망 가치보다 마찰 비용 큼.
 - minimize 유지: PR 스레드에 minimized 블록 누적 → "Show outdated" 토글이 보이고 답답. 이력은 GitHub Activity 탭에서 보존.
-- 단일 review API 호출 (요약을 review body 안에): Files changed 탭에만 보이고 Conversation 탭에서 요약 가시성 떨어짐.
+- 요약을 `gh pr comment` 일반 댓글로 분리 (2026-09-01 기각): 요약과 인라인이 Conversation 탭에서 흩어지고 등록 호출이 2회로 늘어남. 리뷰 `body` 도 Conversation 탭에 그대로 노출되므로 분리 이유가 없었음.
+- 리뷰까지 포함해 전부 minimize: DELETE 결정을 뒤집게 되고 minimized 블록이 누적됨. REST 로 지울 수 없는 리뷰 본문 한 종류에만 예외를 둠.
 
-**HEREDOC 패턴 강제 (실측 사고)**:
-- 일반 요약 댓글은 반드시 `gh pr comment --body-file - <<'COMMENT_EOF' ... COMMENT_EOF` HEREDOC 으로 stdin 전달.
-- `gh pr comment --body "...\n..."` 패턴은 shell 이 `\n` 을 literal 두 글자로 전달해 댓글 줄바꿈 깨짐.
-- review JSON body 안의 `\n` 은 JSON parser 가 해석하므로 정상.
+**요청 본문 전달 강제 (실측 사고)**:
+- 리뷰 요청 JSON 은 `mktemp` 로 만든 임시 파일에 담아 `--input` 으로 넘긴다.
+- `--field body="...\n..."` 패턴은 shell 이 `\n` 을 literal 두 글자로 전달해 본문 줄바꿈이 깨진다.
+- JSON 문자열 안의 `\n` 은 JSON parser 가 해석하므로 정상.
+- 임시 파일은 체크아웃 밖에 만든다. action wrapper 의 `git add -A` 가 체크아웃 안 파일을 PR 브랜치 commit 으로 흘려보낸다 (fos-blog PR #83 사고).
 
 ---
 
